@@ -1,0 +1,15 @@
+test1@example.com
+test2@example.c0m
+"test3@example.com"
+a line including test4@example.com and other words
+test-5@example.com
+test+6@example.com
+test7@example.
+test_8@example.com
+test.9@example.com
+teeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee10@example.com
+test11@192.168.1.1
+test&12@example.com
+test@13@exmple.com
+!test14@example.com
+test/15@example.com
