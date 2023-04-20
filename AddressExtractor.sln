@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AddressExtractor", "src\AddressExtractor.csproj", "{BC12FEE1-AF3F-4034-B295-77E3C5994BF0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{840191ED-A7D1-45C7-803E-2AB4985C7E8A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AddressExtractorTest", "test\AddressExtractorTest.csproj", "{45FD58BE-D8C9-4F76-9FF5-CA627FE618C3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC12FEE1-AF3F-4034-B295-77E3C5994BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC12FEE1-AF3F-4034-B295-77E3C5994BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC12FEE1-AF3F-4034-B295-77E3C5994BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC12FEE1-AF3F-4034-B295-77E3C5994BF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45FD58BE-D8C9-4F76-9FF5-CA627FE618C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45FD58BE-D8C9-4F76-9FF5-CA627FE618C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45FD58BE-D8C9-4F76-9FF5-CA627FE618C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45FD58BE-D8C9-4F76-9FF5-CA627FE618C3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{45FD58BE-D8C9-4F76-9FF5-CA627FE618C3} = {840191ED-A7D1-45C7-803E-2AB4985C7E8A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {818156B2-06E8-4141-B544-19336F60D854}
+	EndGlobalSection
+EndGlobal
