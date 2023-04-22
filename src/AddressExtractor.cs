@@ -19,6 +19,14 @@ namespace MyAddressExtractor
 
             foreach (Match match in matches)
             {
+                var email = match.Value;
+                if (address.Contains('*'))
+                    continue;
+                if (address.Contains('..'))
+                    continue;
+                if (address.Length >= 256)
+                    continue;
+                
                 uniqueAddresses.Add(match.Value.ToLower());
             }
 
