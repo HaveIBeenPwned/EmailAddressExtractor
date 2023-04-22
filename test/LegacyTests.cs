@@ -109,6 +109,11 @@ namespace AddressExtractorTest
     [TestMethod]
     public void domain_with_underscore_only_is_not_valid() { Assert.IsFalse(IsValidEmail(@"foobar@_.com")); }
 
+    /// <summary>
+    /// Purely added to make it easy to include the legacy tests, ideally should be removed in favour of more verbose test syntax
+    /// </summary>
+    /// <param name="sourceEmail"></param>
+    /// <returns></returns>
     private bool IsValidEmail(string sourceEmail)
     {
       var sut = new AddressExtractor();
