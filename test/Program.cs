@@ -5,7 +5,7 @@ using MyAddressExtractor;
 public class MyAddressExtractorTest
 {
     [TestMethod]
-    public void Test0()
+    public void correct_number_of_addresses_are_extracted_from_file()
     {
         // Arrange
         var sut = new AddressExtractor();
