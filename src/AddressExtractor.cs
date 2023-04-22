@@ -13,7 +13,7 @@ namespace MyAddressExtractor
 
         public List<string> ExtractAddresses(string content)
         {
-            string addressPattern = @"(?!\.)[\w\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([\w\-]+\.)+[\w]{2,}\b(?<!\s)";
+            string addressPattern = @"(?!\.)[a-zA-Z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-zA-Z0-9\-]+\.)+[a-zA-Z0-9]{2,}\b(?<!\s)";
             var matches = Regex.Matches(content, addressPattern);
             var uniqueAddresses = new HashSet<string>();
 
@@ -32,7 +32,7 @@ namespace MyAddressExtractor
                 if (email.Substring(email.LastIndexOf("@")).Contains("_"))
                     continue;
                 // Handle cases such as: foo@bar.1com, foo@bar.12com
-                if (int.TryParse(Name[Name.LastIndexOf(".")+1].ToString(), out _))
+                if (int.TryParse(email[email.LastIndexOf(".")+1].ToString(), out _))
                     continue;
                 
                 uniqueAddresses.Add(match.Value.ToLower());
