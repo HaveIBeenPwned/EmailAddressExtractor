@@ -20,11 +20,14 @@ namespace MyAddressExtractor
             foreach (Match match in matches)
             {
                 var email = match.Value;
-                if (address.Contains('*'))
+                if (email.Contains('*'))
                     continue;
-                if (address.Contains('..'))
+                if (email.Contains('..'))
                     continue;
-                if (address.Length >= 256)
+                if (email.Length >= 256)
+                    continue;
+                // Handle cases such as: foobar@_.com, oobar@f_b.com
+                if (email.Substring(email.LastIndexOf("@")).Contains("_"))
                     continue;
                 
                 uniqueAddresses.Add(match.Value.ToLower());
