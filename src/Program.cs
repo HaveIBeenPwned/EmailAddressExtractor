@@ -18,7 +18,7 @@ namespace MyAddressExtractor
             InvalidArguments = 2
         }
 
-        static int Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             var inputFilePaths = new List<string>();
             var outputFilePath = "addresses_output.txt";
@@ -46,11 +46,11 @@ namespace MyAddressExtractor
             try
             {
                 var stopwatch = Stopwatch.StartNew();
-                var allAddresses = new HashSet<string>();
+                var allAddresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var inputFilePath in inputFilePaths)
                 {
-                    var addresses = extractor.ExtractAddressesFromFile(inputFilePath);
+                    var addresses = await extractor.ExtractAddressesFromFileAsync(inputFilePath, CancellationToken.None);
                     allAddresses.UnionWith(addresses);
                     uniqueAddressesPerFile.Add(inputFilePath, addresses.Count);
                 }
@@ -62,8 +62,8 @@ namespace MyAddressExtractor
                 long rate = (long)(allAddresses.Count / (stopwatch.ElapsedMilliseconds / 1000.0));
                 Console.WriteLine($"Extraction rate: {rate}/s");
 
-                extractor.SaveAddresses(outputFilePath, allAddresses.ToList());
-                extractor.SaveReport(reportFilePath, uniqueAddressesPerFile);
+                await extractor.SaveAddressesAsync(outputFilePath, allAddresses, CancellationToken.None);
+                await extractor.SaveReportAsync(reportFilePath, uniqueAddressesPerFile, CancellationToken.None);
 
                 Console.WriteLine($"Addresses saved to {outputFilePath}");
                 Console.WriteLine($"Report saved to {reportFilePath}");
