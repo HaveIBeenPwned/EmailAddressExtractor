@@ -5,13 +5,13 @@ using MyAddressExtractor;
 public class MyAddressExtractorTest
 {
     [TestMethod]
-    public void correct_number_of_addresses_are_extracted_from_file()
+    public async Task correct_number_of_addresses_are_extracted_from_file()
     {
         // Arrange
         var sut = new AddressExtractor();
 
         // Act
-        var result = sut.ExtractAddressesFromFile(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
+        var result = await sut.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
 
         // Assert
         Assert.IsTrue(result.Count == 12, "Parsing should pass");
@@ -28,7 +28,7 @@ public class MyAddressExtractorTest
         var result = sut.ExtractAddresses(addresses);
 
         // Assert
-        Assert.IsTrue(result.Count == 1, "Same addresses of different case should be merged");
+        Assert.IsTrue(result.Count() == 1, "Same addresses of different case should be merged");
     }   
     
     [TestMethod]
