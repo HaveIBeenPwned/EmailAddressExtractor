@@ -1,22 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+
+[assembly:InternalsVisibleTo("AddressExtractorTest")]
 
 namespace MyAddressExtractor
 {
     class Program
     {
-        static void Main(string[] args)
+        enum ErrorCode
         {
-            if (args.Length == 0)
-            {
-                Console.WriteLine("Please provide at least one input file path.");
-                return;
-            }
+            NoError = 0,
+            UnspecifiedError = 1,
+            InvalidArguments = 2
+        }
 
+        static int Main(string[] args)
+        {
+            var inputFilePaths = new List<string>();
             var outputFilePath = "addresses_output.txt";
             var reportFilePath = "report.txt";
+
+            try
+            {
+                CommandLineProcessor.Process(args, inputFilePaths, ref outputFilePath, ref reportFilePath);
+            }
+            catch (ArgumentException ae)
+            {
+                Console.Error.WriteLine(ae.Message);
+                return (int)ErrorCode.InvalidArguments;
+            }
+            // If no input paths were listed, the usage was printed, so we should exit cleanly
+            if (inputFilePaths.Count == 0)
+            {
+                return (int)ErrorCode.NoError;
+            }
+
             Dictionary<string, int> uniqueAddressesPerFile = new Dictionary<string, int>();
 
             var extractor = new AddressExtractor();
@@ -25,7 +46,7 @@ namespace MyAddressExtractor
             {
                 var allAddresses = new HashSet<string>();
 
-                foreach (var inputFilePath in args)
+                foreach (var inputFilePath in inputFilePaths)
                 {
                     var addresses = extractor.ExtractAddressesFromFile(inputFilePath);
                     allAddresses.UnionWith(addresses);
@@ -40,8 +61,11 @@ namespace MyAddressExtractor
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.Error.WriteLine($"An error occurred: {ex.Message}");
+                return (int)ErrorCode.UnspecifiedError;
             }
+
+            return (int)ErrorCode.NoError;
         }
     }
 }
