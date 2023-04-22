@@ -24,6 +24,8 @@ namespace MyAddressExtractor
                     continue;
                 if (email.Contains('..'))
                     continue;
+                if (email.Contains('.@'))
+                    continue;
                 if (email.Length >= 256)
                     continue;
                 // Handle cases such as: foobar@_.com, oobar@f_b.com
