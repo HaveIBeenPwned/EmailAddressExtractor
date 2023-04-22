@@ -31,6 +31,9 @@ namespace MyAddressExtractor
                 // Handle cases such as: foobar@_.com, oobar@f_b.com
                 if (email.Substring(email.LastIndexOf("@")).Contains("_"))
                     continue;
+                // Handle cases such as: foo@bar.1com, foo@bar.12com
+                if (int.TryParse(Name[Name.LastIndexOf(".")+1].ToString(), out _))
+                    continue;
                 
                 uniqueAddresses.Add(match.Value.ToLower());
             }
