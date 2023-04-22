@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -44,6 +45,7 @@ namespace MyAddressExtractor
 
             try
             {
+                var stopwatch = Stopwatch.StartNew();
                 var allAddresses = new HashSet<string>();
 
                 foreach (var inputFilePath in inputFilePaths)
@@ -52,6 +54,13 @@ namespace MyAddressExtractor
                     allAddresses.UnionWith(addresses);
                     uniqueAddressesPerFile.Add(inputFilePath, addresses.Count);
                 }
+                
+                stopwatch.Stop();
+                Console.WriteLine($"Extraction time: {stopwatch.ElapsedMilliseconds}ms");
+                Console.WriteLine($"Addresses extracted: {allAddresses.Count}");
+                // Extraction does not currently process per row, so we do not have the row count at this time
+                long rate = (long)(allAddresses.Count / (stopwatch.ElapsedMilliseconds / 1000.0));
+                Console.WriteLine($"Extraction rate: {rate}/s");
 
                 extractor.SaveAddresses(outputFilePath, allAddresses.ToList());
                 extractor.SaveReport(reportFilePath, uniqueAddressesPerFile);
