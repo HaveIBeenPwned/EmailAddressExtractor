@@ -13,7 +13,7 @@ namespace MyAddressExtractor
 
         public List<string> ExtractAddresses(string content)
         {
-            string addressPattern = @"\b[a-zA-Z0-9\.\-_\+]+@[a-zA-Z0-9\.\-_]+\.[a-zA-Z]+\b";
+            string addressPattern = @"\b[^.\s][\w\.\-!#$%&'*+-/=?^_`{|}~]+@([\w\-]+\.)+[\w]{2,}\b";
             var matches = Regex.Matches(content, addressPattern);
             var uniqueAddresses = new HashSet<string>();
 
