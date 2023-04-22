@@ -22,9 +22,9 @@ namespace MyAddressExtractor
                 var email = match.Value;
                 if (email.Contains('*'))
                     continue;
-                if (email.Contains('..'))
+                if (email.Contains(".."))
                     continue;
-                if (email.Contains('.@'))
+                if (email.Contains(".@"))
                     continue;
                 if (email.Length >= 256)
                     continue;
