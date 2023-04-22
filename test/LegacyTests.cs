@@ -15,7 +15,7 @@ namespace AddressExtractorTest
     public void single_backslash_enclosed_in_quotes_is_valid() { Assert.IsTrue(IsValidEmail(@"""test\""blah""@example.com")); }
 
     [TestMethod]
-    public void forwardslash_is_valid() { Assert.IsTrue(IsValidEmail(@"customer/department@example.com")); }
+    public void forward_slash_is_valid() { Assert.IsTrue(IsValidEmail(@"customer/department@example.com")); }
 
     [TestMethod]
     public void starting_with_dollar_sign_is_valid() { Assert.IsTrue(IsValidEmail(@"$A12345@example.com")); }
