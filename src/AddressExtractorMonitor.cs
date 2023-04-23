@@ -11,7 +11,7 @@ namespace MyAddressExtractor {
         protected readonly Stopwatch Stopwatch = Stopwatch.StartNew();
         private readonly Timer Timer;
 
-        public AddressExtractorMonitor(): this(TimeSpan.FromSeconds(1)) {}
+        public AddressExtractorMonitor(): this(TimeSpan.FromMinutes(1)) {}
         public AddressExtractorMonitor(TimeSpan iterate)
         {
             this.Timer = new Timer(_ => this.Log(), null, iterate, iterate);
