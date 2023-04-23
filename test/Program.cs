@@ -40,6 +40,32 @@ public class MyAddressExtractorTest
 
         // Assert
         Assert.IsTrue(result.Count == 1, "Address should always be converted to lowercase");
+    } 
+    
+    [TestMethod]
+    public void email_addresses_cannot_have_domain_starting_with_hyphen()
+    {
+        // Arrange
+        const string input = "test@-example.com";
+
+        // Act
+        var result = this.ExtractAddresses(input);
+
+        // Assert
+        Assert.IsFalse(result.Any(), "No results should be returned");
+    }    
+
+    [TestMethod]
+    public void email_addresses_cannot_have_domain_ending_with_hyphen()
+    {
+        // Arrange
+        const string input = "test@example-.com";
+
+        // Act
+        var result = this.ExtractAddresses(input);
+
+        // Assert
+        Assert.IsFalse(result.Any(), "No results should be returned");
     }
 
     #region Wrappers
