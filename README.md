@@ -22,3 +22,18 @@ The regex I've used is as follows: `\b[a-zA-Z0-9\.\-_\+]+@[a-zA-Z0-9\.\-_]+\.[a-
 # Test data
 
 I'll generate some test data in different formats and drop those into this repository shortly.
+
+# Running the Address Extractor
+
+Syntax: `AddressExtractor.exe -?`
+Syntax: `AddressExtractor.exe -v`
+Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
+
+| Option | Description |
+| ------ | ----------- |
+| -? | Prints the command line syntax and options |
+| -v | Prints the application version number |
+| input  | One or more input filenames |
+| -o output | Path and filename of the output file. Defaults to 'addresses_output.txt' |
+| -r report | Path and filename of the report file. Defaults to 'report.txt' |
+
