@@ -3,19 +3,29 @@ using System.Text.RegularExpressions;
 
 namespace MyAddressExtractor
 {
-    public class AddressExtractor
+    public partial class AddressExtractor
     {
-        public List<string> ExtractAddressesFromFile(string inputFilePath)
+        [GeneratedRegex(@"(?!\.)[a-zA-Z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-zA-Z0-9\-_]+\.)+[a-zA-Z0-9]{2,}\b(?<!\s)")]
+        public static partial Regex EmailRegex();
+        
+        public async ValueTask<HashSet<string>> ExtractAddressesFromFileAsync(string inputFilePath, CancellationToken cancellation = default)
         {
-            string fileContent = File.ReadAllText(inputFilePath);
-            return ExtractAddresses(fileContent);
+            var list = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            await foreach(string line in File.ReadLinesAsync(inputFilePath, cancellation))
+            {
+                foreach (string address in this.ExtractAddresses(line)) {
+                    list.Add(address);
+                }
+            }
+            
+            return list;
         }
 
-        public List<string> ExtractAddresses(string content)
+        public IEnumerable<string> ExtractAddresses(string content)
         {
-            string addressPattern = @"(?!\.)[a-zA-Z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-zA-Z0-9\-_]+\.)+[a-zA-Z0-9]{2,}\b(?<!\s)";
-            var matches = Regex.Matches(content, addressPattern);
-            var uniqueAddresses = new HashSet<string>();
+
+            var matches = AddressExtractor.EmailRegex()
+                .Matches(content);
 
             foreach (Match match in matches)
             {
@@ -35,27 +45,25 @@ namespace MyAddressExtractor
                 if (int.TryParse(email[email.LastIndexOf(".")+1].ToString(), out _))
                     continue;
                 
-                uniqueAddresses.Add(match.Value.ToLower());
+                yield return match.Value;
             }
-
-            return uniqueAddresses.OrderBy(a => a).ToList();
         }
 
-        public void SaveAddresses(string filePath, List<string> addresses)
+        public async ValueTask SaveAddressesAsync(string filePath, IEnumerable<string> addresses, CancellationToken cancellation = default)
         {
-            File.WriteAllLines(filePath, addresses);
+            await File.WriteAllLinesAsync(filePath, addresses.OrderBy(a => a), cancellation);
         }
 
-        public void SaveReport(string filePath, Dictionary<string, int> uniqueAddressesPerFile)
+        public async ValueTask SaveReportAsync(string filePath, Dictionary<string, int> uniqueAddressesPerFile, CancellationToken cancellation = default)
         {
             var reportContent = new StringBuilder("Unique addresses per file:\n");
-
+            
             foreach (var entry in uniqueAddressesPerFile)
             {
                 reportContent.AppendLine($"{entry.Key}: {entry.Value}");
             }
-
-            File.WriteAllText(filePath, reportContent.ToString());
+            
+            await File.WriteAllTextAsync(filePath, reportContent.ToString(), cancellation);
         }
     }
 }
