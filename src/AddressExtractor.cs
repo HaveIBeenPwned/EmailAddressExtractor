@@ -6,16 +6,22 @@ namespace MyAddressExtractor
 {
     public partial class AddressExtractor
     {
-        [GeneratedRegex(@"(?!\.)[a-zA-Z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-zA-Z0-9\-_]+\.)+[a-zA-Z0-9]{2,}\b(?<!\s)")]
+        [GeneratedRegex(@"(?!\.)[a-z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(?<!\s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled)]
         public static partial Regex EmailRegex();
         
         public async IAsyncEnumerable<string> ExtractAddressesFromFileAsync(string inputFilePath, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
-            await foreach(var line in File.ReadLinesAsync(inputFilePath, cancellation))
+            await using (var reader = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, FileOptions.SequentialScan | FileOptions.Asynchronous))
             {
-                foreach (var address in this.ExtractAddresses(line))
+                using (var stream = new StreamReader(reader, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 4096))
                 {
-                    yield return address;
+                    while (await stream.ReadLineAsync(cancellation) is {Length: >0} line)
+                    {
+                        foreach (var address in this.ExtractAddresses(line))
+                        {
+                            yield return address;
+                        }
+                    }
                 }
             }
         }
@@ -25,9 +31,9 @@ namespace MyAddressExtractor
             var matches = AddressExtractor.EmailRegex()
                 .Matches(content);
 
-            foreach (Match match in matches)
-            {
-                var email = match.Value;
+            foreach (Match match in matches) {
+                string email = match.Value;
+
                 if (email.Contains('*'))
                     continue;
                 if (email.Contains(".."))
@@ -37,13 +43,13 @@ namespace MyAddressExtractor
                 if (email.Length >= 256)
                     continue;
                 // Handle cases such as: foobar@_.com, oobar@f_b.com
-                if (email.Substring(email.LastIndexOf("@")).Contains("_"))
+                if (email[email.LastIndexOf('@')..].Contains('_'))
                     continue;
                 // Handle cases such as: foo@bar.1com, foo@bar.12com
-                if (int.TryParse(email[email.LastIndexOf(".")+1].ToString(), out _))
+                if (int.TryParse(email[email.LastIndexOf('.')+1].ToString(), out _))
                     continue;
-                
-                yield return match.Value;
+
+                yield return email;
             }
         }
 
