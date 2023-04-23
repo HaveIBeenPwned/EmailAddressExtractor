@@ -54,7 +54,7 @@ namespace MyAddressExtractor
             await File.WriteAllLinesAsync(filePath, addresses.OrderBy(a => a), cancellation);
         }
 
-        public async ValueTask SaveReportAsync(string filePath, Dictionary<string, int> uniqueAddressesPerFile, CancellationToken cancellation = default)
+        public async ValueTask SaveReportAsync(string filePath, IDictionary<string, int> uniqueAddressesPerFile, CancellationToken cancellation = default)
         {
             var reportContent = new StringBuilder("Unique addresses per file:\n");
             
