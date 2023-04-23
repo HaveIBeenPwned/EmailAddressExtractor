@@ -1,12 +1,12 @@
 using System.Diagnostics;
 
 namespace MyAddressExtractor {
-    internal sealed class AddressExtractorMonitor : IAsyncDisposable {
+    public class AddressExtractorMonitor : IAsyncDisposable {
         private readonly AddressExtractor Extractor = new();
-        private readonly IDictionary<string, int> Files = new Dictionary<string, int>();
-        private readonly ISet<string> Addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        protected readonly IDictionary<string, int> Files = new Dictionary<string, int>();
+        protected readonly ISet<string> Addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly Stopwatch Stopwatch = Stopwatch.StartNew();
+        protected readonly Stopwatch Stopwatch = Stopwatch.StartNew();
         private readonly Timer Timer;
 
         public AddressExtractorMonitor(): this(TimeSpan.FromMinutes(1)) {}
@@ -25,7 +25,7 @@ namespace MyAddressExtractor {
             }
         }
 
-        public void Log()
+        public virtual void Log()
         {
             Console.WriteLine($"Extraction time: {this.Stopwatch.ElapsedMilliseconds:n0}ms");
             Console.WriteLine($"Addresses extracted: {this.Addresses.Count:n0}");
@@ -42,6 +42,8 @@ namespace MyAddressExtractor {
 
         public async ValueTask DisposeAsync()
         {
+            GC.SuppressFinalize(this);
+
             await this.Timer.DisposeAsync();
             this.Stopwatch.Stop();
         }
