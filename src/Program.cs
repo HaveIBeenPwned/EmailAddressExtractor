@@ -39,32 +39,21 @@ namespace MyAddressExtractor
                 return (int)ErrorCode.NoError;
             }
 
-            Dictionary<string, int> uniqueAddressesPerFile = new Dictionary<string, int>();
-
-            var extractor = new AddressExtractor();
-
             try
             {
-                var stopwatch = Stopwatch.StartNew();
-                var allAddresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                foreach (var inputFilePath in inputFilePaths)
+                await using (var monitor = new AddressExtractorMonitor())
                 {
-                    var addresses = await extractor.ExtractAddressesFromFileAsync(inputFilePath, CancellationToken.None);
-                    allAddresses.UnionWith(addresses);
-                    uniqueAddressesPerFile.Add(inputFilePath, addresses.Count);
+                    await monitor.RunAsync(inputFilePaths, CancellationToken.None);
+
+                    // Log one last time out of the Timer loop
+                    monitor.Log();
+                    await monitor.SaveAsync(
+                        outputFilePath,
+                        reportFilePath,
+                        CancellationToken.None
+                    );
                 }
                 
-                stopwatch.Stop();
-                Console.WriteLine($"Extraction time: {stopwatch.ElapsedMilliseconds:n0}ms");
-                Console.WriteLine($"Addresses extracted: {allAddresses.Count:n0}");
-                // Extraction does not currently process per row, so we do not have the row count at this time
-                long rate = (long)(allAddresses.Count / (stopwatch.ElapsedMilliseconds / 1000.0));
-                Console.WriteLine($"Extraction rate: {rate:n0}/s");
-
-                await extractor.SaveAddressesAsync(outputFilePath, allAddresses, CancellationToken.None);
-                await extractor.SaveReportAsync(reportFilePath, uniqueAddressesPerFile, CancellationToken.None);
-
                 Console.WriteLine($"Addresses saved to {outputFilePath}");
                 Console.WriteLine($"Report saved to {reportFilePath}");
             }

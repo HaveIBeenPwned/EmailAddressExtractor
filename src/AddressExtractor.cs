@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -8,22 +9,19 @@ namespace MyAddressExtractor
         [GeneratedRegex(@"(?!\.)[a-zA-Z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-zA-Z0-9\-_]+\.)+[a-zA-Z0-9]{2,}\b(?<!\s)")]
         public static partial Regex EmailRegex();
         
-        public async ValueTask<HashSet<string>> ExtractAddressesFromFileAsync(string inputFilePath, CancellationToken cancellation = default)
+        public async IAsyncEnumerable<string> ExtractAddressesFromFileAsync(string inputFilePath, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
-            var list = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            await foreach(string line in File.ReadLinesAsync(inputFilePath, cancellation))
+            await foreach(var line in File.ReadLinesAsync(inputFilePath, cancellation))
             {
-                foreach (string address in this.ExtractAddresses(line)) {
-                    list.Add(address);
+                foreach (var address in this.ExtractAddresses(line))
+                {
+                    yield return address;
                 }
             }
-            
-            return list;
         }
 
         public IEnumerable<string> ExtractAddresses(string content)
         {
-
             var matches = AddressExtractor.EmailRegex()
                 .Matches(content);
 
@@ -54,13 +52,13 @@ namespace MyAddressExtractor
             await File.WriteAllLinesAsync(filePath, addresses.OrderBy(a => a), cancellation);
         }
 
-        public async ValueTask SaveReportAsync(string filePath, Dictionary<string, int> uniqueAddressesPerFile, CancellationToken cancellation = default)
+        public async ValueTask SaveReportAsync(string filePath, IDictionary<string, Count> uniqueAddressesPerFile, CancellationToken cancellation = default)
         {
             var reportContent = new StringBuilder("Unique addresses per file:\n");
             
-            foreach (var entry in uniqueAddressesPerFile)
+            foreach ((var file, var count) in uniqueAddressesPerFile)
             {
-                reportContent.AppendLine($"{entry.Key}: {entry.Value}");
+                reportContent.AppendLine($"{file}: {count}");
             }
             
             await File.WriteAllTextAsync(filePath, reportContent.ToString(), cancellation);

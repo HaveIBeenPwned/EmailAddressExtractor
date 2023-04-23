@@ -7,11 +7,8 @@ public class MyAddressExtractorTest
     [TestMethod]
     public async Task correct_number_of_addresses_are_extracted_from_file()
     {
-        // Arrange
-        var sut = new AddressExtractor();
-
         // Act
-        var result = await sut.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
+        var result = await this.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
 
         // Assert
         Assert.IsTrue(result.Count == 12, "Parsing should pass");
@@ -45,6 +42,8 @@ public class MyAddressExtractorTest
         Assert.IsTrue(result.Count == 1, "Address should always be converted to lowercase");
     }
 
+    #region Wrappers
+    
     /// <summary>
     /// Extract the addresses from the Address Extractor and wrap it into a set
     /// Wrapping the <see cref="IEnumerable{String}"/> here instead of within the Method
@@ -57,4 +56,16 @@ public class MyAddressExtractorTest
         set.UnionWith(extractor.ExtractAddresses(input));
         return set;
     }
+
+    private async ValueTask<HashSet<string>> ExtractAddressesFromFileAsync(string path, CancellationToken cancellation = default)
+    {
+        // Arrange
+        var extractor = new AddressExtractor();
+        var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        await foreach(var address in extractor.ExtractAddressesFromFileAsync(path, cancellation))
+            set.Add(address);
+        return set;
+    }
+
+    #endregion
 }
