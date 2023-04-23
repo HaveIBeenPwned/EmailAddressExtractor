@@ -38,7 +38,7 @@ namespace MyAddressExtractor {
             Console.WriteLine($"Addresses extracted: {this.Addresses.Count:n0}");
             // Extraction does not currently process per row, so we do not have the row count at this time
             long rate = (long)(this.Addresses.Count / (this.Stopwatch.ElapsedMilliseconds / 1000.0));
-            Console.WriteLine($"Extraction rate: {rate:n0}/s");
+            Console.WriteLine($"Extraction rate: {rate:n0}/s\n");
         }
 
         public async ValueTask SaveAsync(string outputFilePath, string reportFilePath, CancellationToken cancellation = default)
