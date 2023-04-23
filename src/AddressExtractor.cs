@@ -49,7 +49,7 @@ namespace MyAddressExtractor
 
         public async ValueTask SaveAddressesAsync(string filePath, IEnumerable<string> addresses, CancellationToken cancellation = default)
         {
-            await File.WriteAllLinesAsync(filePath, addresses.OrderBy(a => a), cancellation);
+            await File.WriteAllLinesAsync(filePath, addresses.OrderBy(a => a, StringComparer.OrdinalIgnoreCase), cancellation);
         }
 
         public async ValueTask SaveReportAsync(string filePath, IDictionary<string, Count> uniqueAddressesPerFile, CancellationToken cancellation = default)
