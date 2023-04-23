@@ -1,9 +1,10 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace MyAddressExtractor {
     public class AddressExtractorMonitor : IAsyncDisposable {
         private readonly AddressExtractor Extractor = new();
-        protected readonly IDictionary<string, int> Files = new Dictionary<string, int>();
+        protected readonly IDictionary<string, Count> Files = new ConcurrentDictionary<string, Count>();
         protected readonly ISet<string> Addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         protected readonly Stopwatch Stopwatch = Stopwatch.StartNew();
@@ -19,9 +20,15 @@ namespace MyAddressExtractor {
         {
             foreach (var inputFilePath in files)
             {
-                var addresses = await this.Extractor.ExtractAddressesFromFileAsync(inputFilePath, cancellation);
-                this.Addresses.UnionWith(addresses);
-                this.Files.Add(inputFilePath, addresses.Count);
+                var count = new Count();
+                var addresses = 0;
+
+                this.Files.Add(inputFilePath, count);
+                await foreach(var email in this.Extractor.ExtractAddressesFromFileAsync(inputFilePath, cancellation))
+                {
+                    this.Addresses.Add(email);
+                    count.Value = addresses++;
+                }
             }
         }
 
