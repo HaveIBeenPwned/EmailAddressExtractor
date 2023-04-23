@@ -50,7 +50,10 @@ namespace MyAddressExtractor
                     continue;
                 if (email.StartsWith("."))
                     continue;
-
+                 // Handle cases such as: username@-example-.com , username@-example.com and username@example-.com
+                if (email.Contains("@-") || email[email.LastIndexOf('@')..].Contains("-."))
+                    continue;
+                    
                 yield return email;
             }
         }
