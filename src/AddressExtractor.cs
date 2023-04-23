@@ -5,7 +5,7 @@ namespace MyAddressExtractor
 {
     public partial class AddressExtractor
     {
-        [GeneratedRegex(@"(?!\.)[a-zA-Z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-zA-Z0-9\-]+\.)+[a-zA-Z0-9]{2,}\b(?<!\s)")]
+        [GeneratedRegex(@"(?!\.)[a-zA-Z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-zA-Z0-9\-_]+\.)+[a-zA-Z0-9]{2,}\b(?<!\s)")]
         public static partial Regex EmailRegex();
         
         public async ValueTask<HashSet<string>> ExtractAddressesFromFileAsync(string inputFilePath, CancellationToken cancellation = default)
@@ -23,6 +23,7 @@ namespace MyAddressExtractor
 
         public IEnumerable<string> ExtractAddresses(string content)
         {
+
             var matches = AddressExtractor.EmailRegex()
                 .Matches(content);
 
