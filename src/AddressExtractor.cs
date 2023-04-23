@@ -6,7 +6,7 @@ namespace MyAddressExtractor
 {
     public partial class AddressExtractor
     {
-        [GeneratedRegex(@"(?!\.)[a-z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(?<!\s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled)]
+        [GeneratedRegex(@"[a-z0-9\.\-!#$%&'+-/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(?<!\s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled)]
         public static partial Regex EmailRegex();
         
         public async IAsyncEnumerable<string> ExtractAddressesFromFileAsync(string inputFilePath, [EnumeratorCancellation] CancellationToken cancellation = default)
@@ -48,7 +48,12 @@ namespace MyAddressExtractor
                 // Handle cases such as: foo@bar.1com, foo@bar.12com
                 if (int.TryParse(email[email.LastIndexOf('.')+1].ToString(), out _))
                     continue;
-
+                if (email.StartsWith("."))
+                    continue;
+                 // Handle cases such as: username@-example-.com , username@-example.com and username@example-.com
+                if (email.Contains("@-") || email[email.LastIndexOf('@')..].Contains("-."))
+                    continue;
+                    
                 yield return email;
             }
         }
