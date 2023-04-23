@@ -6,6 +6,7 @@ namespace MyAddressExtractor {
         private readonly AddressExtractor Extractor = new();
         protected readonly IDictionary<string, Count> Files = new ConcurrentDictionary<string, Count>();
         protected readonly ISet<string> Addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        protected int Lines { get; private set; }
 
         protected readonly Stopwatch Stopwatch = Stopwatch.StartNew();
         private readonly Timer Timer;
@@ -26,8 +27,9 @@ namespace MyAddressExtractor {
                 this.Files.Add(inputFilePath, count);
                 await foreach(var email in this.Extractor.ExtractAddressesFromFileAsync(inputFilePath, cancellation))
                 {
-                    this.Addresses.Add(email);
-                    count.Value = addresses++;
+                    if (this.Addresses.Add(email))
+                        count.Value = addresses++;
+                    this.Lines++;
                 }
             }
         }
@@ -36,9 +38,9 @@ namespace MyAddressExtractor {
         {
             Console.WriteLine($"Extraction time: {this.Stopwatch.ElapsedMilliseconds:n0}ms");
             Console.WriteLine($"Addresses extracted: {this.Addresses.Count:n0}");
-            // Extraction does not currently process per row, so we do not have the row count at this time
-            long rate = (long)(this.Addresses.Count / (this.Stopwatch.ElapsedMilliseconds / 1000.0));
-            Console.WriteLine($"Extraction rate: {rate:n0}/s\n");
+            long rate = (long)(this.Lines / (this.Stopwatch.ElapsedMilliseconds / 1000.0));
+            Console.WriteLine($"Read lines total: {this.Lines:n0}");
+            Console.WriteLine($"Read lines rate: {rate:n0}/s\n");
         }
 
         public async ValueTask SaveAsync(string outputFilePath, string reportFilePath, CancellationToken cancellation = default)
