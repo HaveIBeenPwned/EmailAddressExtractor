@@ -55,7 +55,12 @@ namespace MyAddressExtractor
 
         public async ValueTask SaveAddressesAsync(string filePath, IEnumerable<string> addresses, CancellationToken cancellation = default)
         {
-            await File.WriteAllLinesAsync(filePath, addresses.OrderBy(a => a, StringComparer.OrdinalIgnoreCase), cancellation);
+            await File.WriteAllLinesAsync(
+                filePath,
+                addresses.Select(address => address.ToLowerInvariant())
+                    .OrderBy(address => address, StringComparer.OrdinalIgnoreCase),
+                cancellation
+            );
         }
 
         public async ValueTask SaveReportAsync(string filePath, IDictionary<string, Count> uniqueAddressesPerFile, CancellationToken cancellation = default)
