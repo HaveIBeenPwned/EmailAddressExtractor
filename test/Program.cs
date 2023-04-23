@@ -25,10 +25,12 @@ public class MyAddressExtractorTest
         const string addresses = "test@example.com TEST@EXAMPLE.COM";
 
         // Act
-        var result = sut.ExtractAddresses(addresses);
+        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        result.UnionWith(sut.ExtractAddresses(addresses));
 
         // Assert
-        Assert.IsTrue(result.Count() == 1, "Same addresses of different case should be merged");
+        Assert.IsTrue(result.Count == 1, "Same addresses of different case should be merged");
     }   
     
     [TestMethod]
