@@ -3,9 +3,14 @@ using System.Reflection;
 
 namespace MyAddressExtractor
 {
-    internal class CommandLineProcessor
+    internal static class CommandLineProcessor
     {
-        internal static void Process(string[] args, IList<string> inputFilePaths, ref string outputFilePath, ref string reportFilePath)
+        public static string OUTPUT_FILE_PATH { get; private set; } = "addresses_output.txt";
+        public static string REPORT_FILE_PATH { get; private set; } = "report.txt";
+
+        public static bool OPERATE_RECURSIVELY { get; private set; } = false;
+
+        internal static void Process(string[] args, IList<string> inputFilePaths)
         {
             if (args.Length == 0)
             {
@@ -24,7 +29,7 @@ namespace MyAddressExtractor
                     {
                         throw new ArgumentException("Missing output file path after -o option");
                     }
-                    outputFilePath = arg;
+                    OUTPUT_FILE_PATH = arg;
                     expectingOutput = false;
                 }
                 else if (expectingReport)
@@ -34,7 +39,7 @@ namespace MyAddressExtractor
                     {
                         throw new ArgumentException("Missing report file path after -r option");
                     }
-                    reportFilePath = arg;
+                    REPORT_FILE_PATH = arg;
                     expectingReport = false;
                 }
                 else
@@ -47,6 +52,9 @@ namespace MyAddressExtractor
                             var option = arg[1..];
                             switch (option)
                             {
+                                case "-recursive":
+                                    OPERATE_RECURSIVELY = true;
+                                    break;
                                 case "o":
                                     expectingOutput = true;
                                     break;
@@ -100,6 +108,16 @@ namespace MyAddressExtractor
             }
         }
 
+        internal static bool WaitInput()
+        {
+            Console.WriteLine("Press ANY KEY to continue. Q to Quit.");
+            ConsoleKeyInfo info;
+            do {
+                info = Console.ReadKey(intercept: true);
+            } while(info.Modifiers is not 0); // No modifiers
+            return info.Key is not ConsoleKey.Q; // Check for Enter confirmation
+        }
+
         static void Usage()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -111,6 +129,8 @@ namespace MyAddressExtractor
             Console.WriteLine("input                One or more input file paths");
             Console.WriteLine("-o output            File path to write output file");
             Console.WriteLine("-r report            File path to write report file");
+            Console.WriteLine("");
+            Console.WriteLine("--recursive          Recursively enters directories provided to search for files");
         }
 
         static void Version()
