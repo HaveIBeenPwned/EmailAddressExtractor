@@ -5,10 +5,10 @@ namespace MyAddressExtractor
 {
     internal static class CommandLineProcessor
     {
-        public static string OUTPUT_FILE_PATH { get; private set; } = "addresses_output.txt";
-        public static string REPORT_FILE_PATH { get; private set; } = "report.txt";
+        public static string OUTPUT_FILE_PATH { get; private set; } = Defaults.OUTPUT_FILE_PATH;
+        public static string REPORT_FILE_PATH { get; private set; } = Defaults.REPORT_FILE_PATH;
 
-        public static bool OPERATE_RECURSIVELY { get; private set; } = false;
+        public static bool OPERATE_RECURSIVELY { get; private set; } = Defaults.OPERATE_RECURSIVELY;
 
         internal static void Process(string[] args, IList<string> inputFilePaths)
         {
@@ -137,6 +137,13 @@ namespace MyAddressExtractor
         {
             var assembly = Assembly.GetExecutingAssembly();
             Console.WriteLine(assembly.GetName().Version);
+        }
+        
+        public static class Defaults {
+            public const string OUTPUT_FILE_PATH = "addresses_output.txt";
+            public const string REPORT_FILE_PATH = "report.txt";
+            
+            public const bool OPERATE_RECURSIVELY = false;
         }
     }
 }
