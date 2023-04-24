@@ -43,10 +43,10 @@ namespace MyAddressExtractor {
             Console.WriteLine($"Read lines rate: {rate:n0}/s\n");
         }
 
-        public async ValueTask SaveAsync(string outputFilePath, string reportFilePath, CancellationToken cancellation = default)
+        public async ValueTask SaveAsync(CancellationToken cancellation = default)
         {
-            await this.Extractor.SaveAddressesAsync(outputFilePath, this.Addresses, cancellation);
-            await this.Extractor.SaveReportAsync(reportFilePath, this.Files, cancellation);
+            await this.Extractor.SaveAddressesAsync(CommandLineProcessor.OUTPUT_FILE_PATH, this.Addresses, cancellation);
+            await this.Extractor.SaveReportAsync(CommandLineProcessor.REPORT_FILE_PATH, this.Files, cancellation);
         }
 
         public async ValueTask DisposeAsync()

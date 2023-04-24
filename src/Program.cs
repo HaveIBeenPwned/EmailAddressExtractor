@@ -21,12 +21,10 @@ namespace MyAddressExtractor
         static async Task<int> Main(string[] args)
         {
             var inputFilePaths = new List<string>();
-            var outputFilePath = "addresses_output.txt";
-            var reportFilePath = "report.txt";
 
             try
             {
-                CommandLineProcessor.Process(args, inputFilePaths, ref outputFilePath, ref reportFilePath);
+                CommandLineProcessor.Process(args, inputFilePaths);
             }
             catch (ArgumentException ae)
             {
@@ -41,21 +39,22 @@ namespace MyAddressExtractor
 
             try
             {
+                var files = new FileCollection(inputFilePaths);
+
+                if (!CommandLineProcessor.WaitInput())
+                    return (int)ErrorCode.NoError;
+
                 await using (var monitor = new AddressExtractorMonitor())
                 {
-                    await monitor.RunAsync(inputFilePaths, CancellationToken.None);
+                    await monitor.RunAsync(files, CancellationToken.None);
 
                     // Log one last time out of the Timer loop
                     monitor.Log();
-                    await monitor.SaveAsync(
-                        outputFilePath,
-                        reportFilePath,
-                        CancellationToken.None
-                    );
+                    await monitor.SaveAsync(CancellationToken.None);
                 }
                 
-                Console.WriteLine($"Addresses saved to {outputFilePath}");
-                Console.WriteLine($"Report saved to {reportFilePath}");
+                Console.WriteLine($"Addresses saved to {CommandLineProcessor.OUTPUT_FILE_PATH}");
+                Console.WriteLine($"Report saved to {CommandLineProcessor.REPORT_FILE_PATH}");
             }
             catch (Exception ex)
             {
