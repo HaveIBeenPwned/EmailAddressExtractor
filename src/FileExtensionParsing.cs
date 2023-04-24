@@ -10,7 +10,7 @@ namespace MyAddressExtractor {
             
             // Accepted plaintext files
             extensions.AddAll(
-                new[] { ".log", ".json", ".txt", ".gcode", ".prproj", ".xml", ".sample", ".csv" },
+                new[] { ".log", ".json", ".txt", ".sql", ".xml", ".sample", ".csv", ".tsv" },
                 new FileExtensionParsing() // No error means OK!
             );
             

@@ -74,7 +74,7 @@ namespace MyAddressExtractor {
             Console.WriteLine($"Found {count:n0} files:");
             foreach (ExtensionInfo info in sorted)
             {
-                Console.WriteLine($"{info.Extension}: {info.Count} files : {info.Bytes} bytes{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
+                Console.WriteLine($"{info.Extension}: {info.Count:n0} files : {info.Bytes:n0} bytes{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
             }
         }
 
