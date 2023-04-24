@@ -7,7 +7,9 @@ namespace MyAddressExtractor
     {
         public static string OUTPUT_FILE_PATH { get; private set; } = "addresses_output.txt";
         public static string REPORT_FILE_PATH { get; private set; } = "report.txt";
-        
+
+        public static bool OPERATE_RECURSIVELY { get; private set; } = false;
+
         internal static void Process(string[] args, IList<string> inputFilePaths)
         {
             if (args.Length == 0)
@@ -50,6 +52,9 @@ namespace MyAddressExtractor
                             var option = arg[1..];
                             switch (option)
                             {
+                                case "-recursive":
+                                    OPERATE_RECURSIVELY = true;
+                                    break;
                                 case "o":
                                     expectingOutput = true;
                                     break;
@@ -124,6 +129,8 @@ namespace MyAddressExtractor
             Console.WriteLine("input                One or more input file paths");
             Console.WriteLine("-o output            File path to write output file");
             Console.WriteLine("-r report            File path to write report file");
+            Console.WriteLine("");
+            Console.WriteLine("--recursive          Recursively enters directories provided to search for files");
         }
 
         static void Version()

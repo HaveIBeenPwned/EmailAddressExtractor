@@ -13,15 +13,18 @@ namespace MyAddressExtractor {
             this.Log();
         }
 
-        private IEnumerable<string> GatherFiles(IEnumerable<string> inputs)
+        private IEnumerable<string> GatherFiles(IEnumerable<string> inputs, bool recursed = false)
         {
             foreach (string file in inputs) {
                 FileAttributes attributes = File.GetAttributes(file);
                 if (attributes.HasFlag(FileAttributes.Directory))
                 {
-                    foreach (string enumerated in Directory.EnumerateFiles(file))
+                    if (!recursed || CommandLineProcessor.OPERATE_RECURSIVELY)
                     {
-                        yield return enumerated;
+                        foreach (string enumerated in this.GatherFiles(Directory.EnumerateFileSystemEntries(file), recursed: true))
+                        {
+                            yield return enumerated;
+                        }
                     }
                 }
                 else if (File.Exists(file))
