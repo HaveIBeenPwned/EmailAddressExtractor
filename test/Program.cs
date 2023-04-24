@@ -85,6 +85,32 @@ public class MyAddressExtractorTest
         Assert.AreEqual(expectedLast, result.Last(), $"Last email address must be {expectedLast}");
     }
 
+    [TestMethod]
+    public void alias_on_emoji_domain_is_found()
+    {
+      // Arrange
+      const string input = "example@i❤️.ws is";
+
+      // Act
+      var result = this.ExtractAddresses(input);
+
+      // Assert
+      Assert.IsTrue(result.Any(), "A result should be returned");
+    }
+
+    [TestMethod]
+    public void email_Address_on_idn_domain_name_is_recognised()
+    {
+      // Arrange
+      const string input = "بريد@موقع.شبكة";
+
+      // Act
+      var result = this.ExtractAddresses(input);
+
+      // Assert
+      Assert.IsTrue(result.Any(), "A result should be returned");
+    }
+
     #region Wrappers
     
     /// <summary>
