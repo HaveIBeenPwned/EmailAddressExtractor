@@ -68,6 +68,23 @@ public class MyAddressExtractorTest
         Assert.IsFalse(result.Any(), "No results should be returned");
     }
 
+    [TestMethod]
+    public void comma_should_terminate_address()
+    {
+        // Arrange
+        const string input = "email1@example.com,email2@example.com";
+        const string expectedFirst = "email1@example.com";
+        const string expectedLast = "email2@example.com";
+
+        // Act
+        var result = this.ExtractAddresses(input);
+
+        // Assert
+        Assert.IsTrue(result.Count == 2, "Two results should be returned");
+        Assert.AreEqual(expectedFirst, result.First(), $"First email address must be {expectedFirst}");
+        Assert.AreEqual(expectedLast, result.Last(), $"Last email address must be {expectedLast}");
+    }
+
     #region Wrappers
     
     /// <summary>
