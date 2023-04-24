@@ -126,8 +126,8 @@ namespace AddressExtractorTest
             CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, string.Empty);
-            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, CommandLineProcessor.Defaults.OUTPUT_FILE_PATH);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
         }
 
         [TestMethod]
@@ -139,8 +139,8 @@ namespace AddressExtractorTest
             Assert.AreEqual(inputs.Count, 2);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[1]);
-            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, string.Empty);
-            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, CommandLineProcessor.Defaults.OUTPUT_FILE_PATH);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
         }
 
         [TestMethod]
@@ -152,7 +152,7 @@ namespace AddressExtractorTest
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, args[2]);
-            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
         }
 
         [TestMethod]
@@ -163,7 +163,7 @@ namespace AddressExtractorTest
             CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, CommandLineProcessor.Defaults.OUTPUT_FILE_PATH);
             Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, args[2]);
         }
 
@@ -201,7 +201,7 @@ namespace AddressExtractorTest
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[1]);
             Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, args[3]);
-            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
         }
 
         [TestMethod]
@@ -214,7 +214,7 @@ namespace AddressExtractorTest
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[3]);
             Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, args[2]);
-            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
         }
     }
 }
