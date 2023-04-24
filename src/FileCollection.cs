@@ -52,6 +52,7 @@ namespace MyAddressExtractor {
         private void Log()
         {
             var infos = new ConcurrentDictionary<string, ExtensionInfo>(StringComparer.OrdinalIgnoreCase);
+            var count = this.Files.Count; // Cache the count before removing
             foreach (string path in this)
             {
                 var file = new FileInfo(path);
@@ -59,12 +60,18 @@ namespace MyAddressExtractor {
                 {
                     var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(extension.ToLower()));
                     info.AddFile(file);
+                    
+                    // Remove ignored files
+                    if (!info.Parsing.Read)
+                    {
+                        this.Files.Remove(path);
+                    }
                 }
             }
 
             var sorted = infos.Values
                 .OrderBy(info => info.Parsing.Read ? -info.Count : 0);
-            Console.WriteLine($"Found {this.Files.Count:n0} files:");
+            Console.WriteLine($"Found {count:n0} files:");
             foreach (ExtensionInfo info in sorted)
             {
                 Console.WriteLine($"{info.Extension}: {info.Count:n0} files : {info.Bytes:n0} bytes{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
