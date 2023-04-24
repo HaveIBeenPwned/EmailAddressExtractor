@@ -99,7 +99,7 @@ public class MyAddressExtractorTest
     }
 
     [TestMethod]
-    public void email_Address_on_idn_domain_name_is_recognised()
+    public void email_address_on_idn_domain_name_is_recognised()
     {
       // Arrange
       const string input = "بريد@موقع.شبكة";
