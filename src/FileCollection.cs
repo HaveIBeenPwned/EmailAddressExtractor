@@ -57,7 +57,7 @@ namespace MyAddressExtractor {
                 var file = new FileInfo(path);
                 if (file.Extension is {Length: >0} extension)
                 {
-                    var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(extension));
+                    var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(extension.ToLower()));
                     info.AddFile(file);
                 }
             }
@@ -67,7 +67,7 @@ namespace MyAddressExtractor {
             Console.WriteLine($"Found {this.Files.Count:n0} files:");
             foreach (ExtensionInfo info in sorted)
             {
-                Console.WriteLine($"{info.Extension.ToLower()}: {info.Count} files : {info.Bytes} bytes{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
+                Console.WriteLine($"{info.Extension}: {info.Count} files : {info.Bytes} bytes{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
             }
         }
 
