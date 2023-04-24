@@ -45,8 +45,17 @@ namespace MyAddressExtractor {
 
         public async ValueTask SaveAsync(CancellationToken cancellation = default)
         {
-            await this.Extractor.SaveAddressesAsync(CommandLineProcessor.OUTPUT_FILE_PATH, this.Addresses, cancellation);
-            await this.Extractor.SaveReportAsync(CommandLineProcessor.REPORT_FILE_PATH, this.Files, cancellation);
+            string output = CommandLineProcessor.OUTPUT_FILE_PATH;
+            string report = CommandLineProcessor.REPORT_FILE_PATH;
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                await this.Extractor.SaveAddressesAsync(output, this.Addresses, cancellation);
+            }
+
+            if (!string.IsNullOrWhiteSpace(report))
+            {
+                await this.Extractor.SaveReportAsync(report, this.Files, cancellation);
+            }
         }
 
         public async ValueTask DisposeAsync()
