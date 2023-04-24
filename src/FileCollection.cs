@@ -73,7 +73,11 @@ namespace MyAddressExtractor {
 
         /// <inheritdoc />
         public IEnumerator<string> GetEnumerator()
-            => this.Files.GetEnumerator();
+            => this.Files.Where(file => {
+                var info = new FileInfo(file);
+                return info.Extension is {Length: >0}
+                    && FileExtensionParsing.Get(info.Extension).Read;
+            }).GetEnumerator();
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator()
