@@ -11,8 +11,7 @@ namespace AddressExtractorTest
         {
             var args = Array.Empty<string>();
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -20,8 +19,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "-o", "output" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -29,8 +27,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-o" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -38,8 +35,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-r" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -47,8 +43,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-o", "-r", "report" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -56,8 +51,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-r", "-o", "output" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -65,8 +59,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -74,8 +67,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-z" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -83,8 +75,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "-?" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
         }
 
         [TestMethod]
@@ -92,8 +83,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input", "-?" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -101,8 +91,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "-?", "input" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -110,8 +99,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "-v" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
         }
 
         [TestMethod]
@@ -119,8 +107,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input", "-v" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -128,8 +115,7 @@ namespace AddressExtractorTest
         {
             var args = new[] { "-v", "input" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs, ref output, ref report));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Process(args, inputs));
         }
 
         [TestMethod]
@@ -137,12 +123,11 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(output, string.Empty);
-            Assert.AreEqual(report, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
         }
 
         [TestMethod]
@@ -150,13 +135,12 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "input2" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 2);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[1]);
-            Assert.AreEqual(output, string.Empty);
-            Assert.AreEqual(report, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
         }
 
         [TestMethod]
@@ -164,12 +148,11 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-o", "output" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(output, args[2]);
-            Assert.AreEqual(report, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, args[2]);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
         }
 
         [TestMethod]
@@ -177,12 +160,11 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-r", "report" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(output, string.Empty);
-            Assert.AreEqual(report, args[2]);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, args[2]);
         }
 
         [TestMethod]
@@ -190,12 +172,11 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-o", "output", "-r", "report" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(output, args[2]);
-            Assert.AreEqual(report, args[4]);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, args[2]);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, args[4]);
         }
 
         [TestMethod]
@@ -203,12 +184,11 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-r", "report", "-o", "output" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(output, args[4]);
-            Assert.AreEqual(report, args[2]);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, args[4]);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, args[2]);
         }
 
         [TestMethod]
@@ -216,13 +196,12 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "input2", "-o", "output" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 2);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[1]);
-            Assert.AreEqual(output, args[3]);
-            Assert.AreEqual(report, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, args[3]);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
         }
 
         [TestMethod]
@@ -230,13 +209,12 @@ namespace AddressExtractorTest
         {
             var args = new[] { "input1", "-o", "output", "input2" };
             var inputs = new List<string>();
-            string output = string.Empty, report = string.Empty;
-            CommandLineProcessor.Process(args, inputs, ref output, ref report);
+            CommandLineProcessor.Process(args, inputs);
             Assert.AreEqual(inputs.Count, 2);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[3]);
-            Assert.AreEqual(output, args[2]);
-            Assert.AreEqual(report, string.Empty);
+            Assert.AreEqual(CommandLineProcessor.OUTPUT_FILE_PATH, args[2]);
+            Assert.AreEqual(CommandLineProcessor.REPORT_FILE_PATH, string.Empty);
         }
     }
 }
