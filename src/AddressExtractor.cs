@@ -26,34 +26,40 @@ namespace MyAddressExtractor
             }
         }
 
-        public IEnumerable<string> ExtractAddresses(string content)
+        public IEnumerable<string> ExtractAddresses(string? content)
         {
+            if (content is null)
+            {
+                yield break;
+            }
+
             var matches = AddressExtractor.EmailRegex()
                 .Matches(content);
 
             foreach (Match match in matches) {
                 string email = match.Value;
 
+                if (email.StartsWith('.'))
+                    continue;
+                if (email.Length >= 256)
+                    continue;
                 if (email.Contains('*'))
                     continue;
                 if (email.Contains(".."))
                     continue;
                 if (email.Contains(".@"))
                     continue;
-                if (email.Length >= 256)
+                var domain = email[email.LastIndexOf('@')..];
+                // Handle cases such as: foo@bar.1com, foo@bar.12com
+                if (char.IsNumber(domain[domain.LastIndexOf('.')+1]))
                     continue;
                 // Handle cases such as: foobar@_.com, oobar@f_b.com
-                if (email[email.LastIndexOf('@')..].Contains('_'))
-                    continue;
-                // Handle cases such as: foo@bar.1com, foo@bar.12com
-                if (int.TryParse(email[email.LastIndexOf('.')+1].ToString(), out _))
-                    continue;
-                if (email.StartsWith("."))
+                if (domain.Contains('_'))
                     continue;
                  // Handle cases such as: username@-example-.com , username@-example.com and username@example-.com
-                if (email.Contains("@-") || email[email.LastIndexOf('@')..].Contains("-."))
+                if (email.Contains("@-") || domain.Contains("-."))
                     continue;
-                    
+
                 yield return email;
             }
         }

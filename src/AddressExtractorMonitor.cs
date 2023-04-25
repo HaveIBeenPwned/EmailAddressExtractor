@@ -43,10 +43,10 @@ namespace MyAddressExtractor {
             Console.WriteLine($"Read lines rate: {rate:n0}/s\n");
         }
 
-        public async ValueTask SaveAsync(CancellationToken cancellation = default)
+        internal async ValueTask SaveAsync(CommandLineProcessor cli, CancellationToken cancellation = default)
         {
-            string output = CommandLineProcessor.OUTPUT_FILE_PATH;
-            string report = CommandLineProcessor.REPORT_FILE_PATH;
+            string output = cli.OutputFilePath;
+            string report = cli.ReportFilePath;
             if (!string.IsNullOrWhiteSpace(output))
             {
                 await this.Extractor.SaveAddressesAsync(output, this.Addresses, cancellation);

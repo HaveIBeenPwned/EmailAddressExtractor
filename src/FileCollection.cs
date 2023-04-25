@@ -4,10 +4,14 @@ using System.Collections.Concurrent;
 namespace MyAddressExtractor {
     internal sealed class FileCollection : IEnumerable<string>
     {
+        private readonly CommandLineProcessor Cli;
         private readonly ISet<string> Files;
 
-        public FileCollection(IEnumerable<string> inputs)
+        public int Count => this.Files.Count;
+
+        public FileCollection(CommandLineProcessor cli, IEnumerable<string> inputs)
         {
+            this.Cli = cli;
             this.Files = this.CreateSystemSet();
             this.Files.UnionWith(this.GatherFiles(inputs));
             this.Log();
@@ -19,7 +23,7 @@ namespace MyAddressExtractor {
                 FileAttributes attributes = File.GetAttributes(file);
                 if (attributes.HasFlag(FileAttributes.Directory))
                 {
-                    if (!recursed || CommandLineProcessor.OPERATE_RECURSIVELY)
+                    if (!recursed || this.Cli.OperateRecursively)
                     {
                         foreach (string enumerated in this.GatherFiles(Directory.EnumerateFileSystemEntries(file), recursed: true))
                         {
@@ -74,7 +78,7 @@ namespace MyAddressExtractor {
             Console.WriteLine($"Found {count:n0} files:");
             foreach (ExtensionInfo info in sorted)
             {
-                Console.WriteLine($"{info.Extension}: {info.Count:n0} files : {info.Bytes:n0} bytes{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
+                Console.WriteLine($"- {info.Extension}: {info.Count:n0} files : {info.Bytes:n0} bytes{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
             }
         }
 
