@@ -3,44 +3,35 @@ using System.Reflection;
 
 namespace MyAddressExtractor
 {
-    internal static class CommandLineProcessor
+    internal class CommandLineProcessor
     {
-        public static string OUTPUT_FILE_PATH { get; private set; } = Defaults.OUTPUT_FILE_PATH;
-        public static string REPORT_FILE_PATH { get; private set; } = Defaults.REPORT_FILE_PATH;
+        public string OutputFilePath { get; private set; } = Defaults.OUTPUT_FILE_PATH;
+        public string ReportFilePath { get; private set; } = Defaults.REPORT_FILE_PATH;
 
-        public static bool OPERATE_RECURSIVELY { get; private set; } = Defaults.OPERATE_RECURSIVELY;
+        public bool OperateRecursively { get; private set; } = Defaults.OPERATE_RECURSIVELY;
+        public bool SkipPrompts { get; private set; } = Defaults.SKIP_PROMPTS;
 
-        internal static void Process(string[] args, IList<string> inputFilePaths)
+        public CommandLineProcessor(string[] args, IList<string> inputFilePaths)
         {
             if (args.Length == 0)
             {
                 throw new ArgumentException("Please provide at least one input file path.");
             }
 
-            bool expectingOutput = false;
-            bool expectingReport = false;
+            Action<string>? handle = null;
+            string previous = string.Empty;
 
             foreach (var arg in args)
             {
-                if (expectingOutput)
+                if (handle is not null)
                 {
                     // Is it an option?
                     if (arg[0] == '-')
                     {
-                        throw new ArgumentException("Missing output file path after -o option");
+                        throw new ArgumentException($"Missing output file path after {previous} option");
                     }
-                    OUTPUT_FILE_PATH = arg;
-                    expectingOutput = false;
-                }
-                else if (expectingReport)
-                {
-                    // Is it an option?
-                    if (arg[0] == '-')
-                    {
-                        throw new ArgumentException("Missing report file path after -r option");
-                    }
-                    REPORT_FILE_PATH = arg;
-                    expectingReport = false;
+                    handle(arg);
+                    handle = null;
                 }
                 else
                 {
@@ -53,22 +44,25 @@ namespace MyAddressExtractor
                             switch (option)
                             {
                                 case "-recursive":
-                                    OPERATE_RECURSIVELY = true;
+                                    this.OperateRecursively = true;
                                     break;
-                                case "o":
-                                    expectingOutput = true;
+                                case "o" or "-output":
+                                    handle = value => this.OutputFilePath = value;
                                     break;
-                                case "r":
-                                    expectingReport = true;
+                                case "r" or "-report":
+                                    handle = value => this.ReportFilePath = value;
                                     break;
-                                case "v":
+                                case "y" or "-yes":
+                                    this.SkipPrompts = true;
+                                    break;
+                                case "v" or "--version":
                                     if (args.Length > 1)
                                     {
                                         throw new ArgumentException($"'{arg}' must be the only argument when it is used");
                                     }
                                     Version();
                                     return;
-                                case "?":
+                                case "?" or "h" or "--help":
                                     if (args.Length > 1)
                                     {
                                         throw new ArgumentException($"'{arg}' must be the only argument when it is used");
@@ -89,18 +83,15 @@ namespace MyAddressExtractor
                         inputFilePaths.Add(arg);
                     }
                 }
+
+                previous = arg;
             }
 
             // If there are no more arguments but we were expecting a option file path, alert the user
-            if (expectingOutput)
+            if (handle is not null)
             {
-                throw new ArgumentException("Missing output file path after -o option");
+                throw new ArgumentException($"Missing output file path after {previous} option");
             }
-            else if (expectingReport)
-            {
-                throw new ArgumentException("Missing report file path after -r option");
-            }
-
             // Make sure we have at least one input file path
             if (inputFilePaths.Count == 0)
             {
@@ -108,14 +99,36 @@ namespace MyAddressExtractor
             }
         }
 
-        internal static bool WaitInput()
+        internal bool WaitInput(FileCollection files)
         {
-            Console.WriteLine("Press ANY KEY to continue. Q to Quit.");
-            ConsoleKeyInfo info;
-            do {
-                info = Console.ReadKey(intercept: true);
-            } while(info.Modifiers is not 0); // No modifiers
-            return info.Key is not ConsoleKey.Q; // Check for Enter confirmation
+            // If silent output don't prompt
+            if (this.SkipPrompts)
+                return true;
+
+            while (true)
+            {
+                Console.WriteLine("Press ANY KEY to continue ['Q' to Quit; 'I' for info].");
+                var info = Console.ReadKey(intercept: true);
+
+                // No modifiers (shift/ctrl/alt)
+                if (info.Modifiers is 0) {
+                    switch (info.Key) {
+                        case ConsoleKey.Q:
+                            Console.WriteLine("Exiting");
+                            return false;
+                        case ConsoleKey.I:
+                            Console.WriteLine($"Reading the following {files.Count} files:");
+                            foreach (var file in files)
+                            {
+                                Console.WriteLine($"- {file}");
+                            }
+                            Console.WriteLine();
+                            continue;
+                        default:
+                            return true;
+                    }
+                }
+            }
         }
 
         static void Usage()
@@ -144,6 +157,7 @@ namespace MyAddressExtractor
             public const string REPORT_FILE_PATH = "report.txt";
             
             public const bool OPERATE_RECURSIVELY = false;
+            public const bool SKIP_PROMPTS = false;
         }
     }
 }

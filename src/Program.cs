@@ -22,9 +22,10 @@ namespace MyAddressExtractor
         {
             var inputFilePaths = new List<string>();
 
+            CommandLineProcessor config;
             try
             {
-                CommandLineProcessor.Process(args, inputFilePaths);
+                config = new CommandLineProcessor(args, inputFilePaths);
             }
             catch (ArgumentException ae)
             {
@@ -39,9 +40,9 @@ namespace MyAddressExtractor
 
             try
             {
-                var files = new FileCollection(inputFilePaths);
+                var files = new FileCollection(config, inputFilePaths);
 
-                if (!CommandLineProcessor.WaitInput())
+                if (!config.WaitInput(files))
                     return (int)ErrorCode.NoError;
 
                 await using (var monitor = new AddressExtractorMonitor())
@@ -50,11 +51,11 @@ namespace MyAddressExtractor
 
                     // Log one last time out of the Timer loop
                     monitor.Log();
-                    await monitor.SaveAsync(CancellationToken.None);
+                    await monitor.SaveAsync(config, CancellationToken.None);
                 }
                 
-                Console.WriteLine($"Addresses saved to {CommandLineProcessor.OUTPUT_FILE_PATH}");
-                Console.WriteLine($"Report saved to {CommandLineProcessor.REPORT_FILE_PATH}");
+                Console.WriteLine($"Addresses saved to {config.OutputFilePath}");
+                Console.WriteLine($"Report saved to {config.ReportFilePath}");
             }
             catch (Exception ex)
             {

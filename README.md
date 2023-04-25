@@ -29,11 +29,12 @@ Syntax: `AddressExtractor.exe -?`
 Syntax: `AddressExtractor.exe -v`
 Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
 
-| Option | Description |
-| ------ | ----------- |
-| -? | Prints the command line syntax and options |
-| -v | Prints the application version number |
-| input  | One or more input filenames |
-| -o output | Path and filename of the output file. Defaults to 'addresses_output.txt' |
-| -r report | Path and filename of the report file. Defaults to 'report.txt' |
-
+| Option                  | Description                                                                |
+|-------------------------|----------------------------------------------------------------------------|
+| `-?`, `-h`, `--help`    | Prints the command line syntax and options                                 |
+| `-v`, `--version`       | Prints the application version number                                      |
+| input                   | One or more input filenames or directories                                 |
+| `-o`, `--output` output | Path and filename of the output file. Defaults to 'addresses_output.txt'   |
+| `-r`, `--report` report | Path and filename of the report file. Defaults to 'report.txt'             |
+| `--recursive`           | Enable recursive mode for directories, which will search child directories |
+| `-y`, `--yes`           | Automatically confirm prompts to CONTINUE without asking                   |
