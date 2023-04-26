@@ -13,6 +13,15 @@ namespace AddressExtractorTest
 
             // Assert
             Assert.IsTrue(result.Count == 12, "Parsing should pass");
+        }     
+        
+        [TestMethod]
+        public async Task AddressAfterBlankLineIsFound()
+        {
+            var result = await this.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/FileWithBlankLine.txt");
+
+            // Assert
+            Assert.IsTrue(result.Count == 1, "An email address should be found");
         }
 
         [TestMethod]
