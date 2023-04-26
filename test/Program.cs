@@ -56,7 +56,11 @@ namespace AddressExtractorTest
         public void LineBreakShouldNotHaltProcessing()
         {
             // Arrange
-            const string INPUT = "some text\r\n\r\ntest@example.com";
+            const string INPUT = """
+                some text
+                
+                test@example.com
+            """;
             const string EXPECTED = "test@example.com";
 
             // Act

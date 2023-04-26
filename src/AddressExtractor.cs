@@ -15,8 +15,10 @@ namespace MyAddressExtractor
             {
                 using (var stream = new StreamReader(reader, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 4096))
                 {
-                    while (await stream.ReadLineAsync(cancellation) is {Length: >0} line)
+                    while (!stream.EndOfStream)
                     {
+                        var line = await stream.ReadLineAsync(cancellation);
+
                         foreach (var address in this.ExtractAddresses(line))
                         {
                             yield return address;
@@ -28,7 +30,7 @@ namespace MyAddressExtractor
 
         public IEnumerable<string> ExtractAddresses(string? content)
         {
-            if (content is null)
+            if (string.IsNullOrWhiteSpace(content))
             {
                 yield break;
             }
