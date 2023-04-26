@@ -47,6 +47,12 @@ namespace MyAddressExtractor
             foreach (Match match in matches) {
                 string email = match.Value;
                 
+                if (email.StartsWith("'"))
+                    email=email[1..];
+                    
+                if (email.EndsWith("'"))
+                    email=email[..(email.Length-1)];
+                    
                 if (email.Length >= 256)
                     continue;
                     
