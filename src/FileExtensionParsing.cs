@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MyAddressExtractor.Objects.Readers;
 
 namespace MyAddressExtractor {
     internal sealed class FileExtensionParsing
@@ -11,7 +12,10 @@ namespace MyAddressExtractor {
             // Accepted plaintext files
             extensions.AddAll(
                 new[] { ".log", ".json", ".txt", ".sql", ".xml", ".sample", ".csv", ".tsv" },
-                new FileExtensionParsing() // No error means OK!
+                new FileExtensionParsing {
+                    ReaderFunc = path => new PlainTextReader(path)
+                    // No error means OK!
+                }
             );
             
             // Archives
@@ -70,11 +74,31 @@ namespace MyAddressExtractor {
             
             FileExtensionParsing.FILE_EXTENSIONS = extensions;
         }
-
-        public static FileExtensionParsing Get(string extension)
-            => FileExtensionParsing.FILE_EXTENSIONS.GetValueOrDefault(extension, FileExtensionParsing.UNKNOWN);
-
+        
         public bool Read => this.Error is null;
         public string? Error { get; init; } = null;
+        
+        private ReaderDelegate? ReaderFunc { get; init; } = null;
+        
+        public ILineReader GetReader(string path) {
+            if (!this.Read)
+                throw new Exception("Cannot read files of this type");
+            return this.ReaderFunc?.Invoke(path) ?? throw new NullReferenceException("A LineReader could not be created for files of this type");
+        }
+        
+        #region Static Accessors
+        
+        public static FileExtensionParsing Get(string extension)
+            => FileExtensionParsing.FILE_EXTENSIONS.GetValueOrDefault(extension, FileExtensionParsing.UNKNOWN);
+        
+        public static FileExtensionParsing Get(FileInfo info)
+            => FileExtensionParsing.FILE_EXTENSIONS.GetValueOrDefault(info.Extension, FileExtensionParsing.UNKNOWN);
+        
+        public static FileExtensionParsing GetFromPath(string path)
+            => FileExtensionParsing.FILE_EXTENSIONS.GetValueOrDefault(Path.GetExtension(path), FileExtensionParsing.UNKNOWN);
+        
+        private delegate ILineReader ReaderDelegate(string path);
+        
+        #endregion
     }
 }

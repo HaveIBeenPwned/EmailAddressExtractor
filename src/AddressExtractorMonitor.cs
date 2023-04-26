@@ -25,11 +25,16 @@ namespace MyAddressExtractor {
                 var addresses = 0;
 
                 this.Files.Add(inputFilePath, count);
-                await foreach(var email in this.Extractor.ExtractAddressesFromFileAsync(inputFilePath, cancellation))
+
+                var parser = FileExtensionParsing.GetFromPath(inputFilePath);
+                await using (var reader = parser.GetReader(inputFilePath))
                 {
-                    if (this.Addresses.Add(email))
-                        count.Value = addresses++;
-                    this.Lines++;
+                    await foreach(var email in this.Extractor.ExtractAddressesAsync(reader, cancellation))
+                    {
+                        if (this.Addresses.Add(email))
+                            count.Value = addresses++;
+                        this.Lines++;
+                    }
                 }
             }
         }
