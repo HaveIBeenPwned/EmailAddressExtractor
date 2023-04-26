@@ -12,7 +12,7 @@ namespace AddressExtractorTest
             var result = await this.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
 
             // Assert
-            Assert.IsTrue(result.Count == 12, "Parsing should pass");
+            Assert.IsTrue(result.Count == 12, "12 email addresses should be found");
         }     
         
         [TestMethod]
@@ -50,6 +50,22 @@ namespace AddressExtractorTest
 
             // Assert
             Assert.IsTrue(result.Count == 1, "Address should always be converted to lowercase");
+        }
+
+        [TestMethod]
+        public void LineBreakShouldNotHaltProcessing()
+        {
+            // Arrange
+            const string INPUT = "some text\r\n\r\ntest@example.com";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = this.ExtractAddresses(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Email should be found");
         } 
 
         [TestMethod]
