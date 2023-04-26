@@ -34,32 +34,34 @@ namespace MyAddressExtractor
             {
                 yield break;
             }
-
+            /*
+                \.\.	Email having consecutive dot
+                \*	    Email having *
+                .@	    Email having .@
+                @-	    Email having @-
+            */
+            string invalidPatternRegex = @"\.\.|\*|\.@|^\.|@-";
             var matches = AddressExtractor.EmailRegex()
                 .Matches(content);
 
             foreach (Match match in matches) {
                 string email = match.Value;
-
-                if (email.StartsWith('.'))
-                    continue;
+                
                 if (email.Length >= 256)
                     continue;
-                if (email.Contains('*'))
+                    
+                if (Regex.IsMatch(email, invalidPatternRegex))
                     continue;
-                if (email.Contains(".."))
-                    continue;
-                if (email.Contains(".@"))
-                    continue;
+                
                 var domain = email[email.LastIndexOf('@')..];
                 // Handle cases such as: foo@bar.1com, foo@bar.12com
                 if (char.IsNumber(domain[domain.LastIndexOf('.')+1]))
                     continue;
-                // Handle cases such as: foobar@_.com, oobar@f_b.com
-                if (domain.Contains('_'))
+                // Handle cases such as: foobar@_.com
+                if (domain.Substring(1, domain.LastIndexOf('.')-1) == "_")
                     continue;
                  // Handle cases such as: username@-example-.com , username@-example.com and username@example-.com
-                if (email.Contains("@-") || domain.Contains("-."))
+                if (domain.Contains("-."))
                     continue;
 
                 yield return email;
