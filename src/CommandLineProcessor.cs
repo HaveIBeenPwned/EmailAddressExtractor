@@ -122,7 +122,7 @@ namespace MyAddressExtractor
                             foreach (var file in files)
                             {
                                 var info = new FileInfo(file);
-                                Console.WriteLine($"- [{ByteExtensions.Format(info.Length)}] {file}");
+                                Console.WriteLine($"- [{ByteExtensions.Format(info.Length).PadRight(10)}] {file}");
                             }
                             Console.WriteLine();
                             continue;
