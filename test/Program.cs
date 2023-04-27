@@ -69,6 +69,38 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
+        public void EmailAddressesInDoubleQuotesIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "\"test@example.com\"";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = this.ExtractAddresses(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from single quotes");
+        }
+
+        [TestMethod]
+        public void EmailAddressesInEscapedDoubleQuotesIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "\\\"test@example.com\\\"";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = this.ExtractAddresses(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from single quotes");
+        }
+
+        [TestMethod]
         public void LineBreakShouldNotHaltProcessing()
         {
             // Arrange
