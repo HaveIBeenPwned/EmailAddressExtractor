@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
+using MyAddressExtractor.Objects;
 
 namespace MyAddressExtractor
 {
@@ -108,11 +109,11 @@ namespace MyAddressExtractor
             while (true)
             {
                 Console.WriteLine("Press ANY KEY to continue ['Q' to Quit; 'I' for info].");
-                var info = Console.ReadKey(intercept: true);
+                var read = Console.ReadKey(intercept: true);
 
                 // No modifiers (shift/ctrl/alt)
-                if (info.Modifiers is 0) {
-                    switch (info.Key) {
+                if (read.Modifiers is 0) {
+                    switch (read.Key) {
                         case ConsoleKey.Q:
                             Console.WriteLine("Exiting");
                             return false;
@@ -120,7 +121,8 @@ namespace MyAddressExtractor
                             Console.WriteLine($"Reading the following {files.Count} files:");
                             foreach (var file in files)
                             {
-                                Console.WriteLine($"- {file}");
+                                var info = new FileInfo(file);
+                                Console.WriteLine($"- [{ByteExtensions.Format(info.Length).PadRight(10)}] {file}");
                             }
                             Console.WriteLine();
                             continue;

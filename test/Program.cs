@@ -177,8 +177,13 @@ namespace AddressExtractorTest
             // Arrange
             var extractor = new AddressExtractor();
             var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            await foreach(var address in extractor.ExtractAddressesFromFileAsync(path, cancellation))
-                set.Add(address);
+            var parser = FileExtensionParsing.GetFromPath(path);
+
+            await using (var reader = parser.GetReader(path))
+            {
+                await foreach(var address in extractor.ExtractAddressesAsync(reader, cancellation))
+                    set.Add(address);
+            }
             return set;
         }
 

@@ -1,29 +1,37 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using MyAddressExtractor.Objects.Readers;
 
 namespace MyAddressExtractor
 {
     public partial class AddressExtractor
     {
+        /// <summary>
+        /// Email Regex pattern
+        /// </summary>
         [GeneratedRegex(@"[a-z0-9\.\-!#$%&'+/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(?<!\s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled)]
         public static partial Regex EmailRegex();
-        
-        public async IAsyncEnumerable<string> ExtractAddressesFromFileAsync(string inputFilePath, [EnumeratorCancellation] CancellationToken cancellation = default)
-        {
-            await using (var reader = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, FileOptions.SequentialScan | FileOptions.Asynchronous))
-            {
-                using (var stream = new StreamReader(reader, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 4096))
-                {
-                    while (!stream.EndOfStream)
-                    {
-                        var line = await stream.ReadLineAsync(cancellation);
 
-                        foreach (var address in this.ExtractAddresses(line))
-                        {
-                            yield return address;
-                        }
-                    }
+        /// <summary>
+        /// A negative-regex pattern for filtering out bad emails
+        /// </summary>
+        /// <remarks>
+        /// \.\.	Email having consecutive dot
+        /// \*	    Email having *
+        /// .@	    Email having .@
+        /// @-	    Email having @-
+        /// </remarks>
+        [GeneratedRegex(@"\.\.|\*|\.@|^\.|@-", RegexOptions.Compiled)]
+        public static partial Regex InvalidEmailRegex();
+
+        public async IAsyncEnumerable<string> ExtractAddressesAsync(ILineReader reader, [EnumeratorCancellation] CancellationToken cancellation = default)
+        {
+            await foreach (var line in reader.ReadLineAsync(cancellation))
+            {
+                foreach (var address in this.ExtractAddresses(line))
+                {
+                    yield return address;
                 }
             }
         }
@@ -34,13 +42,6 @@ namespace MyAddressExtractor
             {
                 yield break;
             }
-            /*
-                \.\.	Email having consecutive dot
-                \*	    Email having *
-                .@	    Email having .@
-                @-	    Email having @-
-            */
-            string invalidPatternRegex = @"\.\.|\*|\.@|^\.|@-";
             var matches = AddressExtractor.EmailRegex()
                 .Matches(content);
 
@@ -49,14 +50,15 @@ namespace MyAddressExtractor
                 
                 if (email.StartsWith("'"))
                     email=email[1..];
-                    
+                
                 if (email.EndsWith("'"))
                     email=email[..(email.Length-1)];
-                    
+                
                 if (email.Length >= 256)
                     continue;
-                    
-                if (Regex.IsMatch(email, invalidPatternRegex))
+                
+                // Filter out edge case addresses
+                if (AddressExtractor.InvalidEmailRegex().IsMatch(email))
                     continue;
                 
                 var domain = email[email.LastIndexOf('@')..];
