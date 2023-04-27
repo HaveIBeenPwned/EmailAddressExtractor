@@ -42,7 +42,7 @@ namespace MyAddressExtractor.Objects {
             Bytes.PB => "Pb",
             Bytes.EB => "Eb",
             Bytes.ZB => "Zb",
-            Bytes.YB => "",
+            Bytes.YB => "Yb",
             _ => throw new ArgumentOutOfRangeException(nameof(bytes), bytes, null)
         };
         
