@@ -10,7 +10,7 @@ namespace MyAddressExtractor
         /// <summary>
         /// Email Regex pattern
         /// </summary>
-        [GeneratedRegex(@"[a-z0-9\.\-!#$%&'+/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(?<!\s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled)]
+        [GeneratedRegex(@"(?!(\.|\\+|'))[a-z0-9\.\-!#$%&'+/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(?<!\s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled)]
         public static partial Regex EmailRegex();
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace MyAddressExtractor
             foreach (Match match in matches) {
                 string email = match.Value;
                 
-                if (email.StartsWith("'"))
+                if (email.StartsWith("\""))
                     email=email[1..];
                 
                 if (email.EndsWith("'"))
