@@ -81,7 +81,7 @@ namespace AddressExtractorTest
             result.Add(EXPECTED);
 
             // Assert
-            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from single quotes");
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from double quotes");
         }
 
         [TestMethod]
@@ -97,7 +97,7 @@ namespace AddressExtractorTest
             result.Add(EXPECTED);
 
             // Assert
-            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from single quotes");
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from escaped double quotes");
         }
 
         [TestMethod]
