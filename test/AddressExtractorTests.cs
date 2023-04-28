@@ -147,6 +147,19 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
+        public void EmailAddressesWithKnownFileExtensionsThatAreNotTldsAreIgnored()
+        {
+            // Arrange
+            const string INPUT = "test@example.jpg";
+
+            // Act
+            var result = this.ExtractAddresses(INPUT);
+
+            // Assert
+            Assert.IsFalse(result.Any(), "No results should be returned");
+        }
+
+        [TestMethod]
         public void CommaShouldTerminateAddress()
         {
             // Arrange
