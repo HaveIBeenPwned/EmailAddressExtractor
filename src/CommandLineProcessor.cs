@@ -11,6 +11,8 @@ namespace MyAddressExtractor
         public bool OperateRecursively { get; private set; } = Defaults.OPERATE_RECURSIVELY;
         public bool SkipPrompts { get; private set; } = Defaults.SKIP_PROMPTS;
 
+        public bool Debug { get; private set; } = Defaults.DEBUG;
+
         public CommandLineProcessor(string[] args, IList<string> inputFilePaths)
         {
             if (args.Length == 0)
@@ -69,6 +71,9 @@ namespace MyAddressExtractor
                                     }
                                     Usage();
                                     return;
+                                case "-debug":
+                                    this.Debug = true;
+                                    break;
                                 default:
                                     throw new ArgumentException($"Unexpected option '{arg}'");
                             }
@@ -159,6 +164,8 @@ namespace MyAddressExtractor
             
             public const bool OPERATE_RECURSIVELY = false;
             public const bool SKIP_PROMPTS = false;
+
+            public const bool DEBUG = false;
         }
     }
 }

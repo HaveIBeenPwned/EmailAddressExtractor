@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using MyAddressExtractor.Objects.Performance;
 using MyAddressExtractor.Objects.Readers;
 
 namespace MyAddressExtractor
@@ -25,11 +26,15 @@ namespace MyAddressExtractor
         [GeneratedRegex(@"\.\.|\*|\.@|^\.|@-", RegexOptions.Compiled)]
         public static partial Regex InvalidEmailRegex();
 
-        public async IAsyncEnumerable<string> ExtractAddressesAsync(ILineReader reader, [EnumeratorCancellation] CancellationToken cancellation = default)
+        public IAsyncEnumerable<string> ExtractAddressesAsync(ILineReader reader, CancellationToken cancellation = default)
+            => this.ExtractAddressesAsync(IPerformanceStack.DEFAULT, reader, cancellation);
+
+        public async IAsyncEnumerable<string> ExtractAddressesAsync(IPerformanceStack stack, ILineReader reader, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
             await foreach (var line in reader.ReadLineAsync(cancellation))
             {
-                foreach (var address in this.ExtractAddresses(line))
+                stack.Step("Read line");
+                foreach (var address in this.ExtractAddresses(stack, line))
                 {
                     yield return address;
                 }
@@ -37,6 +42,9 @@ namespace MyAddressExtractor
         }
 
         public IEnumerable<string> ExtractAddresses(string? content)
+            => this.ExtractAddresses(IPerformanceStack.DEFAULT, content);
+
+        private IEnumerable<string> ExtractAddresses(IPerformanceStack stack, string? content)
         {
             if (string.IsNullOrWhiteSpace(content))
             {
@@ -44,68 +52,72 @@ namespace MyAddressExtractor
             }
             var matches = AddressExtractor.EmailRegex()
                 .Matches(content);
+            using (var debug = stack.CreateStack("Run regex"))
+            {
+                foreach (Match match in matches) {
+                    // Use the match position to validate too long of a length so we don't have to allocate the string
+                    if (match.Index + match.Length >= 256)
+                        continue;
+                    debug.Step("Check length");
 
-            foreach (Match match in matches) {
-                string email = match.Value;
+                    string email = match.Value;
+                    debug.Step("Capture string");
 
-                // Handle quotes at the start and end of the match
-                if (email.StartsWith('\'') && email.EndsWith('\''))
-                    email = email[1..^1];
-                if (email.StartsWith('"') && email.EndsWith('"'))
-                    email = email[1..^1];
-                if (email.StartsWith("\\\"") && email.EndsWith("\\\""))
-                    email = email[2..^2];
+                    // Handle quotes at the start and end of the match
+                    if (email.StartsWith('\'') && email.EndsWith('\''))
+                        email = email[1..^1];
+                    if (email.StartsWith('"') && email.EndsWith('"'))
+                        email = email[1..^1];
+                    if (email.StartsWith("\\\"") && email.EndsWith("\\\""))
+                        email = email[2..^2];
 
-                // The regex cannot enforce length restrictions
-                if (email.Length >= 256)
-                    continue;
+                    // Filter out edge case addresses
+                    if (AddressExtractor.InvalidEmailRegex().IsMatch(email))
+                        continue;
+                    debug.Step("Filter invalids");
 
-                // Filter out edge case addresses
-                if (AddressExtractor.InvalidEmailRegex().IsMatch(email))
-                {
-                    System.Diagnostics.Debug.WriteLine(email);
-                    continue;
-                }
+                    // Is there a single backslash enclosed in quotes? if yes, that's ok. A single backslash without quotes is not
+                    var username = email[0..email.LastIndexOf('@')];
+                    // Handle quotes at the start and end of the username
+                    if (username.StartsWith('\'') && username.EndsWith('\''))
+                        username = username[1..^1];
+                    if (username.StartsWith('"') && username.EndsWith('"'))
+                        username = username[1..^1];
+                    if (username.StartsWith("\\\"") && username.EndsWith("\\\""))
+                        username = username[2..^2];
 
-                // Is there a single backslash enclosed in quotes? if yes, that's ok. A single backslash without quotes is not
-                var username = email[0..email.LastIndexOf('@')];
-                // Handle quotes at the start and end of the username
-                if (username.StartsWith('\'') && username.EndsWith('\''))
-                    username = username[1..^1];
-                if (username.StartsWith('"') && username.EndsWith('"'))
-                    username = username[1..^1];
-                if (username.StartsWith("\\\"") && username.EndsWith("\\\""))
-                    username = username[2..^2];
-
-                // Does the username contain any unescaped double quotes?
-                var quoteIndex = username.IndexOf('"');
-                int unescapedQuoteCount = 0;
-                bool passed = true;
-                while (passed && quoteIndex != -1)
-                {
-                    if (quoteIndex == 0 || (quoteIndex > 0 && username[quoteIndex - 1] != '\\'))
+                    // Does the username contain any unescaped double quotes?
+                    var quoteIndex = username.IndexOf('"');
+                    int unescapedQuoteCount = 0;
+                    bool passed = true;
+                    while (passed && quoteIndex != -1)
                     {
-                        unescapedQuoteCount++;
+                        if (quoteIndex == 0 || (quoteIndex > 0 && username[quoteIndex - 1] != '\\'))
+                        {
+                            unescapedQuoteCount++;
+                        }
+                        quoteIndex = username.IndexOf('"', quoteIndex + 1);
                     }
-                    quoteIndex = username.IndexOf('"', quoteIndex + 1);
+
+                    // Does it contain mismatched (an odd number) quotes?
+                    if ((unescapedQuoteCount & 1) == 1)
+                        continue;
+
+                    var domain = email[email.LastIndexOf('@')..];
+                    // Handle cases such as: foo@bar.1com, foo@bar.12com
+                    if (char.IsNumber(domain[domain.LastIndexOf('.')+1]))
+                        continue;
+                    // Handle cases such as: foobar@_.com
+                    if (domain[1..domain.LastIndexOf('.')] == "_")
+                        continue;
+                    // Handle cases such as: username@-example-.com and username@example-.com
+                    if (domain.Contains("-."))
+                        continue;
+
+                    debug.Step("Validate domain");
+
+                    yield return email;
                 }
-
-                // Does it contain mismatched (an odd number) quotes?
-                if ((unescapedQuoteCount & 1) == 1)
-                    continue;
-
-                var domain = email[email.LastIndexOf('@')..];
-                // Handle cases such as: foo@bar.1com, foo@bar.12com
-                if (char.IsNumber(domain[domain.LastIndexOf('.')+1]))
-                    continue;
-                // Handle cases such as: foobar@_.com
-                if (domain[1..domain.LastIndexOf('.')] == "_")
-                    continue;
-                // Handle cases such as: username@-example-.com and username@example-.com
-                if (domain.Contains("-."))
-                    continue;
-
-                yield return email;
             }
         }
 
