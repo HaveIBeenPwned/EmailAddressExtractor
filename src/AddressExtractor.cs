@@ -101,7 +101,7 @@ namespace MyAddressExtractor
                 // Handle cases such as: foobar@_.com
                 if (domain[1..domain.LastIndexOf('.')] == "_")
                     continue;
-                 // Handle cases such as: username@-example-.com and username@example-.com
+                // Handle cases such as: username@-example-.com and username@example-.com
                 if (domain.Contains("-."))
                     continue;
 
