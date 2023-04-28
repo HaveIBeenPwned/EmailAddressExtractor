@@ -4,7 +4,7 @@ using MyAddressExtractor;
 namespace AddressExtractorTest
 {
     [TestClass]
-    public class MyAddressExtractorTest
+    public class AddressExtractorTests
     {
         [TestMethod]
         public async Task CorrectNumberOfAddressesAreExtractedFromFile()
