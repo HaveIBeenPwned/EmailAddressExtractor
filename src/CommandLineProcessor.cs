@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Reflection;
+﻿using System.Reflection;
 using MyAddressExtractor.Objects;
 
 namespace MyAddressExtractor
@@ -56,14 +55,14 @@ namespace MyAddressExtractor
                                 case "y" or "-yes":
                                     this.SkipPrompts = true;
                                     break;
-                                case "v" or "--version":
+                                case "v" or "-version":
                                     if (args.Length > 1)
                                     {
                                         throw new ArgumentException($"'{arg}' must be the only argument when it is used");
                                     }
                                     Version();
                                     return;
-                                case "?" or "h" or "--help":
+                                case "?" or "h" or "-help":
                                     if (args.Length > 1)
                                     {
                                         throw new ArgumentException($"'{arg}' must be the only argument when it is used");
