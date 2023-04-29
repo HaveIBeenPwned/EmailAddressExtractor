@@ -1,4 +1,6 @@
 using System.IO.Compression;
+using System.Text;
+using System.Xml;
 
 namespace MyAddressExtractor.Objects.Readers {
     internal sealed class OpenDocumentTextReader : PlainTextReader
@@ -19,7 +21,21 @@ namespace MyAddressExtractor.Objects.Readers {
                 {
                     if (entry.FullName.Equals("content.xml", StringComparison.OrdinalIgnoreCase))
                     {
-                        entry.ExtractToFile(DestinationPath, true);
+                        using(var writer = new StreamWriter(DestinationPath, true, Encoding.UTF8, 4096))
+                        {
+                            using(var reader = new XmlTextReader(entry.Open()))
+                            {
+                                while(reader.Read())
+                                {
+                                    if (reader.NodeType == XmlNodeType.Text ||
+                                        reader.NodeType == XmlNodeType.CDATA)
+                                    {
+                                        writer.WriteLine(reader.ReadContentAsString());
+                                    }
+                                }
+                            }
+                        }
+
                         return DestinationPath;
                     }
                 }
