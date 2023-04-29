@@ -44,6 +44,7 @@ namespace MyAddressExtractor
 
                 if (!config.WaitInput(files))
                     return (int)ErrorCode.NoError;
+                Console.WriteLine("Extracting...");
 
                 await using (var monitor = new AddressExtractorMonitor())
                 {
