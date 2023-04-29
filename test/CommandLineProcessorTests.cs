@@ -93,12 +93,16 @@ namespace AddressExtractorTest
         [TestMethod]
         public void Usage()
         {
-            // Arrange
-            var args = new[] { "-?" };
+            var all = new[] { "-?", "-h", "--help" };
+            foreach (var option in all)
+            {
+                // Arrange
+                var args = new[] { option };
 
-            // Act and Assert
-            var config = new CommandLineProcessor(args, out _);
-            // Successful if no exception thrown
+                // Act and Assert
+                var config = new CommandLineProcessor(args, out _);
+                // Successful if no exception thrown
+            }
         }
 
         [TestMethod]
@@ -127,7 +131,8 @@ namespace AddressExtractorTest
         public void Version()
         {
             var all = new[] { "-v", "--version" };
-            foreach (var option in all) {
+            foreach (var option in all)
+            {
                 // Arrange
                 var args = new[] { option };
 
@@ -174,7 +179,8 @@ namespace AddressExtractorTest
         public void SkipPrompt()
         {
             var all = new[] { "-y", "--yes" };
-            foreach (var option in all) {
+            foreach (var option in all)
+            {
                 // Arrange
                 var args = new[] { "input", option };
 
