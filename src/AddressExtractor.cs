@@ -46,10 +46,10 @@ namespace MyAddressExtractor
 
         private IEnumerable<string> ExtractAddresses(IPerformanceStack stack, string? content)
         {
+            // If line is NULL or any time of whitespace, don't waste computation time searching any empty string
             if (string.IsNullOrWhiteSpace(content))
-            {
                 yield break;
-            }
+
             var matches = AddressExtractor.EmailRegex()
                 .Matches(content);
             using (var debug = stack.CreateStack("Run regex"))
