@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using MyAddressExtractor.Objects.Performance;
 
 [assembly:InternalsVisibleTo("AddressExtractorTest")]
 
@@ -46,7 +47,10 @@ namespace MyAddressExtractor
                     return (int)ErrorCode.NoError;
                 Console.WriteLine("Extracting...");
 
-                await using (var monitor = new AddressExtractorMonitor())
+                IPerformanceStack perf = config.Debug
+                    ? new DebugPerformanceStack() : IPerformanceStack.DEFAULT;
+
+                await using (var monitor = new AddressExtractorMonitor(perf))
                 {
                     await monitor.RunAsync(files, CancellationToken.None);
 

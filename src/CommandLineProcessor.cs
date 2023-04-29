@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Reflection;
+﻿using System.Reflection;
 using MyAddressExtractor.Objects;
 
 namespace MyAddressExtractor
@@ -11,6 +10,8 @@ namespace MyAddressExtractor
 
         public bool OperateRecursively { get; private set; } = Defaults.OPERATE_RECURSIVELY;
         public bool SkipPrompts { get; private set; } = Defaults.SKIP_PROMPTS;
+
+        public bool Debug { get; private set; } = Defaults.DEBUG;
 
         public CommandLineProcessor(string[] args, IList<string> inputFilePaths)
         {
@@ -56,20 +57,23 @@ namespace MyAddressExtractor
                                 case "y" or "-yes":
                                     this.SkipPrompts = true;
                                     break;
-                                case "v" or "--version":
+                                case "v" or "-version":
                                     if (args.Length > 1)
                                     {
                                         throw new ArgumentException($"'{arg}' must be the only argument when it is used");
                                     }
                                     Version();
                                     return;
-                                case "?" or "h" or "--help":
+                                case "?" or "h" or "-help":
                                     if (args.Length > 1)
                                     {
                                         throw new ArgumentException($"'{arg}' must be the only argument when it is used");
                                     }
                                     Usage();
                                     return;
+                                case "-debug":
+                                    this.Debug = true;
+                                    break;
                                 default:
                                     throw new ArgumentException($"Unexpected option '{arg}'");
                             }
@@ -160,6 +164,8 @@ namespace MyAddressExtractor
             
             public const bool OPERATE_RECURSIVELY = false;
             public const bool SKIP_PROMPTS = false;
+
+            public const bool DEBUG = false;
         }
     }
 }

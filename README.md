@@ -38,3 +38,4 @@ Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
 | `-r`, `--report` report | Path and filename of the report file. Defaults to 'report.txt'             |
 | `--recursive`           | Enable recursive mode for directories, which will search child directories |
 | `-y`, `--yes`           | Automatically confirm prompts to CONTINUE without asking                   |
+| `--debug`               | Enabled debug mode for fine-tuned performance checking                     |
