@@ -21,12 +21,12 @@ namespace MyAddressExtractor
 
         static async Task<int> Main(string[] args)
         {
-            var inputFilePaths = new List<string>();
+            IList<string> inputFilePaths;
 
             CommandLineProcessor config;
             try
             {
-                config = new CommandLineProcessor(args, inputFilePaths);
+                config = new CommandLineProcessor(args, out inputFilePaths);
             }
             catch (ArgumentException ae)
             {

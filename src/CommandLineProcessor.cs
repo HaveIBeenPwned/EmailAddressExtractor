@@ -13,9 +13,9 @@ namespace MyAddressExtractor
 
         public bool Debug { get; private set; } = Defaults.DEBUG;
 
-        public CommandLineProcessor(string[] args, IList<string> inputFilePaths)
+        public CommandLineProcessor(IReadOnlyCollection<string> args, out IList<string> inputFilePaths)
         {
-            if (args.Length == 0)
+            if (args.Count == 0)
             {
                 throw new ArgumentException("Please provide at least one input file path.");
             }
@@ -23,6 +23,7 @@ namespace MyAddressExtractor
             Action<string>? handle = null;
             string previous = string.Empty;
 
+            inputFilePaths = new List<string>();
             foreach (var arg in args)
             {
                 if (handle is not null)
@@ -58,14 +59,14 @@ namespace MyAddressExtractor
                                     this.SkipPrompts = true;
                                     break;
                                 case "v" or "-version":
-                                    if (args.Length > 1)
+                                    if (args.Count > 1)
                                     {
                                         throw new ArgumentException($"'{arg}' must be the only argument when it is used");
                                     }
                                     Version();
                                     return;
                                 case "?" or "h" or "-help":
-                                    if (args.Length > 1)
+                                    if (args.Count > 1)
                                     {
                                         throw new ArgumentException($"'{arg}' must be the only argument when it is used");
                                     }
