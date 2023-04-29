@@ -72,6 +72,12 @@ namespace MyAddressExtractor {
                 new FileExtensionParsing { Error = "Not currently supported" }
             );
             
+            // Future - OpenDoc
+            extensions.AddAll(
+                new[] { ".odt" },
+                new FileExtensionParsing { Reader = path => new OpenDocumentTextReader(path) }
+            );
+            
             FileExtensionParsing.FILE_EXTENSIONS = extensions;
         }
         
