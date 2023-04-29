@@ -27,6 +27,7 @@ namespace MyAddressExtractor.Objects.Readers {
         {
             this.StreamReader.Dispose();
             await this.FileStream.DisposeAsync();
+            GC.SuppressFinalize(this);
         }
     }
 }
