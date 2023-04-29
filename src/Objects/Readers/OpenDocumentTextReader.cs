@@ -1,17 +1,17 @@
-
 using System.IO.Compression;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace MyAddressExtractor.Objects.Readers {
-    internal sealed class OpenDocumentTextReader : ILineReader
+    internal sealed class OpenDocumentTextReader : PlainTextReader
     {
-        private readonly FileStream? FileStream;
-        private readonly StreamReader? StreamReader;
-        private bool initialised = false;
-        
+        private static string DestinationPath = Path.GetTempFileName();
 
         public OpenDocumentTextReader(string zipPath)
+            : base(ExtractContent(zipPath))
+        {
+
+        }
+
+        private static string ExtractContent(string zipPath)
         {
             using (ZipArchive archive = ZipFile.OpenRead(zipPath))
             {
@@ -19,43 +19,23 @@ namespace MyAddressExtractor.Objects.Readers {
                 {
                     if (entry.FullName.Equals("content.xml", StringComparison.OrdinalIgnoreCase))
                     {
-                        var extractPath = Path.GetTempPath();
-                        
-                        string destinationPath = Path.GetFullPath(Path.Combine(extractPath, entry.FullName));
-
-                        if (destinationPath.StartsWith(extractPath, StringComparison.Ordinal))
-                        {
-                            entry.ExtractToFile(destinationPath);
-
-                            this.FileStream = new FileStream(destinationPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, FileOptions.SequentialScan | FileOptions.Asynchronous);
-                            this.StreamReader = new StreamReader(this.FileStream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 4096);
-                            this.initialised = true;
-                        }
+                        entry.ExtractToFile(DestinationPath, true);
+                        return DestinationPath;
                     }
                 }
             }
-
-            if(!this.initialised)
-            {
-                throw new Exception($"Unable to load content.xml from '{zipPath}'");
-            }
+            
+            throw new Exception($"Unable to load content.xml from '{zipPath}'");
         }
 
-        public async ValueTask DisposeAsync()
+        public async override ValueTask DisposeAsync()
         {
-            if(this.initialised)
+            if(Path.Exists(OpenDocumentTextReader.DestinationPath))
             {
-                this.StreamReader?.Dispose();
-                await this.FileStream!.DisposeAsync();
+                File.Delete(OpenDocumentTextReader.DestinationPath);
             }
-        }
 
-        public async IAsyncEnumerable<string?> ReadLineAsync([EnumeratorCancellation] CancellationToken cancellation = default)
-        {
-            while (!this.StreamReader!.EndOfStream)
-            {
-                yield return await this.StreamReader!.ReadLineAsync(cancellation);
-            }
+            await base.DisposeAsync();
         }
     }
 }
