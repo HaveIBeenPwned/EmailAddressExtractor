@@ -31,7 +31,7 @@ namespace MyAddressExtractor
             await foreach (var line in reader.ReadLineAsync(cancellation))
             {
                 stack.Step("Read line");
-                await foreach (var address in this.ExtractAddressesAsync(stack, line))
+                await foreach (var address in this.ExtractAddressesAsync(stack, line, cancellation))
                 {
                     yield return address;
                 }
