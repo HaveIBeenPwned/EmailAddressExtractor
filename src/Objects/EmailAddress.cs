@@ -1,7 +1,8 @@
 using System.Text.RegularExpressions;
 
 namespace MyAddressExtractor.Objects {
-    public struct EmailAddress {
+    public struct EmailAddress
+    {
         private readonly Match Match;
 
         /// <summary>
