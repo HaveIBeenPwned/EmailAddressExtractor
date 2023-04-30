@@ -1,5 +1,6 @@
 namespace MyAddressExtractor.Objects {
-    public enum Result {
+    public enum Result
+    {
         /// <summary>Your <see cref="AddressFilter.BaseFilter"/> is certain the the <see cref="EmailAddress"/> is VALID</summary>
         ALLOW,
 
