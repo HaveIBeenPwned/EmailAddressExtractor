@@ -41,7 +41,7 @@ namespace MyAddressExtractor.Objects {
         private int? _Separator = null;
 
         /// <summary>The Length of the Full Address</summary>
-        public int Length => this.Full.Length;
+        public int Length => this._Full?.Length ?? this.Match.Length;
 
         public EmailAddress(Match match)
         {
