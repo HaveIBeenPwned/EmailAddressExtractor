@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Text;
 using MyAddressExtractor.Objects.Performance;
 
 namespace MyAddressExtractor {
@@ -35,7 +36,7 @@ namespace MyAddressExtractor {
                     var parser = FileExtensionParsing.GetFromPath(inputFilePath);
                     await using (var reader = parser.GetReader(inputFilePath))
                     {
-                        await foreach(var email in this.Extractor.ExtractAddressesAsync(stack, reader, cancellation))
+                        await foreach(var email in this.Extractor.ExtractFileAddressesAsync(stack, reader, cancellation))
                         {
                             if (this.Addresses.Add(email))
                                 count.Value = addresses++;
@@ -63,12 +64,24 @@ namespace MyAddressExtractor {
             string report = cli.ReportFilePath;
             if (!string.IsNullOrWhiteSpace(output))
             {
-                await this.Extractor.SaveAddressesAsync(output, this.Addresses, cancellation);
+                await File.WriteAllLinesAsync(
+                    output,
+                    this.Addresses.Select(address => address.ToLowerInvariant())
+                        .OrderBy(address => address, StringComparer.OrdinalIgnoreCase),
+                    cancellation
+                );
             }
 
             if (!string.IsNullOrWhiteSpace(report))
             {
-                await this.Extractor.SaveReportAsync(report, this.Files, cancellation);
+                var reportContent = new StringBuilder("Unique addresses per file:\n");
+
+                foreach ((var file, var count) in this.Files)
+                {
+                    reportContent.AppendLine($"{file}: {count}");
+                }
+
+                await File.WriteAllTextAsync(report, reportContent.ToString(), cancellation);
             }
         }
 

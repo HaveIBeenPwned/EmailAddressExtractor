@@ -9,140 +9,140 @@ namespace AddressExtractorTest
         #region Valid addresses
 
         [TestMethod]
-        public void AmpersandIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"Mary&Jane@example.org"));
+        public async Task AmpersandIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"Mary&Jane@example.org"));
 
         [TestMethod]
-        public void SingleBackslashEnclosedInQuotesIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"""test\""blah""@example.com"));
+        public async Task SingleBackslashEnclosedInQuotesIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"""test\""blah""@example.com"));
 
         [TestMethod]
-        public void ForwardSlashIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"customer/department@example.com"));
+        public async Task ForwardSlashIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"customer/department@example.com"));
 
         [TestMethod]
-        public void StartingWithDollarSignIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"$A12345@example.com"));
+        public async Task StartingWithDollarSignIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"$A12345@example.com"));
 
         [TestMethod]
-        public void StartingWithExclamationMarkIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"!def!xyz%abc@example.com"));
+        public async Task StartingWithExclamationMarkIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"!def!xyz%abc@example.com"));
 
         [TestMethod]
-        public void StartingWithUnderscoreIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"_Yosemite.Sam@example.com"));
+        public async Task StartingWithUnderscoreIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"_Yosemite.Sam@example.com"));
 
         [TestMethod]
-        public void DotInAliasIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"Ima.Fool@example.com"));
+        public async Task DotInAliasIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"Ima.Fool@example.com"));
 
         [TestMethod]
-        public void SingleCharDomainIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"foobar@x.com"));
+        public async Task SingleCharDomainIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"foobar@x.com"));
 
         [TestMethod]
-        public void DomainWithNumberIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"foobar@c0m.com"));
+        public async Task DomainWithNumberIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"foobar@c0m.com"));
 
         [TestMethod]
-        public void DomainWithUnderscoreIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"foobar@c_m.com"));
+        public async Task DomainWithUnderscoreIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"foobar@c_m.com"));
 
         [TestMethod]
-        public void DomainWithUnderscoreBeforeTldIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"foo@bar_.com"));
+        public async Task DomainWithUnderscoreBeforeTldIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"foo@bar_.com"));
 
         [TestMethod]
-        public void DomainWithNumbersOnlyIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"foo@666.com"));
+        public async Task DomainWithNumbersOnlyIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"foo@666.com"));
 
         [TestMethod]
-        public void EmailOf255CharsIsValid()
-            => Assert.IsTrue(this.IsValidEmail(@"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111@example.com"));
+        public async Task EmailOf255CharsIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111@example.com"));
 
         #endregion
         #region Invalid addresses
 
         [TestMethod]
-        public void NullIsInvalid()
-        => Assert.IsFalse(this.IsValidEmail(null));
+        public async Task NullIsInvalid()
+        => Assert.IsFalse(await this.IsValidEmailAsync(null));
 
         [TestMethod]
-        public void EmptyEmailIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail(string.Empty));
+        public async Task EmptyEmailIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(string.Empty));
 
         [TestMethod]
-        public void NoAtSymbolIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail("NotAnEmail"));
+        public async Task NoAtSymbolIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("NotAnEmail"));
 
         [TestMethod]
-        public void AtFirstIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail("@NotAnEmail"));
+        public async Task AtFirstIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("@NotAnEmail"));
 
         [TestMethod]
-        public void AtLastIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail("NotAnEmail@"));
+        public async Task AtLastIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("NotAnEmail@"));
 
         [TestMethod]
-        public void BackspaceCharIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail("foo@b" + (char)8 + "ar.com"));
+        public async Task BackspaceCharIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("foo@b" + (char)8 + "ar.com"));
 
         [TestMethod]
-        public void HorizontalTabCharIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail("foo@b" + (char)9 + "ar.com"));
+        public async Task HorizontalTabCharIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("foo@b" + (char)9 + "ar.com"));
 
         [TestMethod]
-        public void DeleteCharIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail("foo@b" + (char)127 + "ar.com"));
+        public async Task DeleteCharIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("foo@b" + (char)127 + "ar.com"));
 
         [TestMethod]
         [Ignore("This is a low priority feature so the test is ignored for the moment in the interests of having all green all the way for tests that *should* be working now")]
-        public void AliasWithAsteriskIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail(@"fo*o@bar.com"));
+        public async Task AliasWithAsteriskIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"fo*o@bar.com"));
 
         [TestMethod]
-        public void EmailOf256CharsIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail(@"1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111@example.com"));
+        public async Task EmailOf256CharsIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111@example.com"));
 
         [TestMethod]
-        public void UnescapedDoubleQuoteIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail("\"test\rblah\"@example.com"));
+        public async Task UnescapedDoubleQuoteIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("\"test\rblah\"@example.com"));
 
         [TestMethod]
-        public void DotFirstIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail(@".wooly@example.com"));
+        public async Task DotFirstIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@".wooly@example.com"));
 
         [TestMethod]
-        public void ConsecutiveDotsIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail(@"wo..oly@example.com"));
+        public async Task ConsecutiveDotsIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"wo..oly@example.com"));
 
         [TestMethod]
-        public void DotBeforeAtIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail(@"pootietang.@example.com"));
+        public async Task DotBeforeAtIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"pootietang.@example.com"));
 
         [TestMethod]
-        public void DotForAliasIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail(@".@example.com"));
+        public async Task DotForAliasIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@".@example.com"));
 
         [TestMethod]
-        public void NoDotInDomainIsInvalid()
-            => Assert.IsFalse(this.IsValidEmail(@"foo@bar"));
+        public async Task NoDotInDomainIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@bar"));
 
         [TestMethod]
-        public void TldStartingWithNumberIsNotValid()
-            => Assert.IsFalse(this.IsValidEmail("foo@bar.1com"));
+        public async Task TldStartingWithNumberIsNotValid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("foo@bar.1com"));
 
         [TestMethod]
-        public void TldWithOnlyNumbersIsNotValid()
-            => Assert.IsFalse(this.IsValidEmail("foo@bar.123"));
+        public async Task TldWithOnlyNumbersIsNotValid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("foo@bar.123"));
 
         [TestMethod]
-        public void TldWithOneCharacterIsNotValid()
-            => Assert.IsFalse(this.IsValidEmail("foo@bar.a"));
+        public async Task TldWithOneCharacterIsNotValid()
+            => Assert.IsFalse(await this.IsValidEmailAsync("foo@bar.a"));
 
         [TestMethod]
-        public void DomainWithUnderscoreOnlyIsNotValid()
-            => Assert.IsFalse(this.IsValidEmail(@"foobar@_.com"));
+        public async Task DomainWithUnderscoreOnlyIsNotValid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foobar@_.com"));
 
         #endregion
 
@@ -151,11 +151,12 @@ namespace AddressExtractorTest
         /// </summary>
         /// <param name="sourceEmail"></param>
         /// <returns></returns>
-        private bool IsValidEmail(string? sourceEmail)
+        private async ValueTask<bool> IsValidEmailAsync(string? sourceEmail)
         {
             var sut = new AddressExtractor();
-            var result = sut.ExtractAddresses(sourceEmail);
-            return result.Any();
+            await foreach (var _ in sut.ExtractAddressesAsync(sourceEmail))
+                return true;
+            return false;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace AddressExtractorTest
             var result = await this.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
 
             // Assert
-            Assert.IsTrue(result.Count == 12, "12 email addresses should be found");
+            Assert.IsTrue(result.Count == 12, $"12 email addresses should be found, found {result.Count}");
         }     
         
         [TestMethod]
@@ -25,26 +25,26 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
-        public void EmailAddressesAreNotCaseSensitive()
+        public async Task EmailAddressesAreNotCaseSensitive()
         {
             const string ADDRESSES = "test@example.com TEST@EXAMPLE.COM";
 
             // Act
-            var result = this.ExtractAddresses(ADDRESSES);
+            var result = await this.ExtractAddressesAsync(ADDRESSES);
 
             // Assert
             Assert.IsTrue(result.Count == 1, "Same addresses of different case should be merged");
         }
 
         [TestMethod]
-        public void EmailAddressesAreConvertedToLowercase()
+        public async Task EmailAddressesAreConvertedToLowercase()
         {
             // Arrange
             const string INPUT = "TEST@EXAMPLE.COM";
             const string EXPECTED = "test@example.com";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             result.Add(EXPECTED);
 
@@ -53,14 +53,14 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
-        public void EmailAddressesInSingleQuotesIsExtracted()
+        public async Task EmailAddressesInSingleQuotesIsExtracted()
         {
             // Arrange
             const string INPUT = "'test@example.com'";
             const string EXPECTED = "test@example.com";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             result.Add(EXPECTED);
 
@@ -69,14 +69,14 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
-        public void EmailAddressesInDoubleQuotesIsExtracted()
+        public async Task EmailAddressesInDoubleQuotesIsExtracted()
         {
             // Arrange
             const string INPUT = "\"test@example.com\"";
             const string EXPECTED = "test@example.com";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             result.Add(EXPECTED);
 
@@ -85,14 +85,14 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
-        public void EmailAddressesInEscapedDoubleQuotesIsExtracted()
+        public async Task EmailAddressesInEscapedDoubleQuotesIsExtracted()
         {
             // Arrange
             const string INPUT = "\\\"test@example.com\\\"";
             const string EXPECTED = "test@example.com";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             result.Add(EXPECTED);
 
@@ -101,7 +101,7 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
-        public void LineBreakShouldNotHaltProcessing()
+        public async Task LineBreakShouldNotHaltProcessing()
         {
             // Arrange
             const string INPUT = """
@@ -112,7 +112,7 @@ namespace AddressExtractorTest
             const string EXPECTED = "test@example.com";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             result.Add(EXPECTED);
 
@@ -121,46 +121,46 @@ namespace AddressExtractorTest
         } 
 
         [TestMethod]
-        public void EmailAddressesCannotHaveDomainStartingWithHyphen()
+        public async Task EmailAddressesCannotHaveDomainStartingWithHyphen()
         {
             // Arrange
             const string INPUT = "test@-example.com";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             // Assert
             Assert.IsFalse(result.Any(), "No results should be returned");
         }    
 
         [TestMethod]
-        public void EmailAddressesCannotHaveDomainEndingWithHyphen()
+        public async Task EmailAddressesCannotHaveDomainEndingWithHyphen()
         {
             // Arrange
             const string INPUT = "test@example-.com";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             // Assert
             Assert.IsFalse(result.Any(), "No results should be returned");
         }
 
         [TestMethod]
-        public void EmailAddressesWithKnownFileExtensionsThatAreNotTldsAreIgnored()
+        public async Task EmailAddressesWithKnownFileExtensionsThatAreNotTldsAreIgnored()
         {
             // Arrange
             const string INPUT = "test@example.jpg";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             // Assert
             Assert.IsFalse(result.Any(), "No results should be returned");
         }
 
         [TestMethod]
-        public void CommaShouldTerminateAddress()
+        public async Task CommaShouldTerminateAddress()
         {
             // Arrange
             const string INPUT = "email1@example.com,email2@example.com";
@@ -168,7 +168,7 @@ namespace AddressExtractorTest
             const string EXPECTED_LAST = "email2@example.com";
 
             // Act
-            var result = this.ExtractAddresses(INPUT);
+            var result = await this.ExtractAddressesAsync(INPUT);
 
             // Assert
             Assert.IsTrue(result.Count == 2, "Two results should be returned");
@@ -178,13 +178,13 @@ namespace AddressExtractorTest
 
         [TestMethod]
         [Ignore("This is a low priority feature so the test is ignored for the moment in the interests of having all green all the way for tests that *should* be working now")]
-        public void AliasOnEmojiDomainIsFound()
+        public async Task AliasOnEmojiDomainIsFound()
         {
           // Arrange
           const string INPUT = "example@i❤️.ws is";
 
           // Act
-          var result = this.ExtractAddresses(INPUT);
+          var result = await this.ExtractAddressesAsync(INPUT);
 
           // Assert
           Assert.IsTrue(result.Any(), "A result should be returned");
@@ -192,13 +192,13 @@ namespace AddressExtractorTest
 
         [TestMethod]
         [Ignore("This is a low priority feature so the test is ignored for the moment in the interests of having all green all the way for tests that *should* be working now")]
-        public void EmailAddressOnIdnDomainNameIsRecognised()
+        public async Task EmailAddressOnIdnDomainNameIsRecognised()
         {
           // Arrange
           const string INPUT = "بريد@موقع.شبكة";
 
           // Act
-          var result = this.ExtractAddresses(INPUT);
+          var result = await this.ExtractAddressesAsync(INPUT);
 
           // Assert
           Assert.IsTrue(result.Any(), "A result should be returned");
@@ -211,11 +211,14 @@ namespace AddressExtractorTest
         /// Wrapping the <see cref="IEnumerable{String}"/> here instead of within the Method
         /// prevents the overhead of creating a Set for every iteration in Production
         /// </summary>
-        private HashSet<string> ExtractAddresses(string input)
+        private async ValueTask<HashSet<string>> ExtractAddressesAsync(string input)
         {
             var extractor = new AddressExtractor();
             var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            set.UnionWith(extractor.ExtractAddresses(input));
+
+            await foreach(var address in extractor.ExtractAddressesAsync(input))
+                set.Add(address);
+
             return set;
         }
 
@@ -228,7 +231,7 @@ namespace AddressExtractorTest
 
             await using (var reader = parser.GetReader(path))
             {
-                await foreach(var address in extractor.ExtractAddressesAsync(reader, cancellation))
+                await foreach(var address in extractor.ExtractFileAddressesAsync(reader, cancellation))
                     set.Add(address);
             }
             return set;
