@@ -6,7 +6,7 @@ namespace MyAddressExtractor.Objects.Filters {
         public override string Name => "Check length";
 
         /// <inheritdoc />
-        public override Result ValidateEmailAddress(EmailAddress address)
+        public override Result ValidateEmailAddress(ref EmailAddress address)
             // Use the match position to validate too long of a length so we don't have to allocate the substring
             => this.Continue(address.Length <= 255);
     }

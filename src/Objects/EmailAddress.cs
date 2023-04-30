@@ -22,6 +22,8 @@ namespace MyAddressExtractor.Objects {
                 this._Separator = null;
                 this._Username = null;
                 this._Domain = null;
+
+                this.Modified = true;
             }
         }
         private string? _Full = null;
@@ -42,6 +44,9 @@ namespace MyAddressExtractor.Objects {
 
         /// <summary>The Length of the Full Address</summary>
         public int Length => this._Full?.Length ?? this.Match.Length;
+
+        /// <summary>If the <see cref="Full"/> was manually overridden</summary>
+        public bool Modified { get; private set; } = false;
 
         public EmailAddress(Match match)
         {

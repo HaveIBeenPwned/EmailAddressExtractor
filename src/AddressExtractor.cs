@@ -59,19 +59,25 @@ namespace MyAddressExtractor
                     var address = new EmailAddress(match);
                     debug.Step("Generate capture");
 
-                    var valid = true;
-                    foreach (var filter in AddressFilter.Filters) {
-                        var result = await filter.ValidateEmailAddressAsync(address, cancellation);
-                        debug.Step(filter.Name);
-
-                        if (result is not Result.CONTINUE)
+                    var valid = Result.ALLOW;
+                    while (true)
+                    {
+                        // Run each filter
+                        foreach (var filter in AddressFilter.Filters)
                         {
-                            valid = result is Result.ALLOW;
-                            break;
+                            valid = await filter.ValidateEmailAddressAsync(ref address, cancellation);
+                            debug.Step(filter.Name);
+
+                            if (valid is not Result.CONTINUE)
+                                break;
                         }
+
+                        // Only break if a result has been formed
+                        if (valid is not Result.REVALIDATE)
+                            break;
                     }
 
-                    if (!valid)
+                    if (valid is Result.DENY)
                         continue;
 
                     yield return address.Full;

@@ -30,11 +30,11 @@ namespace MyAddressExtractor.Objects {
             /// <summary>A Name for the Filter, which is added to the Debug Stack when run</summary>
             public abstract string Name { get; }
 
-            public virtual Result ValidateEmailAddress(EmailAddress address)
+            public virtual Result ValidateEmailAddress(ref EmailAddress address)
                 => Result.CONTINUE;
 
-            public virtual ValueTask<Result> ValidateEmailAddressAsync(EmailAddress address, CancellationToken cancellation = default)
-                => ValueTask.FromResult(this.ValidateEmailAddress(address));
+            public virtual ValueTask<Result> ValidateEmailAddressAsync(ref EmailAddress address, CancellationToken cancellation = default)
+                => ValueTask.FromResult(this.ValidateEmailAddress(ref address));
 
             /// <summary>Convert a <see cref="bool"/> to a <see cref="Result"/>, CONTINUE when true, or DENY when false</summary>
             protected Result Continue(bool success)

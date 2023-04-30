@@ -6,7 +6,7 @@ namespace MyAddressExtractor.Objects.Filters {
         public override string Name => "Domain filter";
 
         /// <inheritdoc />
-        public override Result ValidateEmailAddress(EmailAddress address)
+        public override Result ValidateEmailAddress(ref EmailAddress address)
         {
             var domain = address.Domain;
 

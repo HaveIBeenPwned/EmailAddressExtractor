@@ -25,7 +25,7 @@ namespace MyAddressExtractor.Objects.Filters {
         public override string Name => "Filter invalids";
 
         /// <inheritdoc />
-        public override Result ValidateEmailAddress(EmailAddress address)
+        public override Result ValidateEmailAddress(ref EmailAddress address)
             => this.Continue(!InvalidAddressFilter.InvalidEmailRegex()
                 .IsMatch(address.Full));
     }
