@@ -11,7 +11,14 @@ namespace MyAddressExtractor
         /// <summary>
         /// Email Regex pattern
         /// </summary>
-        [GeneratedRegex(@"(\\"")?""?'?[a-z0-9\.\-\*!#$%&'+/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(\\"")?""?'?(?<!\s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled)]
+        [GeneratedRegex(
+            @"(\\"")?""?'?[a-z0-9\.\-\*!#$%&'+/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(\\"")?""?'?(?<!\s)",
+            RegexOptions.ExplicitCapture // Require naming captures; implies '(?:)' on groups. We don't make use of the groups
+            | RegexOptions.IgnoreCase // Match upper and lower casing
+            | RegexOptions.Compiled // Compile the nodes
+            | RegexOptions.Singleline // Singleline mode
+            | RegexOptions.CultureInvariant // Allow culture invariant character matching
+        )]
         public static partial Regex EmailRegex();
 
         /// <summary>
@@ -23,7 +30,13 @@ namespace MyAddressExtractor
         /// .@	    Email having .@
         /// @-	    Email having @-
         /// </remarks>
-        [GeneratedRegex(@"\.\.|\*|\.@|^\.|@-", RegexOptions.Compiled)]
+        [GeneratedRegex(
+            @"\.\.|\*|\.@|^\.|@-",
+            RegexOptions.ExplicitCapture // Require naming captures; implies '(?:)' on groups. We don't make use of the groups
+            | RegexOptions.IgnoreCase // Match upper and lower casing
+            | RegexOptions.Compiled // Compile the nodes
+            | RegexOptions.Singleline // Singleline mode
+        )]
         public static partial Regex InvalidEmailRegex();
 
         public IAsyncEnumerable<string> ExtractAddressesAsync(ILineReader reader, CancellationToken cancellation = default)
