@@ -1,57 +1,50 @@
 using System.IO.Compression;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Xml;
 
-namespace MyAddressExtractor.Objects.Readers {
-    internal sealed class OpenDocumentTextReader : PlainTextReader
+namespace MyAddressExtractor.Objects.Readers 
+{
+    internal sealed class OpenDocumentTextReader : ILineReader
     {
-        private static string DestinationPath = Path.GetTempFileName();
+        private readonly string zipPath;
 
         public OpenDocumentTextReader(string zipPath)
-            : base(ExtractContent(zipPath))
         {
-
+            this.zipPath = zipPath;
         }
 
-        private static string ExtractContent(string zipPath)
+        public ValueTask DisposeAsync()
+            => ValueTask.CompletedTask;
+
+        public async IAsyncEnumerable<string?> ReadLineAsync([EnumeratorCancellation] CancellationToken cancellation = default)
         {
-            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+            using (ZipArchive archive = ZipFile.OpenRead(this.zipPath))
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     if (entry.FullName.Equals("content.xml", StringComparison.OrdinalIgnoreCase))
                     {
-                        using(var writer = new StreamWriter(DestinationPath, true, Encoding.UTF8, 4096))
+                        XmlReaderSettings settings = new XmlReaderSettings();
+                        settings.Async = true;
+
+                        using(var reader = XmlReader.Create(entry.Open(), settings))
                         {
-                            using(var reader = new XmlTextReader(entry.Open()))
+                            while(await reader.ReadAsync())
                             {
-                                while(reader.Read())
+                                if (reader.NodeType == XmlNodeType.Text ||
+                                    reader.NodeType == XmlNodeType.CDATA)
                                 {
-                                    if (reader.NodeType == XmlNodeType.Text ||
-                                        reader.NodeType == XmlNodeType.CDATA)
-                                    {
-                                        writer.WriteLine(reader.ReadContentAsString());
-                                    }
+                                    yield return await reader.ReadContentAsStringAsync();
                                 }
                             }
                         }
 
-                        return DestinationPath;
+                        yield break;
                     }
                 }
             }
             
-            throw new Exception($"Unable to load content.xml from '{zipPath}'");
-        }
-
-        public async override ValueTask DisposeAsync()
-        {
-            if(Path.Exists(OpenDocumentTextReader.DestinationPath))
-            {
-                File.Delete(OpenDocumentTextReader.DestinationPath);
-            }
-
-            await base.DisposeAsync();
+            throw new Exception($"Unable to load content.xml from '{this.zipPath}'");
         }
     }
 }

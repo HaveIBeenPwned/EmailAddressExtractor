@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace MyAddressExtractor.Objects.Readers {
-    internal class PlainTextReader : ILineReader
+    internal sealed class PlainTextReader : ILineReader
     {
         private readonly FileStream FileStream;
         private readonly StreamReader StreamReader;
@@ -23,11 +23,10 @@ namespace MyAddressExtractor.Objects.Readers {
         }
 
         /// <inheritdoc />
-        public async virtual ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             this.StreamReader.Dispose();
             await this.FileStream.DisposeAsync();
-            GC.SuppressFinalize(this);
         }
     }
 }
