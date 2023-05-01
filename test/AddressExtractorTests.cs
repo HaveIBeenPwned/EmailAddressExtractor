@@ -101,6 +101,22 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
+        public async Task EmailAddressInQuotesAreExtracted()
+        {
+            const string INPUT = """
+                "test1@example.com"
+                ""test2@example.com""
+                'test3@example.com'
+                \"test4@example.com\"
+                "test5"@example.com
+                test6"@example.com
+            """;
+
+            var result = await this.ExtractAddressesAsync(INPUT);
+            throw new NotImplementedException($"A proper count from {nameof(result)} needs to be found");
+        }
+
+        [TestMethod]
         public async Task LineBreakShouldNotHaltProcessing()
         {
             // Arrange
