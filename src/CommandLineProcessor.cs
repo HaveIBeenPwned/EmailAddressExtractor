@@ -113,12 +113,15 @@ namespace MyAddressExtractor
 
             while (true)
             {
-                Console.WriteLine("Press ANY KEY to continue ['Q' to Quit; 'I' for info].");
+                Console.Write("Press ANY KEY to continue ['Q' to Quit; 'I' for info]: ");
                 var read = Console.ReadKey(intercept: true);
+                Console.WriteLine();
 
                 // No modifiers (shift/ctrl/alt)
-                if (read.Modifiers is 0) {
-                    switch (read.Key) {
+                if (read.Modifiers is 0)
+                {
+                    switch (read.Key)
+                    {
                         case ConsoleKey.Q:
                             Console.WriteLine("Exiting");
                             return false;
@@ -133,6 +136,37 @@ namespace MyAddressExtractor
                             continue;
                         default:
                             return true;
+                    }
+                }
+            }
+        }
+
+        internal bool WaitContinue()
+        {
+            // If silent output don't prompt
+            if (this.SkipPrompts)
+                return true;
+
+            Console.Write("Continue? [y/n]: ");
+            while (true)
+            {
+                var read = Console.ReadKey(intercept: true);
+
+                // No modifiers (shift/ctrl/alt)
+                if (read.Modifiers is 0)
+                {
+                    switch (read.Key)
+                    {
+                        // Allow continuing
+                        case ConsoleKey.Y:
+                            Console.WriteLine();
+                            return true;
+
+                        // Exit
+                        case ConsoleKey.N:
+                        case ConsoleKey.Escape:
+                            Console.WriteLine();
+                            return false;
                     }
                 }
             }

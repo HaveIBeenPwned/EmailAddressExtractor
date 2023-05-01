@@ -52,13 +52,23 @@ namespace MyAddressExtractor
 
                 await using (var monitor = new AddressExtractorMonitor(perf))
                 {
-                    await monitor.RunAsync(files, CancellationToken.None);
+                    foreach (var file in files)
+                    {
+                        try {
+                            await monitor.RunAsync(file, CancellationToken.None);
+
+                        } catch (Exception ex) {
+                            Console.Error.WriteLine($"An error occurred while reading '{file}': {ex.Message}");
+                            if (ex is not NotImplementedException && !config.WaitContinue())
+                                return (int)ErrorCode.UnspecifiedError;
+                        }
+                    }
 
                     // Log one last time out of the Timer loop
                     monitor.Log();
                     await monitor.SaveAsync(config, CancellationToken.None);
                 }
-                
+
                 Console.WriteLine($"Addresses saved to {config.OutputFilePath}");
                 Console.WriteLine($"Report saved to {config.ReportFilePath}");
             }

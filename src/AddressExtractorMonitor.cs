@@ -22,26 +22,23 @@ namespace MyAddressExtractor {
             this.Timer = new Timer(_ => this.Log(), null, iterate, iterate);
         }
 
-        public async ValueTask RunAsync(IEnumerable<string> files, CancellationToken cancellation = default)
+        public async ValueTask RunAsync(string inputFilePath, CancellationToken cancellation = default)
         {
-            foreach (var inputFilePath in files)
+            using (var stack = this.Stack.CreateStack("Read file"))
             {
-                using (var stack = this.Stack.CreateStack("Read file"))
+                var count = new Count();
+                var addresses = 0;
+
+                this.Files.Add(inputFilePath, count);
+
+                var parser = FileExtensionParsing.GetFromPath(inputFilePath);
+                await using (var reader = parser.GetReader(inputFilePath))
                 {
-                    var count = new Count();
-                    var addresses = 0;
-
-                    this.Files.Add(inputFilePath, count);
-
-                    var parser = FileExtensionParsing.GetFromPath(inputFilePath);
-                    await using (var reader = parser.GetReader(inputFilePath))
+                    await foreach(var email in this.Extractor.ExtractFileAddressesAsync(stack, reader, cancellation))
                     {
-                        await foreach(var email in this.Extractor.ExtractFileAddressesAsync(stack, reader, cancellation))
-                        {
-                            if (this.Addresses.Add(email))
-                                count.Value = addresses++;
-                            this.Lines++;
-                        }
+                        if (this.Addresses.Add(email))
+                            count.Value = addresses++;
+                        this.Lines++;
                     }
                 }
             }
