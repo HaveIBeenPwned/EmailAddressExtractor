@@ -171,7 +171,7 @@ namespace MyAddressExtractor.Objects.Performance {
 
             public void Log(int left = 0, int right = 0)
             {
-                Console.WriteLine($"{new string(' ', left)} - {this.Name.PadRight(right)} x{this.Counter:n0} | Took {TimeUnitExtensions.Format(this.Span.TotalMilliseconds, TimeUnit.MILLISECONDS)} (at ~{TimeUnitExtensions.Format(this.Span.TotalMicroseconds / this.Counter)} per)");
+                Console.WriteLine($"{new string(' ', left)} - {this.Name.PadRight(right)} x{this.Counter:n0} | Took {this.Span.Format()} (at ~{TimeUnitExtensions.Format(this.Span.TotalMicroseconds / this.Counter)} per)");
             }
         }
     }
