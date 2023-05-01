@@ -21,7 +21,7 @@ The regex I've used is as follows: `\b[a-zA-Z0-9\.\-_\+]+@[a-zA-Z0-9\.\-_]+\.[a-
 
 # Test data
 
-I'll generate some test data in different formats and drop those into this repository shortly.
+Using Red Gate's SQL Data Generator, [a sample file containing 10M records of typical breach data is available do download from Mega]([url](https://mega.nz/file/Ls8U1ADK#c1We1C_CZi44P0k3OB8YpNVN7HMM3gE_4-fH06E454c)).
 
 # Running the Address Extractor
 
