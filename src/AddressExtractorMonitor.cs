@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
+using MyAddressExtractor.Objects;
 using MyAddressExtractor.Objects.Performance;
 
 namespace MyAddressExtractor {
@@ -49,7 +50,7 @@ namespace MyAddressExtractor {
 
         public virtual void Log()
         {
-            Console.WriteLine($"Extraction time: {this.Stopwatch.ElapsedMilliseconds:n0}ms");
+            Console.WriteLine($"Extraction time: {TimeUnitExtensions.Format(this.Stopwatch.ElapsedMilliseconds, TimeUnit.MILLISECONDS)}");
             Console.WriteLine($"Addresses extracted: {this.Addresses.Count:n0}");
             long rate = (long)(this.Lines / (this.Stopwatch.ElapsedMilliseconds / 1000.0));
             Console.WriteLine($"Read lines total: {this.Lines:n0}");
