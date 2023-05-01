@@ -22,7 +22,8 @@ namespace MyAddressExtractor.Objects.Readers
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (entry.FullName.Equals("content.xml", StringComparison.OrdinalIgnoreCase))
+                    if (entry.FullName.Equals("content.xml", StringComparison.OrdinalIgnoreCase) ||
+                        entry.FullName.Equals("word/document.xml", StringComparison.OrdinalIgnoreCase))
                     {
                         XmlReaderSettings settings = new XmlReaderSettings();
                         settings.Async = true;

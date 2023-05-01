@@ -74,7 +74,7 @@ namespace MyAddressExtractor {
             
             // Future - OpenDoc
             extensions.AddAll(
-                new[] { ".odt" },
+                new[] { ".odt", ".docx" },
                 new FileExtensionParsing { Reader = path => new OpenDocumentTextReader(path) }
             );
             
