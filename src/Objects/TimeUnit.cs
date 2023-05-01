@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace MyAddressExtractor.Objects {
     public enum TimeUnit : long {
         MICROSECONDS = 1,
@@ -43,7 +45,10 @@ namespace MyAddressExtractor.Objects {
                 }
             }
 
-            return $"{result:n0}{size.Format()}";
+            return $"{string.Format($"{{0:F{size.Decimals()}}}", result)}{size.Format()}";
         }
+
+        public static int Decimals(this TimeUnit unit)
+            => unit > TimeUnit.SECONDS ? 1 : 0;
     }
 }
