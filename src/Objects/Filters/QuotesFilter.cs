@@ -45,23 +45,26 @@ namespace MyAddressExtractor.Objects.Filters {
         {
             bool modified = false;
             foreach (object junk in QuotesFilter.JUNK_CHARS) {
-                int? len = null;
-                if (junk is string str)
-                {
-                    if (address.Full.StartsWith(str) && address.Full.EndsWith(str))
-                        len = str.Length;
-                }
-                else if (junk is char c)
-                {
-                    if (address.Full.StartsWith(c) && address.Full.EndsWith(c))
-                        len = 1;
-                }
+                int? len;
+                do {
+                    len = null;
+                    if (junk is string str)
+                    {
+                        if (address.Full.StartsWith(str) && address.Full.EndsWith(str))
+                            len = str.Length;
+                    }
+                    else if (junk is char c)
+                    {
+                        if (address.Full.StartsWith(c) && address.Full.EndsWith(c))
+                            len = 1;
+                    }
 
-                if (len is not null)
-                {
-                    address.Full = address.Full[(Range)(len..^len)];
-                    modified = true;
-                }
+                    if (len is not null)
+                    {
+                        address.Full = address.Full[(Range)(len..^len)];
+                        modified = true;
+                    }
+                } while (len is not null);
             }
 
             return modified;
