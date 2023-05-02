@@ -7,7 +7,7 @@ namespace MyAddressExtractor.Objects {
         HOURS = MINUTES * 60,
         DAYS = HOURS * 24
     }
-    
+
     public static class TimeUnitExtensions
     {
         public static double Convert(this TimeUnit to, double fromAmount, TimeUnit from = TimeUnit.MILLISECONDS)
@@ -31,19 +31,24 @@ namespace MyAddressExtractor.Objects {
             var size = from;
             var result = fromAmount;
 
-            foreach (TimeUnit unit in Enum.GetValues<TimeUnit>().OrderDescending()) {
+            foreach (TimeUnit unit in Enum.GetValues<TimeUnit>().OrderDescending())
+            {
                 if (unit <= from || fromAmount < (long)unit)
                     continue;
                 var conversion = unit.Convert(fromAmount, from);
 
-                if (conversion > 0) {
+                if (conversion > 0)
+                {
                     size = unit;
                     result = conversion;
                     break;
                 }
             }
 
-            return $"{result:n0}{size.Format()}";
+            return $"{string.Format($"{{0:F{size.Decimals()}}}", result)}{size.Format()}";
         }
+
+        public static int Decimals(this TimeUnit unit)
+            => unit > TimeUnit.SECONDS ? 1 : 0;
     }
 }

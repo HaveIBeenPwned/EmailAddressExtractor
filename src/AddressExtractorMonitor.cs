@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Text;
 using MyAddressExtractor.Objects.Performance;
 
 namespace MyAddressExtractor {
@@ -21,26 +22,23 @@ namespace MyAddressExtractor {
             this.Timer = new Timer(_ => this.Log(), null, iterate, iterate);
         }
 
-        public async ValueTask RunAsync(IEnumerable<string> files, CancellationToken cancellation = default)
+        public async ValueTask RunAsync(string inputFilePath, CancellationToken cancellation = default)
         {
-            foreach (var inputFilePath in files)
+            using (var stack = this.Stack.CreateStack("Read file"))
             {
-                using (var stack = this.Stack.CreateStack("Read file"))
+                var count = new Count();
+                var addresses = 0;
+
+                this.Files.Add(inputFilePath, count);
+
+                var parser = FileExtensionParsing.GetFromPath(inputFilePath);
+                await using (var reader = parser.GetReader(inputFilePath))
                 {
-                    var count = new Count();
-                    var addresses = 0;
-
-                    this.Files.Add(inputFilePath, count);
-
-                    var parser = FileExtensionParsing.GetFromPath(inputFilePath);
-                    await using (var reader = parser.GetReader(inputFilePath))
+                    await foreach(var email in this.Extractor.ExtractFileAddressesAsync(stack, reader, cancellation))
                     {
-                        await foreach(var email in this.Extractor.ExtractAddressesAsync(stack, reader, cancellation))
-                        {
-                            if (this.Addresses.Add(email))
-                                count.Value = addresses++;
-                            this.Lines++;
-                        }
+                        if (this.Addresses.Add(email))
+                            count.Value = addresses++;
+                        this.Lines++;
                     }
                 }
             }
@@ -48,7 +46,7 @@ namespace MyAddressExtractor {
 
         public virtual void Log()
         {
-            Console.WriteLine($"Extraction time: {this.Stopwatch.ElapsedMilliseconds:n0}ms");
+            Console.WriteLine($"Extraction time: {this.Stopwatch.Format()}");
             Console.WriteLine($"Addresses extracted: {this.Addresses.Count:n0}");
             long rate = (long)(this.Lines / (this.Stopwatch.ElapsedMilliseconds / 1000.0));
             Console.WriteLine($"Read lines total: {this.Lines:n0}");
@@ -63,12 +61,24 @@ namespace MyAddressExtractor {
             string report = cli.ReportFilePath;
             if (!string.IsNullOrWhiteSpace(output))
             {
-                await this.Extractor.SaveAddressesAsync(output, this.Addresses, cancellation);
+                await File.WriteAllLinesAsync(
+                    output,
+                    this.Addresses.Select(address => address.ToLowerInvariant())
+                        .OrderBy(address => address, StringComparer.OrdinalIgnoreCase),
+                    cancellation
+                );
             }
 
             if (!string.IsNullOrWhiteSpace(report))
             {
-                await this.Extractor.SaveReportAsync(report, this.Files, cancellation);
+                var reportContent = new StringBuilder("Unique addresses per file:\n");
+
+                foreach ((var file, var count) in this.Files)
+                {
+                    reportContent.AppendLine($"{file}: {count}");
+                }
+
+                await File.WriteAllTextAsync(report, reportContent.ToString(), cancellation);
             }
         }
 
