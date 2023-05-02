@@ -66,16 +66,22 @@ namespace MyAddressExtractor {
                 new FileExtensionParsing { Error = "Unsupported" }
             );
             
-            // Future
-            extensions.AddAll(
-                new[] { ".xls", ".doc", ".docx", ".ppt", ".pptx", ".pdf", ".rdb" },
-                new FileExtensionParsing { Error = "Not currently supported" }
-            );
-            
-            // Future - OpenDoc
+            // Open Document - ISO 26300
             extensions.AddAll(
                 new[] { ".odt" },
-                new FileExtensionParsing { Reader = path => new OpenDocumentTextReader(path) }
+                new FileExtensionParsing { Reader = path => new OpenDocumentXmlReader(path) }
+            );
+            
+            // Open Office XML - ISO 29500
+            extensions.AddAll(
+                new[] { ".docx", ".pptx" },
+                new FileExtensionParsing { Reader = path => new OpenOfficeXmlReader(path) }
+            );
+            
+            // Future
+            extensions.AddAll(
+                new[] { ".xls", ".doc", ".ppt", ".pdf", ".rdb" },
+                new FileExtensionParsing { Error = "Not currently supported" }
             );
             
             FileExtensionParsing.FILE_EXTENSIONS = extensions;
