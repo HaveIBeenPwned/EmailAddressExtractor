@@ -2,13 +2,13 @@ using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Xml;
 
-namespace MyAddressExtractor.Objects.Readers 
+namespace MyAddressExtractor.Objects.Readers
 {
-    internal sealed class OpenDocumentTextReader : ILineReader
+    internal abstract class CompressedXmlReader : ILineReader
     {
         private readonly string zipPath;
 
-        public OpenDocumentTextReader(string zipPath)
+        public CompressedXmlReader(string zipPath)
         {
             this.zipPath = zipPath;
         }
@@ -22,8 +22,7 @@ namespace MyAddressExtractor.Objects.Readers
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (entry.FullName.Equals("content.xml", StringComparison.OrdinalIgnoreCase) ||
-                        entry.FullName.Equals("word/document.xml", StringComparison.OrdinalIgnoreCase))
+                    if (IsMatch(entry.FullName))
                     {
                         XmlReaderSettings settings = new XmlReaderSettings();
                         settings.Async = true;
@@ -39,13 +38,11 @@ namespace MyAddressExtractor.Objects.Readers
                                 }
                             }
                         }
-
-                        yield break;
                     }
                 }
             }
-            
-            throw new Exception($"Unable to load content.xml from '{this.zipPath}'");
         }
+
+        public abstract bool IsMatch(string entry);
     }
 }
