@@ -74,7 +74,7 @@ namespace MyAddressExtractor {
                 if (type.GetCustomAttribute<ExtensionTypesAttribute>() is {} attribute)
                 {
                     var parsing = new FileExtensionParsing {
-                        Reader = file => FileExtensionParsing.CreateInstance(type, file)
+                        Reader = FileExtensionParsing.CreateInstance(type)
                     };
 
                     // Use the setter to override any other instances
@@ -109,16 +109,15 @@ namespace MyAddressExtractor {
         public static FileExtensionParsing GetFromPath(string path)
             => FileExtensionParsing.FILE_EXTENSIONS.GetValueOrDefault(Path.GetExtension(path), FileExtensionParsing.UNKNOWN);
 
-        private static ILineReader CreateInstance(Type type, string path)
+        private static ReaderDelegate CreateInstance(Type type)
         {
             ConstructorInfo? info = type.GetConstructor(new []{ typeof(string) });
-
-            if (info?.Invoke(new object[] { path }) is ILineReader readerWithPath)
-                return readerWithPath;
+            if (info is not null)
+                return path => info.Invoke(new object[] { path }) as ILineReader ?? throw new Exception("Failed to construct Reader");
 
             info = type.GetConstructor(Array.Empty<Type>());
-            if (info?.Invoke(Array.Empty<object>()) is ILineReader reader)
-                return reader;
+            if (info is not null)
+                return _ => info.Invoke(Array.Empty<object>()) as ILineReader ?? throw new Exception("Failed to construct Reader");
 
             throw new NotSupportedException($"Could not find a valid constructor for {type}");
         }
