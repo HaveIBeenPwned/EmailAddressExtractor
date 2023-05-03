@@ -26,7 +26,8 @@ namespace MyAddressExtractor.Objects {
         /// Instances of <see cref="BaseFilter"/> are created automatically using Reflection when the program starts
         /// A priority for the Filter can be applied using a <see cref="AddressFilterAttribute"/>
         /// </summary>
-        public abstract class BaseFilter {
+        public abstract class BaseFilter
+        {
             /// <summary>A Name for the Filter, which is added to the Debug Stack when run</summary>
             public abstract string Name { get; }
 
@@ -41,7 +42,8 @@ namespace MyAddressExtractor.Objects {
                 => success ? Result.CONTINUE : Result.DENY;
         }
 
-        private sealed class FilterCollection : IEnumerable<BaseFilter> {
+        private sealed class FilterCollection : IEnumerable<BaseFilter>
+        {
             /// <summary>Use a List so that we maintain entry order</summary>
             private readonly IList<BaseFilter> Filters = new List<BaseFilter>();
 
