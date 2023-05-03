@@ -1,4 +1,7 @@
+using MyAddressExtractor.Objects.Attributes;
+
 namespace MyAddressExtractor.Objects.Readers {
+    [ExtensionTypes(".pdf")]
     public sealed class PdfReader : ILineReader
     {
         /// <inheritdoc />

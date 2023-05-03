@@ -1,7 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Text;
+using MyAddressExtractor.Objects.Attributes;
 
 namespace MyAddressExtractor.Objects.Readers {
+    [ExtensionTypes(".log", ".json", ".txt", ".sql", ".xml", ".sample", ".csv", ".tsv")]
     internal sealed class PlainTextReader : ILineReader
     {
         private readonly FileStream FileStream;
