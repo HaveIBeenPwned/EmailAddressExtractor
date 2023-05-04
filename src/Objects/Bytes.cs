@@ -14,22 +14,22 @@ namespace MyAddressExtractor.Objects {
     
     public static class ByteExtensions
     {
-        public static long Convert(this Bytes to, long fromAmount, Bytes from = Bytes.BYTE)
+        public static double Convert(this Bytes to, long fromAmount, Bytes from = Bytes.BYTE)
         {
             if ( to == from )
             {
                 return fromAmount;
             }
-            
-            int diff = Math.Abs(to - from);
-            double multiplier = Math.Pow(1000, diff);
-            
-            long result;
+
+            var diff = Math.Abs(to - from);
+            var multiplier = Math.Pow(1000, diff);
+
+            double result;
             if ( to < from )
-                result = (long)(fromAmount * multiplier);
+                result = fromAmount * multiplier;
             else
-                result = (long)(fromAmount / multiplier);
-            
+                result = fromAmount / multiplier;
+
             return result;
         }
         
@@ -49,21 +49,24 @@ namespace MyAddressExtractor.Objects {
         public static string Format(long fromAmount, Bytes from = Bytes.BYTE)
         {
             var size = from;
-            var result = fromAmount;
-            
+            var result = (double)fromAmount;
+
             foreach (Bytes bytes in Enum.GetValues<Bytes>().OrderDescending()) {
                 if (bytes <= from)
                     continue;
-                long conversion = bytes.Convert(fromAmount, from);
+                double conversion = bytes.Convert(fromAmount, from);
                 
-                if (conversion > 0) {
+                if (conversion >= 0.1d) {
                     size = bytes;
                     result = conversion;
                     break;
                 }
             }
-            
-            return $"{result:n0} {size.Format()}";
+
+            return $"{string.Format($"{{0:F{size.Decimals()}}}", result)} {size.Format()}";
         }
+
+        public static int Decimals(this Bytes unit)
+            => unit > Bytes.BYTE ? 1 : 0;
     }
 }
