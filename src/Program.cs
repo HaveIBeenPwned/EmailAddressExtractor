@@ -10,9 +10,9 @@ using MyAddressExtractor.Objects.Performance;
 
 namespace MyAddressExtractor
 {
-    class Program
+    public class Program
     {
-        enum ErrorCode
+        private enum ErrorCode
         {
             NoError = 0,
             UnspecifiedError = 1,
@@ -50,7 +50,10 @@ namespace MyAddressExtractor
                 IPerformanceStack perf = config.Debug
                     ? new DebugPerformanceStack() : IPerformanceStack.DEFAULT;
 
-                await using (var monitor = new AddressExtractorMonitor(perf))
+                var saveOutput = !string.IsNullOrWhiteSpace(config.OutputFilePath);
+                var saveReport = !string.IsNullOrWhiteSpace(config.ReportFilePath);
+
+                await using (var monitor = new AddressExtractorMonitor(config, perf))
                 {
                     foreach (var file in files)
                     {
@@ -64,17 +67,32 @@ namespace MyAddressExtractor
                         }
                     }
 
+                    // Wait for completion
+                    Console.WriteLine("Finished reading files");
+                    await monitor.AwaitCompletion();
+
                     // Log one last time out of the Timer loop
                     monitor.Log();
-                    await monitor.SaveAsync(config, CancellationToken.None);
+
+                    if (saveOutput || saveReport)
+                    {
+                        Console.WriteLine("Saving to disk..");
+                        await monitor.SaveAsync(CancellationToken.None);
+                    }
                 }
 
-                Console.WriteLine($"Addresses saved to {config.OutputFilePath}");
-                Console.WriteLine($"Report saved to {config.ReportFilePath}");
+                if (saveOutput)
+                    Console.WriteLine($"Addresses saved to {config.OutputFilePath}");
+
+                if (saveReport)
+                    Console.WriteLine($"Report saved to {config.ReportFilePath}");
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"An error occurred: {ex.Message}");
+                if (config.Debug)
+                    Console.WriteLine(ex);
+                else
+                    Console.Error.WriteLine($"An error occurred: {ex.Message}");
                 return (int)ErrorCode.UnspecifiedError;
             }
 

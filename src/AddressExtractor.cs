@@ -45,7 +45,7 @@ namespace MyAddressExtractor
         public IAsyncEnumerable<string> ExtractAddressesAsync(string? content, CancellationToken cancellation = default)
             => this.ExtractAddressesAsync(IPerformanceStack.DEFAULT, content, cancellation);
 
-        private async IAsyncEnumerable<string> ExtractAddressesAsync(IPerformanceStack stack, string? content, [EnumeratorCancellation] CancellationToken cancellation = default)
+        public async IAsyncEnumerable<string> ExtractAddressesAsync(IPerformanceStack stack, string? content, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
             // If line is NULL or any time of whitespace, don't waste computation time searching any empty string
             if (string.IsNullOrWhiteSpace(content))

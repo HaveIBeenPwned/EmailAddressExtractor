@@ -1,9 +1,10 @@
 ﻿using System.Reflection;
+using System.Threading.Channels;
 using MyAddressExtractor.Objects;
 
 namespace MyAddressExtractor
 {
-    internal class CommandLineProcessor
+    public class CommandLineProcessor
     {
         public string OutputFilePath { get; private set; } = Defaults.OUTPUT_FILE_PATH;
         public string ReportFilePath { get; private set; } = Defaults.REPORT_FILE_PATH;
@@ -11,9 +12,11 @@ namespace MyAddressExtractor
         public bool OperateRecursively { get; private set; } = Defaults.OPERATE_RECURSIVELY;
         public bool SkipPrompts { get; private set; } = Defaults.SKIP_PROMPTS;
 
+        public int Channels { get; private set; } = Defaults.CHANNELS;
+
         public bool Debug { get; private set; } = Defaults.DEBUG;
 
-        public CommandLineProcessor(IReadOnlyCollection<string> args, out IList<string> inputFilePaths)
+        internal CommandLineProcessor(IReadOnlyCollection<string> args, out IList<string> inputFilePaths)
         {
             if (args.Count == 0)
             {
@@ -29,12 +32,18 @@ namespace MyAddressExtractor
                 if (handle is not null)
                 {
                     // Is it an option?
-                    if (arg[0] == '-')
+                    if (arg.Length > 0 && arg[0] == '-')
                     {
-                        throw new ArgumentException($"Missing output file path after {previous} option");
+                        throw new ArgumentException($"Missing value for '{previous}' option");
                     }
-                    handle(arg);
-                    handle = null;
+                    try {
+                        handle(arg);
+                        handle = null;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ArgumentException($"Error reading option '{previous}' ({e.Message})");
+                    }
                 }
                 else
                 {
@@ -75,6 +84,9 @@ namespace MyAddressExtractor
                                 case "-debug":
                                     this.Debug = true;
                                     break;
+                                case "-channels":
+                                    handle = value => this.Channels = this.ParseInt(value, min: 0, max: 1000);
+                                    break;
                                 default:
                                     throw new ArgumentException($"Unexpected option '{arg}'");
                             }
@@ -104,6 +116,31 @@ namespace MyAddressExtractor
                 throw new ArgumentException("No input file paths specified");
             }
         }
+
+        public Channel<Line> CreateChannel()
+            => Channel.CreateBounded<Line>(new BoundedChannelOptions(this.Channels) {
+                SingleWriter = true, // Only one instance of `ILineReader` is used at a time
+                AllowSynchronousContinuations = false // Require Async
+            });
+
+        #region Parsers
+
+        private int ParseInt(string value, int? min = null, int? max = null)
+        {
+            if (!int.TryParse(value, out int i))
+                throw new ArgumentException("Value must be a number");
+
+            if (i < min)
+                throw new ArgumentException($"Value cannot be less than {min}");
+
+            if (i > max)
+                throw new ArgumentException($"Value cannot be more than {max}");
+
+            return i;
+        }
+
+        #endregion
+        #region CLI Waiters
 
         internal bool WaitInput(FileCollection files)
         {
@@ -172,6 +209,9 @@ namespace MyAddressExtractor
             }
         }
 
+        #endregion
+        #region Special Output
+
         static void Usage()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -192,13 +232,17 @@ namespace MyAddressExtractor
             var assembly = Assembly.GetExecutingAssembly();
             Console.WriteLine(assembly.GetName().Version);
         }
-        
+
+        #endregion
+
         public static class Defaults {
             public const string OUTPUT_FILE_PATH = "addresses_output.txt";
             public const string REPORT_FILE_PATH = "report.txt";
-            
+
             public const bool OPERATE_RECURSIVELY = false;
             public const bool SKIP_PROMPTS = false;
+
+            public const int CHANNELS = 4;
 
             public const bool DEBUG = false;
         }

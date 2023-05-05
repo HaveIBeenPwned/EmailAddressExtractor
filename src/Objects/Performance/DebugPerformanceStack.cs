@@ -1,20 +1,21 @@
-using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace MyAddressExtractor.Objects.Performance {
     public sealed class DebugPerformanceStack : IPerformanceStack {
         private readonly DebugPerformanceStack? Parent;
         private readonly NodeAverage Node;
+        private readonly ReaderWriterLockSlim Lock = new();
+
         public string Name => this.Node.Name;
 
         /// <summary>An ordered list of <see cref="Nodes"/>.Values and <see cref="Children"/>.Values</summary>
         private readonly List<object> Entries = new();
 
         /// <summary>A set of averages that are grouped within this <see cref="DebugPerformanceStack"/></summary>
-        private readonly ConcurrentDictionary<string, NodeAverage> Nodes = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, NodeAverage> Nodes = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>Children <see cref="DebugPerformanceStack"/>s</summary>
-        private readonly ConcurrentDictionary<string, DebugPerformanceStack> Children = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, DebugPerformanceStack> Children = new(StringComparer.OrdinalIgnoreCase);
 
         private readonly DateTimeOffset StartTime;
         private readonly Stopwatch Stopwatch;
@@ -32,14 +33,10 @@ namespace MyAddressExtractor.Objects.Performance {
             this.MaxLength = name.Length;
         }
 
-        /// <inheritdoc />
-        public IPerformanceStack CreateStack(string name)
-            => new DebugPerformanceStack(this, name);
-
         private void AddEntry(object entry)
         {
             this.Entries.Add(entry);
-            
+
             string name;
             if (entry is DebugPerformanceStack stack)
                 name = stack.Name;
@@ -51,61 +48,74 @@ namespace MyAddressExtractor.Objects.Performance {
         }
 
         /// <inheritdoc />
+        public IPerformanceStack CreateStack(string name)
+            => new DebugPerformanceStack(this, name);
+
+        /// <inheritdoc />
         public void Step(string name)
         {
-            // Update the logging width
-            var len = name.Length;
-            if (len > this.MaxLength)
-                this.MaxLength = len;
+            this.Lock.EnterWriteLock();
+            try {
+                // Update the logging width
+                var len = name.Length;
+                if (len > this.MaxLength)
+                    this.MaxLength = len;
 
-            var span = this.Stopwatch.GetAndReset();
+                if (!this.Nodes.TryGetValue(name, out NodeAverage? node)) {
+                    node = new NodeAverage(name);
 
-            var node = this.Nodes.GetOrAdd(name, i => {
-                var node = new NodeAverage(i);
-                this.AddEntry(node);
-                return node;
-            });
+                    this.AddEntry(node);
 
-            node.Add(span);
+                    this.Nodes[name] = node;
+                }
+
+                node.Add(this.Stopwatch.GetAndReset());
+            } finally {
+                this.Lock.ExitWriteLock();
+            }
         }
 
         private void Write(DebugPerformanceStack child)
         {
-            this.Children.AddOrUpdate(
-                // Add the entry using the name
-                child.Name,
-                // When first adding, also add to the Entries
-                _ => {
+            this.Lock.EnterWriteLock();
+            try {
+                if (this.Children.TryGetValue(child.Name, out DebugPerformanceStack? stack))
+                    stack.Merge(child);
+                else {
                     this.AddEntry(child);
-                    return child;
-                },
-                // We can't have duplicate keys, so add the averages together
-                (s,  stack) => {
-                    stack.Node.Merge(child.Node);
 
-                    foreach (object entry in child.Entries) {
-                        if (entry is NodeAverage node)
-                        {
-                            stack.Nodes.AddOrUpdate(node.Name,
-                                _ => {
-                                    stack.AddEntry(node);
-                                    return node;
-                                },
-                                (_,  average) => {
-                                    average.Merge(node);
-                                    return average;
-                                }
-                            );
-                        }
-                        else if (entry is DebugPerformanceStack grandchild)
-                        {
-                            stack.Write(grandchild);
+                    this.Children[child.Name] = child;
+                }
+            } finally {
+                this.Lock.ExitWriteLock();
+            }
+        }
+
+        private void Merge(DebugPerformanceStack other)
+        {
+            this.Lock.EnterWriteLock();
+            try {
+                this.Node.Merge(other.Node);
+
+                foreach (object entry in other.Entries) {
+                    if (entry is NodeAverage node)
+                    {
+                        if (this.Nodes.TryGetValue(node.Name, out NodeAverage? val))
+                            val.Merge(node);
+                        else {
+                            this.AddEntry(node);
+
+                            this.Nodes[node.Name] = node;
                         }
                     }
-                    
-                    return stack;
+                    else if (entry is DebugPerformanceStack child)
+                    {
+                        this.Write(child);
+                    }
                 }
-            );
+            } finally {
+                this.Lock.ExitWriteLock();
+            }
         }
 
         /// <inheritdoc />
@@ -113,32 +123,42 @@ namespace MyAddressExtractor.Objects.Performance {
             => this.Log(0);
         private void Log(int i)
         {
-            int buffer = i * 2;
-            foreach (object entry in this.Entries)
-            {
-                if (entry is DebugPerformanceStack stack)
+            this.Lock.EnterReadLock();
+            try {
+                int buffer = i * 2;
+                foreach (object entry in this.Entries)
                 {
-                    if (!string.IsNullOrEmpty(stack.Name))
-                        stack.Node.Log(buffer, this.MaxLength);
-                    stack.Log(i + 1);
+                    if (entry is DebugPerformanceStack stack)
+                    {
+                        if (!string.IsNullOrEmpty(stack.Name))
+                            stack.Node.Log(buffer, this.MaxLength);
+                        stack.Log(i + 1);
+                    }
+                    else if (entry is NodeAverage node)
+                    {
+                        node.Log(buffer, this.MaxLength);
+                    }
                 }
-                else if (entry is NodeAverage node)
-                {
-                    node.Log(buffer, this.MaxLength);
-                }
-            }
 
-            // If we're not recursing add a blank line at the end
-            if (this.Parent is null)
-                Console.WriteLine();
+                // If we're not recursing add a blank line at the end
+                if (this.Parent is null)
+                    Console.WriteLine();
+            } finally {
+                this.Lock.ExitReadLock();
+            }
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            this.Node.Add(DateTimeOffset.UtcNow - this.StartTime);
-            this.Stopwatch.Stop();
-            this.Parent?.Write(this);
+            this.Lock.EnterWriteLock();
+            try {
+                this.Node.Add(DateTimeOffset.UtcNow - this.StartTime);
+                this.Stopwatch.Stop();
+                this.Parent?.Write(this);
+            } finally {
+                this.Lock.ExitWriteLock();
+            }
         }
 
         /// <summary>
