@@ -61,7 +61,11 @@ namespace MyAddressExtractor
                             await monitor.RunAsync(file, CancellationToken.None);
 
                         } catch (Exception ex) {
-                            Console.Error.WriteLine($"An error occurred while reading '{file}': {ex.Message}");
+                            if (config.Debug)
+                                Console.WriteLine(new Exception($"An error occurred while reading '{file}':", ex));
+                            else
+                                Console.Error.WriteLine($"An error occurred while reading '{file}': {ex.Message}");
+
                             if (ex is not NotImplementedException && !config.WaitContinue())
                                 return (int)ErrorCode.UnspecifiedError;
                         }
