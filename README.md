@@ -29,13 +29,21 @@ Syntax: `AddressExtractor.exe -?`
 Syntax: `AddressExtractor.exe -v`
 Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
 
-| Option                  | Description                                                                |
-|-------------------------|----------------------------------------------------------------------------|
-| `-?`, `-h`, `--help`    | Prints the command line syntax and options                                 |
-| `-v`, `--version`       | Prints the application version number                                      |
-| input                   | One or more input filenames or directories                                 |
-| `-o`, `--output` output | Path and filename of the output file. Defaults to 'addresses_output.txt'   |
-| `-r`, `--report` report | Path and filename of the report file. Defaults to 'report.txt'             |
+### Main Options
+
+| Option                  | Description                                                               |
+|-------------------------|---------------------------------------------------------------------------|
+| `-?`, `-h`, `--help`    | Prints the command line syntax and options                                |
+| `-v`, `--version`       | Prints the application version number                                     |
+| input                   | One or more input filenames or directories                                |
+| `-o`, `--output` output | Path and filename of the output file. Defaults to 'addresses_output.txt'  |
+| `-r`, `--report` report | Path and filename of the report file. Defaults to 'report.txt'            |
 | `--recursive`           | Enable recursive mode for directories, which will search child directories |
-| `-y`, `--yes`           | Automatically confirm prompts to CONTINUE without asking                   |
-| `--debug`               | Enable debug mode for fine-tuned performance checking                     |
+| `-y`, `--yes`           | Automatically confirm prompts to CONTINUE without asking                  |
+
+### Performance / Debugging
+
+| Option          | Description                                                                                                                                      |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--debug`       | Enable debug mode for fine-tuned performance checking                                                                                            |
+| `--threads` num | Uses multiple threads with [channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) for reading from files. Defaults to `4` |

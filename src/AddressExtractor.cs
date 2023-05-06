@@ -20,21 +20,7 @@ namespace MyAddressExtractor
             | RegexOptions.NonBacktracking //  guarantees linear-time processing in the length of the input.
             | RegexOptions.CultureInvariant // Allow culture invariant character matching
         )]
-        public static partial Regex EmailRegex_Simple();
-
-
-        /// <summary>
-        /// Email Regex pattern with full complex checks
-        /// </summary>
-        [GeneratedRegex(
-            @"(\\"")?""?'?[a-z0-9\.\-\*!#$%&'+/=?^_`{|}~""\\]+(?<!\.)@([a-z0-9\-_]+\.)+[a-z0-9]{2,}\b(\\"")?""?'?(?<!\s)",
-            RegexOptions.ExplicitCapture // Require naming captures; implies '(?:)' on groups. We don't make use of the groups
-            | RegexOptions.IgnoreCase // Match upper and lower casing
-            | RegexOptions.Compiled // Compile the nodes
-            | RegexOptions.Singleline // Singleline mode
-            | RegexOptions.CultureInvariant // Allow culture invariant character matching
-        )]
-        public static partial Regex EmailRegex_Full();
+        public static partial Regex LooseMatch();
 
         #region File Extraction
 
@@ -59,15 +45,14 @@ namespace MyAddressExtractor
         public IAsyncEnumerable<string> ExtractAddressesAsync(string? content, CancellationToken cancellation = default)
             => this.ExtractAddressesAsync(IPerformanceStack.DEFAULT, content, cancellation);
 
-        private async IAsyncEnumerable<string> ExtractAddressesAsync(IPerformanceStack stack, string? content, [EnumeratorCancellation] CancellationToken cancellation = default)
+        public async IAsyncEnumerable<string> ExtractAddressesAsync(IPerformanceStack stack, string? content, [EnumeratorCancellation] CancellationToken cancellation = default)
         {
             // If line is NULL or any time of whitespace, don't waste computation time searching any empty string
             if (string.IsNullOrWhiteSpace(content))
                 yield break;
 
-            var matches =
-                AddressExtractor.EmailRegex_Simple().Matches(content)
-                .Where(x => EmailRegex_Full().IsMatch(x.Value));
+            var matches = AddressExtractor.LooseMatch()
+                .Matches(content);
 
             using (var debug = stack.CreateStack("Run regex"))
             {
