@@ -43,7 +43,7 @@ Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
 
 ### Performance / Debugging
 
-| Option           | Description                                                                                                                       |
-|------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `--debug`        | Enable debug mode for fine-tuned performance checking                                                                             |
-| `--channels` num | Uses multiple [channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) for reading from files. Defaults to 4 |
+| Option          | Description                                                                                                                                      |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--debug`       | Enable debug mode for fine-tuned performance checking                                                                                            |
+| `--threads` num | Uses multiple threads with [channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) for reading from files. Defaults to `4` |

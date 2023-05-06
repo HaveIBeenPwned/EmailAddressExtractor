@@ -41,7 +41,7 @@ namespace MyAddressExtractor {
             this.Stack = stack;
             this.Timer = new Timer(_ => this.Log(), null, iterate, iterate);
 
-            for (int i = 0; i < this.Config.Channels; i++)
+            for (int i = 0; i < this.Config.Threads; i++)
                 this.Tasks.Add(Task.Run(() => this.ReadAsync(CancellationToken.None)));
         }
 

@@ -12,7 +12,7 @@ namespace MyAddressExtractor
         public bool OperateRecursively { get; private set; } = Defaults.OPERATE_RECURSIVELY;
         public bool SkipPrompts { get; private set; } = Defaults.SKIP_PROMPTS;
 
-        public int Channels { get; private set; } = Defaults.CHANNELS;
+        public int Threads { get; private set; } = Defaults.CHANNELS;
 
         public bool Debug { get; private set; } = Defaults.DEBUG;
 
@@ -84,8 +84,8 @@ namespace MyAddressExtractor
                                 case "-debug":
                                     this.Debug = true;
                                     break;
-                                case "-channels":
-                                    handle = value => this.Channels = this.ParseInt(value, min: 0, max: 1000);
+                                case "-threads":
+                                    handle = value => this.Threads = this.ParseInt(value, min: 1, max: 1000);
                                     break;
                                 default:
                                     throw new ArgumentException($"Unexpected option '{arg}'");
@@ -118,8 +118,9 @@ namespace MyAddressExtractor
         }
 
         public Channel<Line> CreateChannel()
-            => Channel.CreateBounded<Line>(new BoundedChannelOptions(this.Channels) {
+            => Channel.CreateBounded<Line>(new BoundedChannelOptions(this.Threads * 3) {
                 SingleWriter = true, // Only one instance of `ILineReader` is used at a time
+                SingleReader = false,
                 AllowSynchronousContinuations = false // Require Async
             });
 
