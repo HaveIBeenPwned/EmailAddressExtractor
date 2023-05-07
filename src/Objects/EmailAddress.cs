@@ -30,12 +30,40 @@ namespace MyAddressExtractor.Objects {
 
         /// <summary>The username part of the address.</summary>
         /// <example>username</example>
-        public string Username => this._Username ??= this.Full[..this.Separator];
+        public string Username {
+            get => this._Username ??= this.Full[..this.Separator];
+            set {
+                this._Username = value ?? throw new NullReferenceException();
+                var domain = this.Domain;
+
+                this._Full = $"{this._Username}@{domain}";
+
+                // Clear the cache
+                this._Separator = null;
+                this._Domain = null;
+
+                this.Modified = true;
+            }
+        }
         private string? _Username = null;
 
         /// <summary>The domain part of the address.</summary>
         /// <example>test.com</example>
-        public string Domain => this._Domain ??= this.Full[this.Separator..];
+        public string Domain {
+            get => this._Domain ??= this.Full[(this.Separator + 1)..];
+            set {
+                this._Domain = value ?? throw new NullReferenceException();
+                var username = this.Username;
+
+                this._Full = $"{username}@{this._Domain}";
+
+                // Clear the cache
+                this._Separator = null;
+                this._Username = null;
+
+                this.Modified = true;
+            }
+        }
         private string? _Domain = null;
 
         /// <summary>Cache where the '@' separate is for 'Username' and 'Domain' so we don't keep calling 'IndexOf()'</summary>
