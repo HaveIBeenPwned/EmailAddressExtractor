@@ -21,7 +21,7 @@ The regex I've used is as follows: `\b[a-zA-Z0-9\.\-_\+]+@[a-zA-Z0-9\.\-_]+\.[a-
 
 # Test data
 
-Using Red Gate's SQL Data Generator, [a sample file containing 10M records of typical breach data is available to download from Mega](https://mega.nz/file/Ls8U1ADK#c1We1C_CZi44P0k3OB8YpNVN7HMM3gE_4-fH06E454c).
+Using Red Gate's SQL Data Generator, [a sample file containing 10M records of typical breach data is available to download from Mega](https://mega.nz/file/Xk91ETzb#UYklfa84pLs5OzrysEGNFVMbFb5OC0KU7rlnugF_Aps). This file results in exactly 10M email addresses being extracted with the current version of this app. Note: the test data file is presently in V2, with the earlier version resulting in slightly less than 10M unique addresses due to the presence of invalid domain name patterns.
 
 # Running the Address Extractor
 
