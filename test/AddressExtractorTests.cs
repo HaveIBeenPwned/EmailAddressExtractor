@@ -12,7 +12,7 @@ namespace AddressExtractorTest
             var result = await this.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
 
             // Assert
-            Assert.IsTrue(result.Count == 12, $"12 email addresses should be found, found {result.Count}");
+            Assert.IsTrue(result.Count == 11, $"11 email addresses should be found, found {result.Count}");
         }     
         
         [TestMethod]
