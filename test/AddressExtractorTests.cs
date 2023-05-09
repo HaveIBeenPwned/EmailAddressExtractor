@@ -193,6 +193,16 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
+        [Ignore("The loose address matching captures this as a valid address, TBD if it should be valid or not")]
+        public async Task WeirdAddressTesting()
+        {
+            const string INPUT = "'@nicedomain.com";
+
+            // OK if this doesn't throw any exceptions!
+            var result = await this.ExtractAddressesAsync(INPUT);
+        }
+
+        [TestMethod]
         [Ignore("This is a low priority feature so the test is ignored for the moment in the interests of having all green all the way for tests that *should* be working now")]
         public async Task AliasOnEmojiDomainIsFound()
         {

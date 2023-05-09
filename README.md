@@ -31,15 +31,16 @@ Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
 
 ### Main Options
 
-| Option                  | Description                                                               |
-|-------------------------|---------------------------------------------------------------------------|
-| `-?`, `-h`, `--help`    | Prints the command line syntax and options                                |
-| `-v`, `--version`       | Prints the application version number                                     |
-| input                   | One or more input filenames or directories                                |
-| `-o`, `--output` output | Path and filename of the output file. Defaults to 'addresses_output.txt'  |
-| `-r`, `--report` report | Path and filename of the report file. Defaults to 'report.txt'            |
+| Option                  | Description                                                                |
+|-------------------------|----------------------------------------------------------------------------|
+| `-?`, `-h`, `--help`    | Prints the command line syntax and options                                 |
+| `-v`, `--version`       | Prints the application version number                                      |
+| input                   | One or more input filenames or directories                                 |
+| `-o`, `--output` output | Path and filename of the output file. Defaults to 'addresses_output.txt'   |
+| `-r`, `--report` report | Path and filename of the report file. Defaults to 'report.txt'             |
 | `--recursive`           | Enable recursive mode for directories, which will search child directories |
-| `-y`, `--yes`           | Automatically confirm prompts to CONTINUE without asking                  |
+| `-y`, `--yes`           | Automatically confirm prompts to CONTINUE without asking                   |
+| `-q`, `--quiet`         | Run with less verbosity, progress messages aren't shown                    |
 
 ### Performance / Debugging
 

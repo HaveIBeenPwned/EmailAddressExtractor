@@ -6,6 +6,8 @@ namespace MyAddressExtractor
 {
     public class CommandLineProcessor
     {
+        #region Config Options
+
         public string OutputFilePath { get; private set; } = Defaults.OUTPUT_FILE_PATH;
         public string ReportFilePath { get; private set; } = Defaults.REPORT_FILE_PATH;
 
@@ -15,13 +17,24 @@ namespace MyAddressExtractor
         public int Threads { get; private set; } = Defaults.CHANNELS;
 
         public bool Debug { get; private set; } = Defaults.DEBUG;
+        public bool Quiet { get; private set; } = Defaults.QUIET;
+
+        #endregion
+        #region Runtime
+
+        private readonly UserPromptLock PromptLock;
+        private readonly CancellationTokenSource ProgramCancellation;
+        public CancellationToken CancellationToken => this.ProgramCancellation.Token;
+
+        #endregion
 
         internal CommandLineProcessor(IReadOnlyCollection<string> args, out IList<string> inputFilePaths)
         {
+            this.ProgramCancellation = new CancellationTokenSource();
+            this.PromptLock = new UserPromptLock(this.ProgramCancellation);
+
             if (args.Count == 0)
-            {
                 throw new ArgumentException("Please provide at least one input file path.");
-            }
 
             Action<string>? handle = null;
             string previous = string.Empty;
@@ -33,9 +46,8 @@ namespace MyAddressExtractor
                 {
                     // Is it an option?
                     if (arg.Length > 0 && arg[0] == '-')
-                    {
                         throw new ArgumentException($"Missing value for '{previous}' option");
-                    }
+
                     try {
                         handle(arg);
                         handle = null;
@@ -84,6 +96,9 @@ namespace MyAddressExtractor
                                 case "-debug":
                                     this.Debug = true;
                                     break;
+                                case "q" or "-quiet":
+                                    this.Quiet = true;
+                                    break;
                                 case "-threads":
                                     handle = value => this.Threads = this.ParseInt(value, min: 1, max: 1000);
                                     break;
@@ -107,14 +122,11 @@ namespace MyAddressExtractor
 
             // If there are no more arguments but we were expecting a option file path, alert the user
             if (handle is not null)
-            {
                 throw new ArgumentException($"Missing output file path after {previous} option");
-            }
+
             // Make sure we have at least one input file path
             if (inputFilePaths.Count == 0)
-            {
                 throw new ArgumentException("No input file paths specified");
-            }
         }
 
         public Channel<Line> CreateChannel()
@@ -161,14 +173,13 @@ namespace MyAddressExtractor
                     switch (read.Key)
                     {
                         case ConsoleKey.Q:
-                            Console.WriteLine("Exiting");
+                            Output.Write("Exiting");
                             return false;
                         case ConsoleKey.I:
-                            Console.WriteLine($"Reading the following {files.Count} files:");
+                            Output.Write($"Reading the following {files.Count} files:");
                             foreach (var file in files)
                             {
-                                var info = new FileInfo(file);
-                                Console.WriteLine($"- [{ByteExtensions.Format(info.Length).PadRight(10)}] {file}");
+                                Output.Write($"  [{ByteExtensions.Format(file.Length).PadRight(10)}] {file.FullName}");
                             }
                             Console.WriteLine();
                             continue;
@@ -179,36 +190,12 @@ namespace MyAddressExtractor
             }
         }
 
-        internal bool WaitContinue()
-        {
-            // If silent output don't prompt
-            if (this.SkipPrompts)
-                return true;
+        internal async ValueTask<bool> WaitOnExceptionAsync(CancellationToken cancellation = default)
+            => this.SkipPrompts // If silent output don't prompt
+            || await this.PromptLock.PromptAsync(cancellation);
 
-            Console.Write("Continue? [y/n]: ");
-            while (true)
-            {
-                var read = Console.ReadKey(intercept: true);
-
-                // No modifiers (shift/ctrl/alt)
-                if (read.Modifiers is 0)
-                {
-                    switch (read.Key)
-                    {
-                        // Allow continuing
-                        case ConsoleKey.Y:
-                            Console.WriteLine();
-                            return true;
-
-                        // Exit
-                        case ConsoleKey.N:
-                        case ConsoleKey.Escape:
-                            Console.WriteLine();
-                            return false;
-                    }
-                }
-            }
-        }
+        internal Task AwaitContinuationAsync(CancellationToken cancellation = default)
+            => this.PromptLock.WaitAsync(cancellation);
 
         #endregion
         #region Special Output
@@ -216,16 +203,24 @@ namespace MyAddressExtractor
         static void Usage()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            Console.WriteLine($"Syntax: {assembly.GetName().Name} -?");
-            Console.WriteLine($"Syntax: {assembly.GetName().Name} -v");
-            Console.WriteLine($"Syntax: {assembly.GetName().Name} <input [input...]> [-o output] [-r report]");
-            Console.WriteLine("-?                   Help for the command line arguments");
-            Console.WriteLine("-v                   Prints the application version");
-            Console.WriteLine("input                One or more input file paths");
-            Console.WriteLine("-o output            File path to write output file");
-            Console.WriteLine("-r report            File path to write report file");
-            Console.WriteLine("");
-            Console.WriteLine("--recursive          Recursively enters directories provided to search for files");
+            Console.WriteLine($"""
+                Syntax: {assembly.GetName().Name} -?
+                Syntax: {assembly.GetName().Name} -v
+                Syntax: {assembly.GetName().Name} <input [input...]> [-o output] [-r report]
+                
+                --help, -h, -?       Help for the command line arguments
+                -v                   Prints the application version
+                
+                input                One or more input file paths
+                -o output            File path to write output file
+                -r report            File path to write report file
+                
+                --debug              Enables debug mode, prints timings and exceptions
+                --threads #          Specifies the number of Tasks to use for parsing Regex
+                --recursive          Recursively enters directories provided to search for files
+                --yes, -y            Skips any prompts asking to continue
+                --quiet, -q          Runs in quiet mode, not as verbose
+            """);
         }
 
         static void Version()
@@ -246,6 +241,7 @@ namespace MyAddressExtractor
             public const int CHANNELS = 4;
 
             public const bool DEBUG = false;
+            public const bool QUIET = false;
         }
     }
 }
