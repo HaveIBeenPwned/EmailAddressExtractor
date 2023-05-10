@@ -9,8 +9,8 @@ namespace MyAddressExtractor {
         public int Value => this._Value;
         private int _Value = 0;
 
-        public void Add(int value = 1)
-            => Interlocked.Add(ref this._Value, value);
+        public void Increment()
+            => Interlocked.Increment(ref this._Value);
 
         /// <inheritdoc />
         public override string ToString()

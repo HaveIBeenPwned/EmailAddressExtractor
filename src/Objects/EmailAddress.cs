@@ -58,7 +58,6 @@ namespace MyAddressExtractor.Objects {
                 this._Full = $"{username}@{this._Domain}";
 
                 // Clear the cache
-                this._Separator = null;
                 this._Username = null;
 
                 this.Modified = true;

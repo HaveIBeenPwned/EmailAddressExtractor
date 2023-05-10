@@ -3,10 +3,10 @@ using System.Collections.Concurrent;
 using MyAddressExtractor.Objects;
 
 namespace MyAddressExtractor {
-    internal sealed class FileCollection : IEnumerable<string>
+    internal sealed class FileCollection : IEnumerable<FileInfo>
     {
         private readonly CommandLineProcessor Cli;
-        private readonly ISet<string> Files;
+        private readonly IDictionary<string, FileInfo> Files;
 
         public int Count => this.Files.Count;
 
@@ -14,11 +14,12 @@ namespace MyAddressExtractor {
         {
             this.Cli = cli;
             this.Files = this.CreateSystemSet();
-            this.Files.UnionWith(this.GatherFiles(inputs));
+            foreach (var file in this.GatherFiles(inputs))
+                this.Files[file.FullName] = file;
             this.Log();
         }
 
-        private IEnumerable<string> GatherFiles(IEnumerable<string> inputs, bool recursed = false)
+        private IEnumerable<FileInfo> GatherFiles(IEnumerable<string> inputs, bool recursed = false)
         {
             foreach (string file in inputs) {
                 FileAttributes attributes = File.GetAttributes(file);
@@ -26,7 +27,7 @@ namespace MyAddressExtractor {
                 {
                     if (!recursed || this.Cli.OperateRecursively)
                     {
-                        foreach (string enumerated in this.GatherFiles(Directory.EnumerateFileSystemEntries(file), recursed: true))
+                        foreach (var enumerated in this.GatherFiles(Directory.EnumerateFileSystemEntries(file), recursed: true))
                         {
                             yield return enumerated;
                         }
@@ -34,7 +35,7 @@ namespace MyAddressExtractor {
                 }
                 else if (File.Exists(file))
                 {
-                    yield return file;
+                    yield return new FileInfo(file);
                 }
             }
         }
@@ -43,49 +44,47 @@ namespace MyAddressExtractor {
         /// Gather our <see cref="IEnumerable{String}"/> as a Set so that we don't have duplicates
         /// Windows uses a Case-Insensitive File system, so on it we can mostly ignore casing
         /// </summary>
-        private ISet<string> CreateSystemSet()
+        private IDictionary<string, FileInfo> CreateSystemSet()
         {
             OperatingSystem os = Environment.OSVersion;
             if (os.Platform is PlatformID.Win32S or PlatformID.Win32Windows or PlatformID.Win32NT or PlatformID.WinCE)
             {
-                return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                return new Dictionary<string, FileInfo>(StringComparer.OrdinalIgnoreCase);
             }
 
-            return new HashSet<string>();
+            return new Dictionary<string, FileInfo>();
         }
 
         private void Log()
         {
             var infos = new ConcurrentDictionary<string, ExtensionInfo>(StringComparer.OrdinalIgnoreCase);
             var count = this.Files.Count; // Cache the count before removing
-            foreach (string path in this)
+
+            foreach (var file in this)
             {
-                var file = new FileInfo(path);
                 if (file.Extension is {Length: >0} extension)
                 {
                     var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(extension.ToLower()));
                     info.AddFile(file);
-                    
+
                     // Remove ignored files
                     if (!info.Parsing.Read)
-                    {
-                        this.Files.Remove(path);
-                    }
+                        this.Files.Remove(file.FullName);
                 }
             }
 
             var sorted = infos.Values
                 .OrderBy(info => info.Parsing.Read ? -info.Count : 0);
-            Console.WriteLine($"Found {count:n0} files:");
+            Output.Write($"Found {count:n0} files:");
             foreach (ExtensionInfo info in sorted)
             {
-                Console.WriteLine($"- {info.Extension.PadRight(6)} {info.Count:n0} files: {ByteExtensions.Format(info.Bytes)}{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
+                Output.Write($"  {info.Extension.PadRight(6)} {info.Count:n0} files: {ByteExtensions.Format(info.Bytes)}{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
             }
         }
 
         /// <inheritdoc />
-        public IEnumerator<string> GetEnumerator()
-            => this.Files.GetEnumerator();
+        public IEnumerator<FileInfo> GetEnumerator()
+            => this.Files.Values.GetEnumerator();
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator()

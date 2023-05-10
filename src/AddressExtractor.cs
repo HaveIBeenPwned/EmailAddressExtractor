@@ -31,6 +31,8 @@ namespace MyAddressExtractor
         {
             await foreach (var line in reader.ReadLineAsync(cancellation))
             {
+                cancellation.ThrowIfCancellationRequested();
+
                 stack.Step("Read line");
                 await foreach (var address in this.ExtractAddressesAsync(stack, line, cancellation))
                 {
@@ -67,6 +69,8 @@ namespace MyAddressExtractor
                         // Run each filter
                         foreach (var filter in AddressFilter.Filters)
                         {
+                            cancellation.ThrowIfCancellationRequested();
+
                             valid = await filter.ValidateEmailAddressAsync(ref address, cancellation);
                             debug.Step(filter.Name);
 

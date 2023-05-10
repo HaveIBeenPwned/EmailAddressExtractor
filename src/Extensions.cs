@@ -34,5 +34,27 @@ namespace MyAddressExtractor {
             TimeUnit.DAYS => span.TotalDays,
             _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
         };
+
+        /// <summary>
+        /// A safe call to <see cref="string.StartsWith(string)"/> and <see cref="string.EndsWith(string)"/>
+        /// Guarantees that the string is actually long enough for the start and end to be different
+        /// (eg; `"abc".StartsAndEndsWith("abc")` will be FALSE, and `"abcabc".StartsAndEndsWith("abc" will be TRUE)`)
+        /// </summary>
+        public static bool StartsAndEndsWith(this string check, string value)
+            => check.Length >= value.Length * 2 && check.StartsWith(value) && check.EndsWith(value);
+
+        /// <summary>
+        /// A safe call to <see cref="string.StartsWith(char)"/> and <see cref="string.EndsWith(char)"/>
+        /// Guarantees that the string is actually long enough for the start and end to be different
+        /// (eg; `"abc".StartsAndEndsWith("abc")` will be FALSE, and `"abcabc".StartsAndEndsWith("abc" will be TRUE)`)
+        /// </summary>
+        public static bool StartsAndEndsWith(this string check, char value)
+            => check.Length >= 2 && check.StartsWith(value) && check.EndsWith(value);
+
+        /// <summary>
+        /// Just here for testing
+        /// </summary>
+        public static bool NextBool(this Random random)
+            => random.NextDouble() >= 0.5d;
     }
 }

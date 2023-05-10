@@ -15,20 +15,20 @@ namespace MyAddressExtractor.Objects.Filters {
             var username = address.Username;
 
             // Handle quotes at the start and end of the username
-            if (username.StartsWith('\'') && username.EndsWith('\''))
+            if (username.StartsAndEndsWith('\''))
                 username = username[1..^1];
-            if (username.StartsWith('"') && username.EndsWith('"'))
+            if (username.StartsAndEndsWith('"'))
                 username = username[1..^1];
-            if (username.StartsWith("\\\"") && username.EndsWith("\\\""))
+            if (username.StartsAndEndsWith("\\\""))
                 username = username[2..^2];
 
             // Does the username contain any unescaped double quotes?
             var quoteIndex = username.IndexOf('"');
             var unescapedQuoteCount = 0;
 
-            while (quoteIndex != -1)
+            while (quoteIndex is not -1)
             {
-                if (quoteIndex == 0 || (quoteIndex > 0 && username[quoteIndex - 1] != '\\'))
+                if (quoteIndex is 0 || (quoteIndex > 0 && username[quoteIndex - 1] != '\\'))
                 {
                     unescapedQuoteCount++;
                 }
@@ -50,12 +50,12 @@ namespace MyAddressExtractor.Objects.Filters {
                     len = null;
                     if (junk is string str)
                     {
-                        if (address.Full.StartsWith(str) && address.Full.EndsWith(str))
+                        if (address.Full.StartsAndEndsWith(str))
                             len = str.Length;
                     }
                     else if (junk is char c)
                     {
-                        if (address.Full.StartsWith(c) && address.Full.EndsWith(c))
+                        if (address.Full.StartsAndEndsWith(c))
                             len = 1;
                     }
 

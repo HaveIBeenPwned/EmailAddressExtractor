@@ -6,12 +6,15 @@ namespace MyAddressExtractor.Objects
     public struct Line
     {
         /// <summary>The file the line was read from</summary>
-        public string File { get; init; }
+        public required string File { get; init; }
 
         /// <summary>The value of the Line</summary>
-        public string Value { get; init; }
+        public required string Value { get; init; }
 
-        /// <summary>The reader count</summary>
-        public Count Counter { get; init; }
+        /// <summary>The count of extracted Email Addresses</summary>
+        public required Count Counter { get; init; }
+
+        /// <summary>The current line number</summary>
+        public required int Number { get; init; }
     }
 }
