@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyAddressExtractor;
+using MyAddressExtractor.Objects;
 
 namespace AddressExtractorTest
 {
@@ -232,6 +233,15 @@ namespace AddressExtractorTest
 
         #region Wrappers
 
+        private readonly Runtime Runtime;
+        private readonly AddressExtractor Extractor;
+
+        public AddressExtractorTests()
+        {
+            this.Runtime = new Runtime();
+            this.Extractor = new AddressExtractor(this.Runtime);
+        }
+
         /// <summary>
         /// Extract the addresses from the Address Extractor and wrap it into a set
         /// Wrapping the <see cref="IEnumerable{String}"/> here instead of within the Method
@@ -239,10 +249,9 @@ namespace AddressExtractorTest
         /// </summary>
         private async ValueTask<HashSet<string>> ExtractAddressesAsync(string input)
         {
-            var extractor = new AddressExtractor();
             var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            await foreach(var address in extractor.ExtractAddressesAsync(input))
+            await foreach(var address in this.Extractor.ExtractAddressesAsync(input))
                 set.Add(address);
 
             return set;
@@ -251,13 +260,12 @@ namespace AddressExtractorTest
         private async ValueTask<HashSet<string>> ExtractAddressesFromFileAsync(string path, CancellationToken cancellation = default)
         {
             // Arrange
-            var extractor = new AddressExtractor();
             var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var parser = FileExtensionParsing.GetFromPath(path);
+            var parser = this.Runtime.GetExtensionFromPath(path);
 
             await using (var reader = parser.GetReader(path))
             {
-                await foreach(var address in extractor.ExtractFileAddressesAsync(reader, cancellation))
+                await foreach(var address in this.Extractor.ExtractFileAddressesAsync(reader, cancellation))
                     set.Add(address);
             }
             return set;

@@ -22,6 +22,13 @@ namespace MyAddressExtractor
         )]
         public static partial Regex LooseMatch();
 
+        private readonly Runtime Runtime;
+        
+        public AddressExtractor(Runtime runtime)
+        {
+            this.Runtime = runtime;
+        }
+
         #region File Extraction
 
         public IAsyncEnumerable<string> ExtractFileAddressesAsync(ILineReader reader, CancellationToken cancellation = default)
@@ -67,7 +74,7 @@ namespace MyAddressExtractor
                     while (true)
                     {
                         // Run each filter
-                        foreach (var filter in AddressFilter.Filters)
+                        foreach (var filter in this.Runtime.Filters)
                         {
                             cancellation.ThrowIfCancellationRequested();
 

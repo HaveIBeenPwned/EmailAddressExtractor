@@ -5,14 +5,15 @@ using MyAddressExtractor.Objects;
 namespace MyAddressExtractor {
     internal sealed class FileCollection : IEnumerable<FileInfo>
     {
-        private readonly Config Config;
+        private readonly Runtime Runtime;
+        private Config Config => this.Runtime.Config;
         private readonly IDictionary<string, FileInfo> Files;
 
         public int Count => this.Files.Count;
 
-        public FileCollection(Config config, IEnumerable<string> inputs)
+        public FileCollection(Runtime runtime, IEnumerable<string> inputs)
         {
-            this.Config = config;
+            this.Runtime = runtime;
             this.Files = this.CreateSystemSet();
             foreach (var file in this.GatherFiles(inputs))
                 this.Files[file.FullName] = file;
@@ -64,7 +65,7 @@ namespace MyAddressExtractor {
             {
                 if (file.Extension is {Length: >0} extension)
                 {
-                    var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(extension.ToLower()));
+                    var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(this.Runtime, extension.ToLower()));
                     info.AddFile(file);
 
                     // Remove ignored files
@@ -102,10 +103,10 @@ namespace MyAddressExtractor {
             public int Count { get; private set; }
             public long Bytes { get; private set; }
 
-            public ExtensionInfo(string extension)
+            public ExtensionInfo(Runtime runtime, string extension)
             {
                 this.Extension = extension;
-                this.Parsing = FileExtensionParsing.Get(extension);
+                this.Parsing = runtime.GetExtension(extension);
             }
 
             public void AddFile(FileInfo info)

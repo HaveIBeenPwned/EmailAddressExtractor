@@ -1,70 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using MyAddressExtractor.Objects.Attributes;
 
 namespace MyAddressExtractor.Objects {
     public sealed class Config {
-        #region Runtime
-
-        private readonly UserPromptLock PromptLock;
-        private readonly CancellationTokenSource ProgramCancellation;
-        public CancellationToken CancellationToken => this.ProgramCancellation.Token;
-
-        #endregion
-
-        public Config()
-        {
-            this.ProgramCancellation = new CancellationTokenSource();
-            this.PromptLock = new UserPromptLock(this.ProgramCancellation);
-        }
-
-        #region CLI Waiters
-
-        internal bool WaitInput(FileCollection files)
-        {
-            // If silent output don't prompt
-            if (this.SkipPrompts)
-                return true;
-
-            while (true)
-            {
-                Console.Write("Press ANY KEY to continue ['Q' to Quit; 'I' for info]: ");
-                var read = Console.ReadKey(intercept: true);
-                Console.WriteLine();
-
-                // No modifiers (shift/ctrl/alt)
-                if (read.Modifiers is 0)
-                {
-                    switch (read.Key)
-                    {
-                        case ConsoleKey.Q:
-                            Output.Write("Exiting");
-                            return false;
-                        case ConsoleKey.I:
-                            Output.Write($"Reading the following {files.Count} files:");
-                            foreach (var file in files)
-                            {
-                                Output.Write($"  [{ByteExtensions.Format(file.Length).PadRight(10)}] {file.FullName}");
-                            }
-                            Console.WriteLine();
-                            continue;
-                        default:
-                            return true;
-                    }
-                }
-            }
-        }
-
-        internal async ValueTask<bool> WaitOnExceptionAsync(CancellationToken cancellation = default)
-            => this.SkipExceptions // If silent output don't prompt
-            || await this.PromptLock.PromptAsync(cancellation);
-
-        internal Task AwaitContinuationAsync(CancellationToken cancellation = default)
-            => this.PromptLock.WaitAsync(cancellation);
-
-        #endregion
         #region Options
 
         /// <summary>If the program should recursively enter folders</summary>

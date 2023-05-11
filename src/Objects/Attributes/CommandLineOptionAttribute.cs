@@ -50,7 +50,7 @@ namespace MyAddressExtractor.Objects.Attributes {
         public CommandLineOption(MemberInfo method, CommandLineOptionAttribute attribute)
         {
             this.Args = this.MapArgs(attribute.Args);
-            this.Description = attribute.Description;
+            this.Description = this.GetDescription(attribute.Description);
             this.Expects = attribute.Expects;
             this.IsExclusive = attribute.Exclusive;
             this.MemberInfo = method;
@@ -138,6 +138,15 @@ namespace MyAddressExtractor.Objects.Attributes {
                 };
             }
 
+            if (type.IsEnum) {
+                return input => {
+                    if (!Enum.TryParse(type, input, ignoreCase: true, out object? value))
+                        throw new ArgumentException("");
+
+                    property.SetValue(config, value);
+                };
+            }
+
             if (type == typeof(bool))
             {
                 var val = property.GetValue(config) as bool?;
@@ -159,8 +168,20 @@ namespace MyAddressExtractor.Objects.Attributes {
                     return "#";
                 if (type == typeof(string))
                     return "string";
+                if (type.IsEnum)
+                    return type.Name.ToLowerInvariant();
             }
             return "input";
+        }
+
+        private string GetDescription(string input)
+        {
+            if (this.MemberInfo is PropertyInfo {PropertyType: Type type} && type.IsEnum)
+            {
+                var values = Enum.GetNames(type).Select(val => val.ToLowerInvariant());
+                input += $" ({string.Join(", ", values)})";
+            }
+            return input;
         }
 
         #endregion

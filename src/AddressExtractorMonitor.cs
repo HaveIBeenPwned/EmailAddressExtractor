@@ -7,13 +7,14 @@ using MyAddressExtractor.Objects.Performance;
 
 namespace MyAddressExtractor {
     public class AddressExtractorMonitor : IAsyncDisposable {
-        private readonly Config Config;
+        private readonly Runtime Runtime;
+        private Config Config => this.Runtime.Config;
         private readonly Channel<Line> Channel;
         private ChannelReader<Line> Reader => this.Channel.Reader;
         private ChannelWriter<Line> Writer => this.Channel.Writer;
         private IList<Task> Tasks = new List<Task>();
 
-        private readonly AddressExtractor Extractor = new();
+        private readonly AddressExtractor Extractor;
         private readonly IPerformanceStack Stack;
 
         protected readonly IDictionary<string, Count> Files = new ConcurrentDictionary<string, Count>();
@@ -27,23 +28,24 @@ namespace MyAddressExtractor {
         private readonly Timer Timer;
 
         public AddressExtractorMonitor(
-            Config config,
+            Runtime runtime,
             IPerformanceStack stack
-        ): this(config, stack, TimeSpan.FromMinutes(1)) {}
+        ): this(runtime, stack, TimeSpan.FromMinutes(1)) {}
 
         public AddressExtractorMonitor(
-            Config config,
+            Runtime runtime,
             IPerformanceStack stack,
             TimeSpan iterate
         ) {
-            this.Config = config;
+            this.Runtime = runtime;
             this.Channel = this.Config.CreateChannel();
+            this.Extractor = new AddressExtractor(runtime);
             this.Stack = stack;
             this.Timer = new Timer(_ => this.Log(), null, iterate, iterate);
 
             for (int i = 0; i < this.Config.Threads; i++)
             {
-                var task = Task.Run(() => this.ReadAsync(config.CancellationToken));
+                var task = Task.Run(() => this.ReadAsync(this.Runtime.CancellationToken));
                 this.Tasks.Add(task);
             }
         }
@@ -63,7 +65,7 @@ namespace MyAddressExtractor {
                         line = await this.Reader.ReadAsync(cancellation);
 
                         // Check for pauses
-                        await this.Config.AwaitContinuationAsync(cancellation);
+                        await this.Runtime.AwaitContinuationAsync(cancellation);
 
                         // Extract addresses from the line
                         await foreach(var email in this.Extractor.ExtractAddressesAsync(this.Stack, line.Value, cancellation))
@@ -87,7 +89,7 @@ namespace MyAddressExtractor {
                     else
                         Output.Error($"An error occurred while parsing '{line.File}'L{line.Number}: {ex.Message}");
 
-                    if (!await this.Config.WaitOnExceptionAsync(cancellation))
+                    if (!await this.Runtime.WaitOnExceptionAsync(cancellation))
                         break;
                 }
             }
@@ -102,11 +104,11 @@ namespace MyAddressExtractor {
 
                 this.Files.Add(file.FullName, count);
 
-                var parser = FileExtensionParsing.Get(file);
+                var parser = this.Runtime.GetExtension(file);
                 await using (var reader = parser.GetReader(file.FullName))
                 {
                     // Await any 'continue' prompts
-                    await this.Config.AwaitContinuationAsync(cancellation);
+                    await this.Runtime.AwaitContinuationAsync(cancellation);
 
                     Output.Write($"Reading \"{file.FullName}\" [{ByteExtensions.Format(file.Length)}]");
                     await foreach(var line in reader.ReadLineAsync(cancellation))

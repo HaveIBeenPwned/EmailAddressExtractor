@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyAddressExtractor;
+using MyAddressExtractor.Objects;
 
 namespace AddressExtractorTest
 {
@@ -153,7 +154,7 @@ namespace AddressExtractorTest
         /// <returns></returns>
         private async ValueTask<bool> IsValidEmailAsync(string? sourceEmail)
         {
-            var sut = new AddressExtractor();
+            var sut = new AddressExtractor(new Runtime());
             await foreach (var _ in sut.ExtractAddressesAsync(sourceEmail))
                 return true;
             return false;
