@@ -80,6 +80,11 @@ namespace MyAddressExtractor {
             {
                 Output.Write($"  {info.Extension.PadRight(6)} {info.Count:n0} files: {ByteExtensions.Format(info.Bytes)}{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
             }
+
+            string output = this.Config.OutputFilePath;
+            string report = this.Config.ReportFilePath;
+            Output.Write($"Output will {(string.IsNullOrWhiteSpace(output) ? "not be saved" : $"be saved to \"{output}\"")}.");
+            Output.Write($"Report will {(string.IsNullOrWhiteSpace(report) ? "not be saved" : $"be saved to \"{report}\"")}.");
         }
 
         /// <inheritdoc />

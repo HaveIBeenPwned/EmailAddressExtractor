@@ -1,9 +1,30 @@
-﻿using MyAddressExtractor.Objects;
+﻿using System.Reflection;
+using MyAddressExtractor.Objects;
+using MyAddressExtractor.Objects.Attributes;
 
 namespace MyAddressExtractor
 {
     public class CommandLineProcessor
     {
+        internal static readonly IEnumerable<CommandLineOption> CLI_OPTIONS;
+        static CommandLineProcessor()
+        {
+            List<CommandLineOption> options = new();
+
+            var methods = typeof(Config).GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            foreach (MemberInfo member in methods) {
+                if (member.GetCustomAttribute<CommandLineOptionAttribute>() is not {} attribute)
+                    continue;
+                if (member is MethodInfo method && method.GetParameters().Length is not 0)
+                    throw new Exception($"Option {method.Name} should not have input parameters");
+
+                options.Add(new CommandLineOption(member, attribute));
+            }
+
+            CommandLineProcessor.CLI_OPTIONS = options.Order(new CommandLineOptionSorter());
+        }
+
         internal static Config Parse(IReadOnlyCollection<string> args, out IList<string> inputFilePaths)
         {
             if (args.Count == 0)
@@ -34,12 +55,25 @@ namespace MyAddressExtractor
                 else
                 {
                     // Is it an option?
-                    if (arg[0] == '-')
-                    {
-                        if (arg.Length > 1)
-                            handle = config.Set(args, arg);
-                        else
+                    if (arg.Length > 0 && arg[0] == '-') {
+                        if (arg.Length <= 1)
                             throw new ArgumentException($"Invalid argument '{arg}'");
+
+                        CommandLineOption? option = CommandLineProcessor.CLI_OPTIONS.FirstOrDefault(option => option.IsMatch(arg));
+
+                        // Invalid option
+                        if (option is null)
+                            throw new ArgumentException($"Unexpected option '{arg}'");
+
+                        // Exclusive options (eg; -h or -v)
+                        if (option.IsExclusive && args.Count > 1)
+                            throw new ArgumentException($"'{arg}' must be the only argument when it is used");
+
+                        handle = option.Invoke(config);
+
+                        // Return since the option is exclusive
+                        if (option.IsExclusive)
+                            return config;
                     }
                     else // No option or not expecting an option file path, so assume it to be an input file path
                     {
@@ -59,6 +93,34 @@ namespace MyAddressExtractor
                 throw new ArgumentException("No input file paths specified");
 
             return config;
+        }
+
+        private class CommandLineOptionSorter : IComparer<CommandLineOption> {
+            /// <inheritdoc />
+            public int Compare(CommandLineOption? x, CommandLineOption? y)
+                => x is null || y is null ? 0 : this.Compare(this.GetChar(x), this.GetChar(y));
+
+            private int Compare(char x, char y)
+                => x.CompareTo(y);
+
+            private char GetChar(CommandLineOption option)
+            {
+                var c = default(char);
+
+                foreach (string arg in option.Args) {
+                    if (arg.StartsWith("--"))
+                        c = arg[2];
+                    else if (arg.StartsWith("-"))
+                        c = arg[1];
+                    else
+                        c = arg[0];
+
+                    if (char.IsLetter(c))
+                        return c;
+                }
+
+                return c;
+            }
         }
     }
 }

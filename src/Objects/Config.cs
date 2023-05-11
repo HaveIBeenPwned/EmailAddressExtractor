@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Text;
 using System.Threading.Channels;
+using MyAddressExtractor.Objects.Attributes;
 
 namespace MyAddressExtractor.Objects {
     public sealed class Config {
@@ -8,20 +11,6 @@ namespace MyAddressExtractor.Objects {
         private readonly UserPromptLock PromptLock;
         private readonly CancellationTokenSource ProgramCancellation;
         public CancellationToken CancellationToken => this.ProgramCancellation.Token;
-
-        #endregion
-        #region Config Options
-
-        public string OutputFilePath { get; private set; } = Defaults.OUTPUT_FILE_PATH;
-        public string ReportFilePath { get; private set; } = Defaults.REPORT_FILE_PATH;
-
-        public bool OperateRecursively { get; private set; } = Defaults.OPERATE_RECURSIVELY;
-        public bool SkipPrompts { get; private set; } = Defaults.SKIP_PROMPTS;
-
-        public int Threads { get; private set; } = Defaults.CHANNELS;
-
-        public bool Debug { get; private set; } = Defaults.DEBUG;
-        public bool Quiet { get; private set; } = Defaults.QUIET;
 
         #endregion
 
@@ -69,124 +58,79 @@ namespace MyAddressExtractor.Objects {
         }
 
         internal async ValueTask<bool> WaitOnExceptionAsync(CancellationToken cancellation = default)
-            => this.SkipPrompts // If silent output don't prompt
-               || await this.PromptLock.PromptAsync(cancellation);
+            => this.SkipExceptions // If silent output don't prompt
+            || await this.PromptLock.PromptAsync(cancellation);
 
         internal Task AwaitContinuationAsync(CancellationToken cancellation = default)
             => this.PromptLock.WaitAsync(cancellation);
 
         #endregion
-        #region Parsers
+        #region Options
 
-        private int ParseInt(string value, int? min = null, int? max = null)
+        /// <summary>If the program should recursively enter folders</summary>
+        [CommandLineOption("recursive", Description = "Recursively enters directories provided to search for files")]
+        public bool OperateRecursively { get; private set; } = Defaults.OPERATE_RECURSIVELY;
+
+        /// <summary>The path to write collected <see cref="EmailAddress"/>es to</summary>
+        [CommandLineOption("o", "output", Description = "File path to write output file", Expects = "path")]
+        public string OutputFilePath { get; private set; } = Defaults.OUTPUT_FILE_PATH;
+
+        /// <summary>The path to write the summary report to</summary>
+        [CommandLineOption("r", "report", Description = "File path to write report file", Expects = "path")]
+        public string ReportFilePath { get; private set; } = Defaults.REPORT_FILE_PATH;
+
+        /// <summary>If the prompt to Continue should be skipped</summary>
+        [CommandLineOption("y", "yes", Description = "Skips any normal continue prompts")]
+        public bool SkipPrompts { get; private set; } = Defaults.SKIP_PROMPTS;
+
+        /// <summary>If the prompt to Continue on Exceptions should be skipped</summary>
+        [CommandLineOption("skip-exceptions", Description = "Skips any continue prompts on exceptions")]
+        public bool SkipExceptions { get; private set; } = Defaults.SKIP_EXCEPTIONS;
+
+        /// <summary>If verbosity for development is enabled</summary>
+        [CommandLineOption("debug", Description = "Enables debug mode, prints timings and exceptions")]
+        public bool Debug { get; private set; } = Defaults.DEBUG;
+
+        /// <summary>If generic verbose messages should be omitted</summary>
+        [CommandLineOption("q", "quiet", Description = "Runs in quiet mode, not as verbose")]
+        public bool Quiet { get; private set; } = Defaults.QUIET;
+
+        /// <summary>The number of <see cref="Task"/>s to use for parsing <see cref="Regex"/></summary>
+        [CommandLineOption("threads", Description = "Specifies the number of Tasks to use for parsing Regex")]
+        [Range(1, 1000)]
+        public int Threads { get; private set; } = Defaults.CHANNELS;
+
+        [CommandLineOption("?", "h", "help", Description = "Help for the command line arguments", Exclusive = true)]
+        private void ShowUsage()
         {
-            if (!int.TryParse(value, out int i))
-                throw new ArgumentException("Value must be a number");
+            var options = new List<CommandLineOption>(CommandLineProcessor.CLI_OPTIONS);
+            options.Insert(0, new CommandLineOption("input", "One or more input file paths"));
 
-            if (i < min)
-                throw new ArgumentException($"Value cannot be less than {min}");
-
-            if (i > max)
-                throw new ArgumentException($"Value cannot be more than {max}");
-
-            return i;
-        }
-
-        #endregion
-        #region Setters
-
-        internal Writer? Set(IReadOnlyCollection<string> args, string input) => input switch {
-            "--recursive"
-                => this.SetRecursion(),
-            "-o" or "--output"
-                => this.SetOutputPath(),
-            "-r" or "--report"
-                => this.SetReportPath(),
-            "-y" or "--yes"
-                => this.SetSkipPrompts(),
-            "-v" or "--version"
-                => args.Count > 1 ? throw new ArgumentException($"'{input}' must be the only argument when it is used") : this.ShowVersion(),
-            "-?" or "-h" or "--help"
-                => args.Count > 0 ? throw new ArgumentException($"'{input}' must be the only argument when it is used") : this.ShowUsage(),
-            "--debug"
-                => this.SetDebug(),
-            "-q" or "--quiet"
-                => this.SetQuiet(),
-            "--threads"
-                => this.SetThreads(),
-            _ => throw new ArgumentException($"Unexpected option '{input}'")
-        };
-
-        private Writer? SetRecursion()
-        {
-            this.OperateRecursively = true;
-            return null;
-        }
-
-        private Writer? SetOutputPath()
-        {
-            return value => this.OutputFilePath = value;
-        }
-
-        private Writer? SetReportPath()
-        {
-            return value => this.ReportFilePath = value;
-        }
-
-        private Writer? SetSkipPrompts()
-        {
-            this.SkipPrompts = true;
-            return null;
-        }
-
-        private Writer? SetDebug()
-        {
-            this.Debug = true;
-            return null;
-        }
-
-        private Writer? SetQuiet()
-        {
-            this.Quiet = true;
-            return null;
-        }
-
-        private Writer? SetThreads()
-        {
-            return value => this.Threads = this.ParseInt(value, min: 1, max: 1000);
-        }
-
-        private Writer? ShowUsage()
-        {
             var assembly = Assembly.GetExecutingAssembly();
-            Console.WriteLine($"""
-                Syntax: {assembly.GetName().Name} -?
-                Syntax: {assembly.GetName().Name} -v
-                Syntax: {assembly.GetName().Name} <input [input...]> [-o output] [-r report]
-                
-                --help, -h, -?       Help for the command line arguments
-                -v                   Prints the application version
-                
-                input                One or more input file paths
-                -o output            File path to write output file
-                -r report            File path to write report file
-                
-                --debug              Enables debug mode, prints timings and exceptions
-                --threads #          Specifies the number of Tasks to use for parsing Regex
-                --recursive          Recursively enters directories provided to search for files
-                --yes, -y            Skips any prompts asking to continue
-                --quiet, -q          Runs in quiet mode, not as verbose
+            var output = new StringBuilder($"""
+            Syntax: {assembly.GetName().Name} -?
+            Syntax: {assembly.GetName().Name} -v
+            Syntax: {assembly.GetName().Name} <input [input...]> [-o output] [-r report]
             """);
 
-            return null;
+            var pairs = options.ToDictionary(key => key.JoinArgs(), val => val.Description);
+            var pad = pairs.Keys.Max(key => key.Length) + 3;
+
+            // Spacing
+            output.AppendLine()
+                .AppendLine();
+
+            foreach ((string key, string value) in pairs)
+                output.AppendLine($"  {key.PadRight(pad)}{value}");
+
+            Console.WriteLine(output);
         }
 
-        private Writer? ShowVersion()
+        [CommandLineOption("v", "version", Description = "Prints the application version", Exclusive = true)]
+        private void ShowVersion()
         {
             var assembly = Assembly.GetExecutingAssembly();
             Console.WriteLine(assembly.GetName().Version);
-
-            return null;
         }
 
         #endregion
@@ -204,6 +148,7 @@ namespace MyAddressExtractor.Objects {
 
             public const bool OPERATE_RECURSIVELY = false;
             public const bool SKIP_PROMPTS = false;
+            public const bool SKIP_EXCEPTIONS = false;
 
             public const int CHANNELS = 4;
 
