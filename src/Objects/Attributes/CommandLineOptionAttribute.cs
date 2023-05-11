@@ -141,7 +141,7 @@ namespace MyAddressExtractor.Objects.Attributes {
             if (type.IsEnum) {
                 return input => {
                     if (!Enum.TryParse(type, input, ignoreCase: true, out object? value))
-                        throw new ArgumentException("");
+                        throw new ArgumentException($"Invalid value \"{input}\"");
 
                     property.SetValue(config, value);
                 };

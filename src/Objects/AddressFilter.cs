@@ -12,6 +12,12 @@ namespace MyAddressExtractor.Objects {
             /// <summary>A Name for the Filter, which is added to the Debug Stack when run</summary>
             public abstract string Name { get; }
 
+            /// <summary>Runtime </summary>
+            public required Runtime Runtime { get; set; }
+
+            /// <summary>The CLI input configuration</summary>
+            public Config Config => this.Runtime.Config;
+
             public virtual Result ValidateEmailAddress(ref EmailAddress address)
                 => Result.CONTINUE;
 

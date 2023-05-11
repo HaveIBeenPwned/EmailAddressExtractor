@@ -42,7 +42,7 @@ namespace MyAddressExtractor
 
             try
             {
-                var runtime = new Runtime();
+                var runtime = new Runtime(config);
                 var files = new FileCollection(runtime, inputFilePaths);
 
                 if (!runtime.WaitInput(files))

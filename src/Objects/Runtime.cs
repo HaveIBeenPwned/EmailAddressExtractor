@@ -94,7 +94,12 @@ namespace MyAddressExtractor.Objects {
             foreach (Type type in types)
             {
                 if (Activator.CreateInstance(type) is AddressFilter.BaseFilter filter)
+                {
+                    var property = type.GetProperty(nameof(AddressFilter.BaseFilter.Runtime));
+                    property!.SetValue(filter, this);
+
                     filters.Add(filter);
+                }
             }
 
             return filters;
@@ -169,7 +174,7 @@ namespace MyAddressExtractor.Objects {
             {
                 if (type.GetCustomAttribute<ExtensionTypesAttribute>() is {} attribute)
                 {
-                    var parsing = new FileExtensionParsing(type);
+                    var parsing = new FileExtensionParsing(this, type);
 
                     // Use the setter to override any other instances
                     foreach (string extension in attribute.Extensions)

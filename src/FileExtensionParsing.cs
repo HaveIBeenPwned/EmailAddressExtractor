@@ -1,4 +1,5 @@
 using System.Reflection;
+using MyAddressExtractor.Objects;
 using MyAddressExtractor.Objects.Readers;
 
 namespace MyAddressExtractor {
@@ -10,9 +11,9 @@ namespace MyAddressExtractor {
         private ReaderDelegate? Reader { get; init; } = null;
 
         public FileExtensionParsing() {}
-        public FileExtensionParsing(Type type)
+        public FileExtensionParsing(Runtime runtime, Type type)
         {
-            this.Reader = FileExtensionParsing.CreateInstance(type);
+            this.Reader = FileExtensionParsing.CreateInstance(runtime, type);
         }
 
         public ILineReader GetReader(string path)
@@ -24,16 +25,11 @@ namespace MyAddressExtractor {
 
         #region Static Accessors
 
-        private static ReaderDelegate CreateInstance(Type type)
+        private static ReaderDelegate CreateInstance(Runtime runtime, Type type)
         {
-            ConstructorInfo? info = type.GetConstructor(new []{ typeof(string) });
+            ConstructorInfo? info = type.GetConstructorWithTypes(typeof(string), typeof(Runtime), typeof(Config));
             if (info is not null)
-                return path => info.Invoke(new object[] { path }) as ILineReader ?? throw new Exception("Failed to construct Reader");
-
-            info = type.GetConstructor(Array.Empty<Type>());
-            if (info is not null)
-                return _ => info.Invoke(Array.Empty<object>()) as ILineReader ?? throw new Exception("Failed to construct Reader");
-
+                return path => info.InvokeMatch(path, runtime, runtime.Config) as ILineReader ?? throw new Exception("Failed to construct Reader");
             throw new NotSupportedException($"Could not find a valid constructor for {type}");
         }
 
