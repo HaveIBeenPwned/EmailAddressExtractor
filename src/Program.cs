@@ -24,10 +24,10 @@ namespace MyAddressExtractor
         {
             IList<string> inputFilePaths;
 
-            CommandLineProcessor config;
+            Config config;
             try
             {
-                config = new CommandLineProcessor(args, out inputFilePaths);
+                config = CommandLineProcessor.Parse(args, out inputFilePaths);
             }
             catch (ArgumentException ae)
             {

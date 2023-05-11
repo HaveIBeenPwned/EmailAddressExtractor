@@ -5,14 +5,14 @@ using MyAddressExtractor.Objects;
 namespace MyAddressExtractor {
     internal sealed class FileCollection : IEnumerable<FileInfo>
     {
-        private readonly CommandLineProcessor Cli;
+        private readonly Config Config;
         private readonly IDictionary<string, FileInfo> Files;
 
         public int Count => this.Files.Count;
 
-        public FileCollection(CommandLineProcessor cli, IEnumerable<string> inputs)
+        public FileCollection(Config config, IEnumerable<string> inputs)
         {
-            this.Cli = cli;
+            this.Config = config;
             this.Files = this.CreateSystemSet();
             foreach (var file in this.GatherFiles(inputs))
                 this.Files[file.FullName] = file;
@@ -25,7 +25,7 @@ namespace MyAddressExtractor {
                 FileAttributes attributes = File.GetAttributes(file);
                 if (attributes.HasFlag(FileAttributes.Directory))
                 {
-                    if (!recursed || this.Cli.OperateRecursively)
+                    if (!recursed || this.Config.OperateRecursively)
                     {
                         foreach (var enumerated in this.GatherFiles(Directory.EnumerateFileSystemEntries(file), recursed: true))
                         {

@@ -7,7 +7,7 @@ using MyAddressExtractor.Objects.Performance;
 
 namespace MyAddressExtractor {
     public class AddressExtractorMonitor : IAsyncDisposable {
-        private readonly CommandLineProcessor Config;
+        private readonly Config Config;
         private readonly Channel<Line> Channel;
         private ChannelReader<Line> Reader => this.Channel.Reader;
         private ChannelWriter<Line> Writer => this.Channel.Writer;
@@ -27,12 +27,12 @@ namespace MyAddressExtractor {
         private readonly Timer Timer;
 
         public AddressExtractorMonitor(
-            CommandLineProcessor config,
+            Config config,
             IPerformanceStack stack
         ): this(config, stack, TimeSpan.FromMinutes(1)) {}
 
         public AddressExtractorMonitor(
-            CommandLineProcessor config,
+            Config config,
             IPerformanceStack stack,
             TimeSpan iterate
         ) {
