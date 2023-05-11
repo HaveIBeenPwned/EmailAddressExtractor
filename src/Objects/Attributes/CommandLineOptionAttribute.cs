@@ -138,10 +138,11 @@ namespace MyAddressExtractor.Objects.Attributes {
                 };
             }
 
-            if (type == typeof(bool)) {
+            if (type == typeof(bool))
+            {
                 var val = property.GetValue(config) as bool?;
-                property.SetValue(config, val is true);
-                
+                property.SetValue(config, val is not true);
+
                 // Bools don't return a writer
                 return null;
             }
