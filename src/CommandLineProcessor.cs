@@ -1,42 +1,37 @@
 ﻿using System.Reflection;
-using System.Threading.Channels;
 using MyAddressExtractor.Objects;
+using MyAddressExtractor.Objects.Attributes;
 
 namespace MyAddressExtractor
 {
     public class CommandLineProcessor
     {
-        #region Config Options
-
-        public string OutputFilePath { get; private set; } = Defaults.OUTPUT_FILE_PATH;
-        public string ReportFilePath { get; private set; } = Defaults.REPORT_FILE_PATH;
-
-        public bool OperateRecursively { get; private set; } = Defaults.OPERATE_RECURSIVELY;
-        public bool SkipPrompts { get; private set; } = Defaults.SKIP_PROMPTS;
-
-        public int Threads { get; private set; } = Defaults.CHANNELS;
-
-        public bool Debug { get; private set; } = Defaults.DEBUG;
-        public bool Quiet { get; private set; } = Defaults.QUIET;
-
-        #endregion
-        #region Runtime
-
-        private readonly UserPromptLock PromptLock;
-        private readonly CancellationTokenSource ProgramCancellation;
-        public CancellationToken CancellationToken => this.ProgramCancellation.Token;
-
-        #endregion
-
-        internal CommandLineProcessor(IReadOnlyCollection<string> args, out IList<string> inputFilePaths)
+        internal static readonly IEnumerable<CommandLineOption> CLI_OPTIONS;
+        static CommandLineProcessor()
         {
-            this.ProgramCancellation = new CancellationTokenSource();
-            this.PromptLock = new UserPromptLock(this.ProgramCancellation);
+            List<CommandLineOption> options = new();
 
+            var methods = typeof(Config).GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            foreach (MemberInfo member in methods) {
+                if (member.GetCustomAttribute<CommandLineOptionAttribute>() is not {} attribute)
+                    continue;
+                if (member is MethodInfo method && method.GetParameters().Length is not 0)
+                    throw new Exception($"Option {method.Name} should not have input parameters");
+
+                options.Add(new CommandLineOption(member, attribute));
+            }
+
+            CommandLineProcessor.CLI_OPTIONS = options.Order(new CommandLineOptionSorter());
+        }
+
+        internal static Config Parse(IReadOnlyCollection<string> args, out IList<string> inputFilePaths)
+        {
             if (args.Count == 0)
                 throw new ArgumentException("Please provide at least one input file path.");
 
-            Action<string>? handle = null;
+            Config config = new();
+            Config.Writer? handle = null;
             string previous = string.Empty;
 
             inputFilePaths = new List<string>();
@@ -60,56 +55,25 @@ namespace MyAddressExtractor
                 else
                 {
                     // Is it an option?
-                    if (arg[0] == '-')
-                    {
-                        if (arg.Length > 1)
-                        {
-                            var option = arg[1..];
-                            switch (option)
-                            {
-                                case "-recursive":
-                                    this.OperateRecursively = true;
-                                    break;
-                                case "o" or "-output":
-                                    handle = value => this.OutputFilePath = value;
-                                    break;
-                                case "r" or "-report":
-                                    handle = value => this.ReportFilePath = value;
-                                    break;
-                                case "y" or "-yes":
-                                    this.SkipPrompts = true;
-                                    break;
-                                case "v" or "-version":
-                                    if (args.Count > 1)
-                                    {
-                                        throw new ArgumentException($"'{arg}' must be the only argument when it is used");
-                                    }
-                                    Version();
-                                    return;
-                                case "?" or "h" or "-help":
-                                    if (args.Count > 1)
-                                    {
-                                        throw new ArgumentException($"'{arg}' must be the only argument when it is used");
-                                    }
-                                    Usage();
-                                    return;
-                                case "-debug":
-                                    this.Debug = true;
-                                    break;
-                                case "q" or "-quiet":
-                                    this.Quiet = true;
-                                    break;
-                                case "-threads":
-                                    handle = value => this.Threads = this.ParseInt(value, min: 1, max: 1000);
-                                    break;
-                                default:
-                                    throw new ArgumentException($"Unexpected option '{arg}'");
-                            }
-                        }
-                        else
-                        {
+                    if (arg.Length > 0 && arg[0] == '-') {
+                        if (arg.Length <= 1)
                             throw new ArgumentException($"Invalid argument '{arg}'");
-                        }
+
+                        CommandLineOption? option = CommandLineProcessor.CLI_OPTIONS.FirstOrDefault(option => option.IsMatch(arg));
+
+                        // Invalid option
+                        if (option is null)
+                            throw new ArgumentException($"Unexpected option '{arg}'");
+
+                        // Exclusive options (eg; -h or -v)
+                        if (option.IsExclusive && args.Count > 1)
+                            throw new ArgumentException($"'{arg}' must be the only argument when it is used");
+
+                        handle = option.Invoke(config);
+
+                        // Return since the option is exclusive
+                        if (option.IsExclusive)
+                            return config;
                     }
                     else // No option or not expecting an option file path, so assume it to be an input file path
                     {
@@ -127,121 +91,36 @@ namespace MyAddressExtractor
             // Make sure we have at least one input file path
             if (inputFilePaths.Count == 0)
                 throw new ArgumentException("No input file paths specified");
+
+            return config;
         }
 
-        public Channel<Line> CreateChannel()
-            => Channel.CreateBounded<Line>(new BoundedChannelOptions(this.Threads * 3) {
-                SingleWriter = true, // Only one instance of `ILineReader` is used at a time
-                SingleReader = false,
-                AllowSynchronousContinuations = false // Require Async
-            });
+        private class CommandLineOptionSorter : IComparer<CommandLineOption> {
+            /// <inheritdoc />
+            public int Compare(CommandLineOption? x, CommandLineOption? y)
+                => x is null || y is null ? 0 : this.Compare(this.GetChar(x), this.GetChar(y));
 
-        #region Parsers
+            private int Compare(char x, char y)
+                => x.CompareTo(y);
 
-        private int ParseInt(string value, int? min = null, int? max = null)
-        {
-            if (!int.TryParse(value, out int i))
-                throw new ArgumentException("Value must be a number");
-
-            if (i < min)
-                throw new ArgumentException($"Value cannot be less than {min}");
-
-            if (i > max)
-                throw new ArgumentException($"Value cannot be more than {max}");
-
-            return i;
-        }
-
-        #endregion
-        #region CLI Waiters
-
-        internal bool WaitInput(FileCollection files)
-        {
-            // If silent output don't prompt
-            if (this.SkipPrompts)
-                return true;
-
-            while (true)
+            private char GetChar(CommandLineOption option)
             {
-                Console.Write("Press ANY KEY to continue ['Q' to Quit; 'I' for info]: ");
-                var read = Console.ReadKey(intercept: true);
-                Console.WriteLine();
+                var c = default(char);
 
-                // No modifiers (shift/ctrl/alt)
-                if (read.Modifiers is 0)
-                {
-                    switch (read.Key)
-                    {
-                        case ConsoleKey.Q:
-                            Output.Write("Exiting");
-                            return false;
-                        case ConsoleKey.I:
-                            Output.Write($"Reading the following {files.Count} files:");
-                            foreach (var file in files)
-                            {
-                                Output.Write($"  [{ByteExtensions.Format(file.Length).PadRight(10)}] {file.FullName}");
-                            }
-                            Console.WriteLine();
-                            continue;
-                        default:
-                            return true;
-                    }
+                foreach (string arg in option.Args) {
+                    if (arg.StartsWith("--"))
+                        c = arg[2];
+                    else if (arg.StartsWith("-"))
+                        c = arg[1];
+                    else
+                        c = arg[0];
+
+                    if (char.IsLetter(c))
+                        return c;
                 }
+
+                return c;
             }
-        }
-
-        internal async ValueTask<bool> WaitOnExceptionAsync(CancellationToken cancellation = default)
-            => this.SkipPrompts // If silent output don't prompt
-            || await this.PromptLock.PromptAsync(cancellation);
-
-        internal Task AwaitContinuationAsync(CancellationToken cancellation = default)
-            => this.PromptLock.WaitAsync(cancellation);
-
-        #endregion
-        #region Special Output
-
-        static void Usage()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            Console.WriteLine($"""
-                Syntax: {assembly.GetName().Name} -?
-                Syntax: {assembly.GetName().Name} -v
-                Syntax: {assembly.GetName().Name} <input [input...]> [-o output] [-r report]
-                
-                --help, -h, -?       Help for the command line arguments
-                -v                   Prints the application version
-                
-                input                One or more input file paths
-                -o output            File path to write output file
-                -r report            File path to write report file
-                
-                --debug              Enables debug mode, prints timings and exceptions
-                --threads #          Specifies the number of Tasks to use for parsing Regex
-                --recursive          Recursively enters directories provided to search for files
-                --yes, -y            Skips any prompts asking to continue
-                --quiet, -q          Runs in quiet mode, not as verbose
-            """);
-        }
-
-        static void Version()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            Console.WriteLine(assembly.GetName().Version);
-        }
-
-        #endregion
-
-        public static class Defaults {
-            public const string OUTPUT_FILE_PATH = "addresses_output.txt";
-            public const string REPORT_FILE_PATH = "report.txt";
-
-            public const bool OPERATE_RECURSIVELY = false;
-            public const bool SKIP_PROMPTS = false;
-
-            public const int CHANNELS = 4;
-
-            public const bool DEBUG = false;
-            public const bool QUIET = false;
         }
     }
 }

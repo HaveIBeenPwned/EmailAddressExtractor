@@ -5,14 +5,15 @@ using MyAddressExtractor.Objects;
 namespace MyAddressExtractor {
     internal sealed class FileCollection : IEnumerable<FileInfo>
     {
-        private readonly CommandLineProcessor Cli;
+        private readonly Runtime Runtime;
+        private Config Config => this.Runtime.Config;
         private readonly IDictionary<string, FileInfo> Files;
 
         public int Count => this.Files.Count;
 
-        public FileCollection(CommandLineProcessor cli, IEnumerable<string> inputs)
+        public FileCollection(Runtime runtime, IEnumerable<string> inputs)
         {
-            this.Cli = cli;
+            this.Runtime = runtime;
             this.Files = this.CreateSystemSet();
             foreach (var file in this.GatherFiles(inputs))
                 this.Files[file.FullName] = file;
@@ -25,7 +26,7 @@ namespace MyAddressExtractor {
                 FileAttributes attributes = File.GetAttributes(file);
                 if (attributes.HasFlag(FileAttributes.Directory))
                 {
-                    if (!recursed || this.Cli.OperateRecursively)
+                    if (!recursed || this.Config.OperateRecursively)
                     {
                         foreach (var enumerated in this.GatherFiles(Directory.EnumerateFileSystemEntries(file), recursed: true))
                         {
@@ -64,7 +65,7 @@ namespace MyAddressExtractor {
             {
                 if (file.Extension is {Length: >0} extension)
                 {
-                    var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(extension.ToLower()));
+                    var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(this.Runtime, extension.ToLower()));
                     info.AddFile(file);
 
                     // Remove ignored files
@@ -80,6 +81,11 @@ namespace MyAddressExtractor {
             {
                 Output.Write($"  {info.Extension.PadRight(6)} {info.Count:n0} files: {ByteExtensions.Format(info.Bytes)}{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
             }
+
+            string output = this.Config.OutputFilePath;
+            string report = this.Config.ReportFilePath;
+            Output.Write($"Output will {(string.IsNullOrWhiteSpace(output) ? "not be saved" : $"be saved to \"{output}\"")}.");
+            Output.Write($"Report will {(string.IsNullOrWhiteSpace(report) ? "not be saved" : $"be saved to \"{report}\"")}.");
         }
 
         /// <inheritdoc />
@@ -97,10 +103,10 @@ namespace MyAddressExtractor {
             public int Count { get; private set; }
             public long Bytes { get; private set; }
 
-            public ExtensionInfo(string extension)
+            public ExtensionInfo(Runtime runtime, string extension)
             {
                 this.Extension = extension;
-                this.Parsing = FileExtensionParsing.Get(extension);
+                this.Parsing = runtime.GetExtension(extension);
             }
 
             public void AddFile(FileInfo info)

@@ -20,14 +20,14 @@ namespace MyAddressExtractor
             InvalidArguments = 2
         }
 
-        static async Task<int> Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
             IList<string> inputFilePaths;
 
-            CommandLineProcessor config;
+            Config config;
             try
             {
-                config = new CommandLineProcessor(args, out inputFilePaths);
+                config = CommandLineProcessor.Parse(args, out inputFilePaths);
             }
             catch (ArgumentException ae)
             {
@@ -42,9 +42,10 @@ namespace MyAddressExtractor
 
             try
             {
-                var files = new FileCollection(config, inputFilePaths);
+                var runtime = new Runtime(config);
+                var files = new FileCollection(runtime, inputFilePaths);
 
-                if (!config.WaitInput(files))
+                if (!runtime.WaitInput(files))
                     return (int)ErrorCode.NoError;
                 Output.Write("Extracting...");
 
@@ -54,21 +55,21 @@ namespace MyAddressExtractor
                 var saveOutput = !string.IsNullOrWhiteSpace(config.OutputFilePath);
                 var saveReport = !string.IsNullOrWhiteSpace(config.ReportFilePath);
 
-                await using (var monitor = new AddressExtractorMonitor(config, perf))
+                await using (var monitor = new AddressExtractorMonitor(runtime, perf))
                 {
                     foreach (var file in files)
                     {
                         try {
-                            await monitor.RunAsync(file, config.CancellationToken);
+                            await monitor.RunAsync(file, runtime.CancellationToken);
                         } catch (OperationCanceledException) {
                             throw;
                         } catch (Exception ex) {
-                            if (config.Debug)
+                            if (runtime.ShouldDebug(ex))
                                 Output.Exception(new Exception($"An error occurred while reading '{file}':", ex));
                             else
                                 Output.Error($"An error occurred while reading '{file}': {ex.Message}");
 
-                            if (ex is not NotImplementedException && !await config.WaitOnExceptionAsync(config.CancellationToken))
+                            if (runtime.ShouldDebug(ex) && !await runtime.WaitOnExceptionAsync())
                                 return (int)ErrorCode.UnspecifiedError;
                         }
                     }

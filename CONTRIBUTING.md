@@ -41,8 +41,9 @@ public sealed class MyFileReader : ILineReader
     private readonly string File;
 
     // A new instance of the reader is constructed for every file.
-    // This allows us to store local variables if need be while reading through the file
-    // We should accept the path here in the constructor, which we'll make use of later
+    //   This allows us to store local variables if need be while reading through the file
+    //   We should accept the path here in the constructor, which we'll make use of later
+    // Reflection will provide a Constructor with a 'string', 'Runtime', or 'Config'
     public MyFileReader(string file)
     {
         // The file when passed into the constructor is a valid system file

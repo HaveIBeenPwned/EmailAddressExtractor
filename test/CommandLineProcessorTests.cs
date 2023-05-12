@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyAddressExtractor;
+using MyAddressExtractor.Objects;
 
 namespace AddressExtractorTest
 {
@@ -15,7 +16,7 @@ namespace AddressExtractorTest
             var args = Array.Empty<string>();
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -25,7 +26,7 @@ namespace AddressExtractorTest
             var args = new[] { "-o", "output" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -35,7 +36,7 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-o" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -45,7 +46,7 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-r" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -55,7 +56,7 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-o", "-r", "report" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -65,7 +66,7 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-r", "-o", "output" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -75,7 +76,7 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -85,7 +86,7 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-z" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         #endregion
@@ -100,7 +101,7 @@ namespace AddressExtractorTest
                 var args = new[] { option };
 
                 // Act and Assert
-                var config = new CommandLineProcessor(args, out _);
+                var config = CommandLineProcessor.Parse(args, out _);
                 // Successful if no exception thrown
             }
         }
@@ -112,7 +113,7 @@ namespace AddressExtractorTest
             var args = new[] { "input", "-?" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -122,7 +123,7 @@ namespace AddressExtractorTest
             var args = new[] { "-?", "input" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         #region Version flag
@@ -137,7 +138,7 @@ namespace AddressExtractorTest
                 var args = new[] { option };
 
                 // Act and Assert
-                var config = new CommandLineProcessor(args, out _);
+                var config = CommandLineProcessor.Parse(args, out _);
                 // Successful if no exception thrown
             }
         }
@@ -149,7 +150,7 @@ namespace AddressExtractorTest
             var args = new[] { "input", "-v" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         [TestMethod]
@@ -159,7 +160,7 @@ namespace AddressExtractorTest
             var args = new[] { "-v", "input" };
 
             // Act and Assert
-            Assert.ThrowsException<ArgumentException>(() => new CommandLineProcessor(args, out _));
+            Assert.ThrowsException<ArgumentException>(() => CommandLineProcessor.Parse(args, out _));
         }
 
         #endregion
@@ -171,7 +172,7 @@ namespace AddressExtractorTest
             var args = new[] { "input", "--debug" };
 
             // Act and Assert
-            var config = new CommandLineProcessor(args, out _);
+            var config = CommandLineProcessor.Parse(args, out _);
             Assert.IsTrue(config.Debug, "Debug mode should be enabled");
         }
 
@@ -185,7 +186,7 @@ namespace AddressExtractorTest
                 var args = new[] { "input", option };
 
                 // Act and Assert
-                var config = new CommandLineProcessor(args, out _);
+                var config = CommandLineProcessor.Parse(args, out _);
                 Assert.IsTrue(config.SkipPrompts, "Skipping prompts should be enabled");
             }
         }
@@ -200,13 +201,13 @@ namespace AddressExtractorTest
             var args = new[] { "input1" };
 
             // Act
-            var config = new CommandLineProcessor(args, out IList<string> inputs);
+            var config = CommandLineProcessor.Parse(args, out IList<string> inputs);
 
             // Assert
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(config.OutputFilePath, CommandLineProcessor.Defaults.OUTPUT_FILE_PATH);
-            Assert.AreEqual(config.ReportFilePath, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
+            Assert.AreEqual(config.OutputFilePath, Config.Defaults.OUTPUT_FILE_PATH);
+            Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
         }
 
         [TestMethod]
@@ -216,14 +217,14 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "input2" };
 
             // Act
-            var config = new CommandLineProcessor(args, out IList<string> inputs);
+            var config = CommandLineProcessor.Parse(args, out IList<string> inputs);
 
             // Assert
             Assert.AreEqual(inputs.Count, 2);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[1]);
-            Assert.AreEqual(config.OutputFilePath, CommandLineProcessor.Defaults.OUTPUT_FILE_PATH);
-            Assert.AreEqual(config.ReportFilePath, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
+            Assert.AreEqual(config.OutputFilePath, Config.Defaults.OUTPUT_FILE_PATH);
+            Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
         }
 
         #endregion
@@ -235,13 +236,13 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-o", "output" };
 
             // Act
-            var config = new CommandLineProcessor(args, out IList<string> inputs);
+            var config = CommandLineProcessor.Parse(args, out IList<string> inputs);
 
             // Assert
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(config.OutputFilePath, args[2]);
-            Assert.AreEqual(config.ReportFilePath, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
+            Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
         }
 
         [TestMethod]
@@ -251,12 +252,12 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-r", "report" };
 
             // Act
-            var config = new CommandLineProcessor(args, out IList<string> inputs);
+            var config = CommandLineProcessor.Parse(args, out IList<string> inputs);
 
             // Assert
             Assert.AreEqual(inputs.Count, 1);
             Assert.AreEqual(inputs[0], args[0]);
-            Assert.AreEqual(config.OutputFilePath, CommandLineProcessor.Defaults.OUTPUT_FILE_PATH);
+            Assert.AreEqual(config.OutputFilePath, Config.Defaults.OUTPUT_FILE_PATH);
             Assert.AreEqual(config.ReportFilePath, args[2]);
         }
 
@@ -267,7 +268,7 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-o", "output", "-r", "report" };
 
             // Act
-            var config = new CommandLineProcessor(args, out IList<string> inputs);
+            var config = CommandLineProcessor.Parse(args, out IList<string> inputs);
 
             // Assert
             Assert.AreEqual(inputs.Count, 1);
@@ -283,7 +284,7 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-r", "report", "-o", "output" };
 
             // Act
-            var config = new CommandLineProcessor(args, out IList<string> inputs);
+            var config = CommandLineProcessor.Parse(args, out IList<string> inputs);
 
             // Assert
             Assert.AreEqual(inputs.Count, 1);
@@ -299,14 +300,14 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "input2", "-o", "output" };
 
             // Act
-            var config = new CommandLineProcessor(args, out IList<string> inputs);
+            var config = CommandLineProcessor.Parse(args, out IList<string> inputs);
 
             // Assert
             Assert.AreEqual(inputs.Count, 2);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[1]);
             Assert.AreEqual(config.OutputFilePath, args[3]);
-            Assert.AreEqual(config.ReportFilePath, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
+            Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
         }
 
         [TestMethod]
@@ -316,14 +317,14 @@ namespace AddressExtractorTest
             var args = new[] { "input1", "-o", "output", "input2" };
 
             // Act
-            var config = new CommandLineProcessor(args, out IList<string> inputs);
+            var config = CommandLineProcessor.Parse(args, out IList<string> inputs);
 
             // Assert
             Assert.AreEqual(inputs.Count, 2);
             Assert.AreEqual(inputs[0], args[0]);
             Assert.AreEqual(inputs[1], args[3]);
             Assert.AreEqual(config.OutputFilePath, args[2]);
-            Assert.AreEqual(config.ReportFilePath, CommandLineProcessor.Defaults.REPORT_FILE_PATH);
+            Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
         }
     }
 }

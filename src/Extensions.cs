@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using MyAddressExtractor.Objects;
 
 namespace MyAddressExtractor {
@@ -56,5 +57,42 @@ namespace MyAddressExtractor {
         /// </summary>
         public static bool NextBool(this Random random)
             => random.NextDouble() >= 0.5d;
+        
+        #region Reflection
+
+        public static ConstructorInfo? GetConstructorWithTypes(this Type type, params Type[] types)
+        {
+            ConstructorInfo? constructor = null;
+            var p = -1;
+
+            foreach (ConstructorInfo info in type.GetConstructors()) {
+                var parameters = info.GetParameters();
+                if (parameters.Length > p && parameters.All(parameter => types.Contains(parameter.ParameterType)))
+                {
+                    constructor = info;
+                    p = parameters.Length;
+                }
+            }
+
+            return constructor;
+        }
+
+        public static object? InvokeMatch(this ConstructorInfo constructor, params object[] values)
+        {
+            var mapped = values.ToDictionary(value => value.GetType());
+            var parameters = constructor.GetParameters();
+            var array = new object[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++) {
+                var parameter = parameters[i];
+                if (!mapped.TryGetValue(parameter.ParameterType, out object? value))
+                    return null;
+
+                array[i] = value;
+            }
+
+            return constructor.Invoke(array);
+        }
+
+        #endregion
     }
 }
