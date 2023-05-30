@@ -70,6 +70,54 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
+        public async Task EmailAddressesInUrlIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "https://example.com/path/test@example.com";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from a URL");
+        }
+
+        [TestMethod]
+        public async Task EmailAddressesStartingWithBackslashIsExtracted()
+        {
+            // Arrange
+            const string INPUT = @"""\test@example.com'";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted when beginning with backslash");
+        }
+
+        [TestMethod]
+        public async Task EmailAddressesStartingWithBacktickIsExtracted()
+        {
+            // Arrange
+            const string INPUT = @"`test@example.com'";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted when beginning with backslash");
+        }
+
+        [TestMethod]
         public async Task EmailAddressesInDoubleQuotesIsExtracted()
         {
             // Arrange
