@@ -45,7 +45,7 @@ namespace MyAddressExtractor.Objects {
                                 // Exit
                                 case ConsoleKey.N:
                                 case ConsoleKey.Escape:
-                                    this.Source.Cancel();
+                                    await this.Source.CancelAsync().ConfigureAwait(false);
                                     return false;
                             }
                         }

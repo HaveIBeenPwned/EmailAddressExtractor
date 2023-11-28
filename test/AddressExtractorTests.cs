@@ -162,7 +162,7 @@ namespace AddressExtractorTest
             """;
 
             var result = await this.ExtractAddressesAsync(INPUT);
-            throw new NotImplementedException($"A proper count from {nameof(result)} needs to be found");
+            Assert.AreEqual(4, result.Count);
         }
 
         [TestMethod]
