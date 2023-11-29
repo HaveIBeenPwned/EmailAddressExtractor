@@ -40,6 +40,22 @@ namespace AddressExtractorTest
             => Assert.IsTrue(await this.IsValidEmailAsync(@"Ima.Fool@example.com"));
 
         [TestMethod]
+        public async Task AliasWithSinglePeriodIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"foo.bar@example.com"));
+
+        [TestMethod]
+        public async Task AliasWithConsecutivePeriodsIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foo..bar@example.com"));
+
+        [TestMethod]
+        public async Task AliasWithPeriodsBeforeAtIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foo.@example.com"));
+
+        [TestMethod]
+        public async Task AliasWithNonConsecutivePeriodsIsValid()
+            => Assert.IsTrue(await this.IsValidEmailAsync(@"f.o.o.b.a.r@example.com"));
+
+        [TestMethod]
         public async Task SingleCharDomainIsValid()
             => Assert.IsTrue(await this.IsValidEmailAsync(@"foobar@x.com"));
 
