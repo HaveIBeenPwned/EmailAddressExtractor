@@ -171,6 +171,10 @@ namespace AddressExtractorTest
         public async Task DomainWithSemicolonIsInvalid()
             => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@ba:r.com"));
 
+        [TestMethod]
+        public async Task DomainWithPercentIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@ba%r.com"));
+
         #endregion
 
         /// <summary>
