@@ -48,12 +48,12 @@ namespace AddressExtractorTest
             => Assert.IsTrue(await this.IsValidEmailAsync(@"foobar@c0m.com"));
 
         [TestMethod]
-        public async Task DomainWithUnderscoreIsValid()
-            => Assert.IsTrue(await this.IsValidEmailAsync(@"foobar@c_m.com"));
+        public async Task DomainWithUnderscoreIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foobar@c_m.com"));
 
         [TestMethod]
-        public async Task DomainWithUnderscoreBeforeTldIsValid()
-            => Assert.IsTrue(await this.IsValidEmailAsync(@"foo@bar_.com"));
+        public async Task DomainWithUnderscoreBeforeTldIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@bar_.com"));
 
         [TestMethod]
         public async Task DomainWithNumbersOnlyIsValid()
