@@ -132,19 +132,19 @@ namespace AddressExtractorTest
             => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@bar"));
 
         [TestMethod]
-        public async Task TldStartingWithNumberIsNotValid()
+        public async Task TldStartingWithNumberIsInvalid()
             => Assert.IsFalse(await this.IsValidEmailAsync("foo@bar.1com"));
 
         [TestMethod]
-        public async Task TldWithOnlyNumbersIsNotValid()
+        public async Task TldWithOnlyNumbersIsInvalid()
             => Assert.IsFalse(await this.IsValidEmailAsync("foo@bar.123"));
 
         [TestMethod]
-        public async Task TldWithOneCharacterIsNotValid()
+        public async Task TldWithOneCharacterIsInvalid()
             => Assert.IsFalse(await this.IsValidEmailAsync("foo@bar.a"));
 
         [TestMethod]
-        public async Task DomainWithUnderscoreOnlyIsNotValid()
+        public async Task DomainWithUnderscoreOnlyIsInalid()
             => Assert.IsFalse(await this.IsValidEmailAsync(@"foobar@_.com"));
 
         #endregion
