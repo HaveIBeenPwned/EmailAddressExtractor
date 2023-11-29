@@ -172,6 +172,10 @@ namespace AddressExtractorTest
             => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@ba\/r.com"));
 
         [TestMethod]
+        public async Task DomainWithBacktickIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@ba`r.com"));
+
+        [TestMethod]
         public async Task DomainWithColonIsInvalid()
             => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@ba:r.com"));
 
