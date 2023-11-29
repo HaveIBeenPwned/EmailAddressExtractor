@@ -151,6 +151,10 @@ namespace AddressExtractorTest
         public async Task DomainWithSpaceIsInvalid()
             => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@bar foo.com"));
 
+        [TestMethod]
+        public async Task DomainWithoutPeriodIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@"foo@barcom"));
+
         #endregion
 
         /// <summary>
