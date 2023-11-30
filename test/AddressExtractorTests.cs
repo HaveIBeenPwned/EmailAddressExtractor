@@ -70,6 +70,22 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
+        public async Task EmailAddressesInSingleQuotesWithTrailingSpaceIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "'test@example.com '";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from single quotes with trailing space");
+        }
+
+        [TestMethod]
         public async Task EmailAddressesInUrlIsExtracted()
         {
             // Arrange
