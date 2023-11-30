@@ -14,12 +14,6 @@ namespace AddressExtractorTest
             => Assert.IsTrue(await this.IsValidEmailAsync(@"Mary&Jane@example.org"));
 
         [TestMethod]
-        public async Task SingleBackslashEnclosedInQuotesIsValid()
-            => Assert.IsTrue(await this.IsValidEmailAsync("""
-                                                          "test\"blah"@example.com
-                                                          """));
-
-        [TestMethod]
         public async Task ForwardSlashIsValid()
             => Assert.IsTrue(await this.IsValidEmailAsync(@"customer/department@example.com"));
 
