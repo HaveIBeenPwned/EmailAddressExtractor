@@ -15,6 +15,19 @@ The regex I've used is as follows: `\b[a-zA-Z0-9\.\-_\+]+@[a-zA-Z0-9\.\-_]+\.[a-
 
 [Email address validation via regex is hard](https://www.troyhunt.com/dont-trust-net-web-forms-email-regex/), but it also doesn't need to be perfect for this use case. False positives are extremely rare and the impact is negligible, namely that a string that isn't a genuine address gets loaded into HIBP *or* a genuine address of an unusual format gets loaded. For the most part, this regex can be summarised as "stuff either side of an @ symbol with a TLD of alphas characters".
 
+# Practical Considerations
+
+Inevitably discussion has led to compliance with RFC versus the practical uses of certain characters when considering parsing rules. There are 2 primary considerations here:
+
+1. Where the RFC allows a character such as a double quote, it should be considered a valid character and permitted in addresses
+2. A character such as a double quote is more likely to be present as the result of a parsing error rather than legitimate use
+
+Anecdotally, point 1 is rarely ever true in comparison to point 2. The impact of falsely rejecting a legitimate spec-compliant address is that it doesn't end up in HIBP (i.e. low impact). The impact of allowing addresses that don't actually exist is that junk records are introduced into HIBP (also low impact). Especially when considering the likelihood of an address with obscure characters being practically used (for example, accepted into a registration form and not rejected), on balance it is preferable to reject characters that are likely the result of parsing errors.
+
+1. When extracting addresses 
+
+Realistically, obscure patterns are unlikely to be used in email addresses
+
 # Contributions
 
 [I've reached out and asked for support](https://twitter.com/troyhunt/status/1637966167548780544) and will get things kicked off via one or two key people then seek broader input. I'm particularly interested in optimising the service across larger data sets and non text-based files, especially with the uptick of documents being dumped by ransomware crews. I'll start creating issues for the bits that need building.
