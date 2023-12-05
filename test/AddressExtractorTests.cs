@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyAddressExtractor;
 using MyAddressExtractor.Objects;
+using MyAddressExtractor.Objects.Filters;
 
 namespace AddressExtractorTest
 {
@@ -261,7 +262,7 @@ namespace AddressExtractorTest
         public async Task AliasOf64CharsIsValid()
         {
             // Arrange
-            var ALIAS = new string('a', 64);
+            var ALIAS = new string('a', LengthFilter.ALIAS_LENGTH);
             var INPUT = $"{ALIAS}@example.com";
 
             // Act
@@ -275,7 +276,7 @@ namespace AddressExtractorTest
         public async Task AliasLongerThan64CharsIsInvalid()
         {
             // Arrange
-            var ALIAS = new string('a', 65);
+            var ALIAS = new string('a', LengthFilter.ALIAS_LENGTH + 1);
             var INPUT = $"{ALIAS}@example.com";
 
             // Act
