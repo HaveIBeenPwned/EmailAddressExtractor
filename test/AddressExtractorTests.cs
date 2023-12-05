@@ -258,6 +258,34 @@ namespace AddressExtractorTest
         }
 
         [TestMethod]
+        public async Task AliasOf64CharsIsValid()
+        {
+            // Arrange
+            var ALIAS = new string('a', 64);
+            var INPUT = $"{ALIAS}@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            // Assert
+            Assert.IsTrue(result.Count == 1, "One result should be returned");
+        }   
+        
+        [TestMethod]
+        public async Task AliasLongerThan64CharsIsInvalid()
+        {
+            // Arrange
+            var ALIAS = new string('a', 65);
+            var INPUT = $"{ALIAS}@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            // Assert
+            Assert.IsTrue(result.Count == 0, "No results should be returned");
+        }
+
+        [TestMethod]
         [Ignore("The loose address matching captures this as a valid address, TBD if it should be valid or not")]
         public async Task WeirdAddressTesting()
         {
