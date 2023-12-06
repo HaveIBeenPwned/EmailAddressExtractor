@@ -343,6 +343,9 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
+# Launch settings for Visual Studio
+launchSettings.json
+
 # BeatPulse healthcheck temp database
 healthchecksdb
 
