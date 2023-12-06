@@ -1,4 +1,4 @@
-namespace MyAddressExtractor.Objects.Filters {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
     public sealed class QuotesFilter : AddressFilter.BaseFilter {
         private static readonly object[] JUNK_CHARS = { '"', '\'', "\\\"" };
 

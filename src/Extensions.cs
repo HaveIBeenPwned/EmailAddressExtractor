@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Reflection;
-using MyAddressExtractor.Objects;
+using HaveIBeenPwned.AddressExtractor.Objects;
 
-namespace MyAddressExtractor {
+namespace HaveIBeenPwned.AddressExtractor {
     public static class Extensions {
         public static void AddAll<TKey, TVal>(this IDictionary<TKey, TVal> dictionary, IEnumerable<TKey> keys, TVal value)
         {

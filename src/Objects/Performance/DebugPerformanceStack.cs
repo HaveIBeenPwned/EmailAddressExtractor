@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace MyAddressExtractor.Objects.Performance {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Performance {
     public sealed class DebugPerformanceStack : IPerformanceStack {
         private readonly DebugPerformanceStack? Parent;
         private readonly NodeAverage Node;

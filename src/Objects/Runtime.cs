@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Reflection;
-using MyAddressExtractor.Objects.Attributes;
-using MyAddressExtractor.Objects.Readers;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects.Readers;
 
-namespace MyAddressExtractor.Objects {
+namespace HaveIBeenPwned.AddressExtractor.Objects {
     public sealed class Runtime {
         /// <summary>The Runtime Configuration</summary>
         public readonly Config Config;

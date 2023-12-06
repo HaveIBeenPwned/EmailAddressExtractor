@@ -3,9 +3,9 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
-using MyAddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
-namespace MyAddressExtractor.Objects {
+namespace HaveIBeenPwned.AddressExtractor.Objects {
     public sealed class Config {
         #region Options
 

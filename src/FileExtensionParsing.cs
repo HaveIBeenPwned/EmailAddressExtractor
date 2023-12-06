@@ -1,8 +1,8 @@
 using System.Reflection;
-using MyAddressExtractor.Objects;
-using MyAddressExtractor.Objects.Readers;
+using HaveIBeenPwned.AddressExtractor.Objects;
+using HaveIBeenPwned.AddressExtractor.Objects.Readers;
 
-namespace MyAddressExtractor {
+namespace HaveIBeenPwned.AddressExtractor {
     internal sealed class FileExtensionParsing
     {
         public bool Read => this.Error is null;

@@ -1,4 +1,4 @@
-namespace MyAddressExtractor.Objects {
+namespace HaveIBeenPwned.AddressExtractor.Objects {
     public enum Result
     {
         /// <summary>Your <see cref="AddressFilter.BaseFilter"/> is certain the the <see cref="EmailAddress"/> is VALID</summary>

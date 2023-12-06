@@ -1,6 +1,6 @@
-using MyAddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
-namespace MyAddressExtractor.Objects.Filters {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
     [AddressFilter(Priority = 900)]
     public sealed class DomainFilter : AddressFilter.BaseFilter {
         public override string Name => "Domain filter";

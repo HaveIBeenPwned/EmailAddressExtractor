@@ -1,4 +1,4 @@
-namespace MyAddressExtractor.Objects.Readers {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Readers {
     public interface ILineReader : IAsyncDisposable
     {
         /// <summary>Read and return string segments to be checked for email addresses</summary>

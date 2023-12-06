@@ -1,10 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
-using MyAddressExtractor.Objects;
-using MyAddressExtractor.Objects.Performance;
+using HaveIBeenPwned.AddressExtractor.Objects;
+using HaveIBeenPwned.AddressExtractor.Objects.Performance;
 
 [assembly:InternalsVisibleTo("AddressExtractorTest")]
 
-namespace MyAddressExtractor
+namespace HaveIBeenPwned.AddressExtractor
 {
     public class Program
     {

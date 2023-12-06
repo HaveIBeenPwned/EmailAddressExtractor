@@ -1,4 +1,4 @@
-namespace MyAddressExtractor.Objects.Attributes {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Attributes {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public sealed class ExtensionTypesAttribute : Attribute
     {

@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace MyAddressExtractor.Objects.Filters {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
     public sealed class TldFilter : AddressFilter.BaseFilter {
         private const string IANA = "https://data.iana.org/TLD/tlds-alpha-by-domain.txt";
         private const string PATH = "tld.json";

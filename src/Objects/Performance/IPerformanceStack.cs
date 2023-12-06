@@ -1,4 +1,4 @@
-namespace MyAddressExtractor.Objects.Performance {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Performance {
     /// <summary>
     /// A performance stack object for debugging performance
     /// </summary>

@@ -1,4 +1,4 @@
-namespace MyAddressExtractor.Objects {
+namespace HaveIBeenPwned.AddressExtractor.Objects {
     public enum Bytes
     {
         BYTE = 0,

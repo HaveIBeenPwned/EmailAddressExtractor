@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace MyAddressExtractor.Objects {
+namespace HaveIBeenPwned.AddressExtractor.Objects {
     public struct EmailAddress
     {
         private readonly Match Match;

@@ -2,7 +2,7 @@ using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Xml;
 
-namespace MyAddressExtractor.Objects.Readers
+namespace HaveIBeenPwned.AddressExtractor.Objects.Readers
 {
     internal abstract class CompressedXmlReader : ILineReader
     {
@@ -22,7 +22,7 @@ namespace MyAddressExtractor.Objects.Readers
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (IsMatch(entry.FullName))
+                    if (this.IsMatch(entry.FullName))
                     {
                         XmlReaderSettings settings = new XmlReaderSettings();
                         settings.Async = true;

@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using MyAddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
-namespace MyAddressExtractor.Objects.Readers
+namespace HaveIBeenPwned.AddressExtractor.Objects.Readers
 {
     /// <summary>Open Office XML - ISO 29500</summary>
     [ExtensionTypes(".docx", ".pptx")]
