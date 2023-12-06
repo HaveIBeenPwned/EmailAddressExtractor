@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace MyAddressExtractor.Objects
+namespace HaveIBeenPwned.AddressExtractor.Objects
 {
     public static class Output
     {

@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.Threading;
 
-namespace MyAddressExtractor.Objects {
+namespace HaveIBeenPwned.AddressExtractor.Objects {
     internal sealed class UserPromptLock {
         /// <summary>A Semaphore with a single handle, so multiple Tasks cannot prompt</summary>
         private readonly SemaphoreSlim Semaphore = new(1);

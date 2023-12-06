@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace MyAddressExtractor.Objects.Attributes {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Attributes {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     internal sealed class CommandLineOptionAttribute : Attribute
     {

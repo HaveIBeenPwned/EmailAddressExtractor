@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>11</LangVersion>
-    <RootNamespace>MyAddressExtractor</RootNamespace>
+    <RootNamespace>HaveIBeenPwned.AddressExtractor</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

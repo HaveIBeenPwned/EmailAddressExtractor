@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Concurrent;
-using MyAddressExtractor.Objects;
+using HaveIBeenPwned.AddressExtractor.Objects;
 
-namespace MyAddressExtractor {
+namespace HaveIBeenPwned.AddressExtractor {
     internal sealed class FileCollection : IEnumerable<FileInfo>
     {
         private readonly Runtime Runtime;

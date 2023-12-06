@@ -1,11 +1,11 @@
-namespace MyAddressExtractor.Objects {
+namespace HaveIBeenPwned.AddressExtractor.Objects {
     public enum TimeUnit : long {
         MICROSECONDS = 1,
-        MILLISECONDS = MICROSECONDS * 1000,
-        SECONDS = MILLISECONDS * 1000,
-        MINUTES = SECONDS * 60,
-        HOURS = MINUTES * 60,
-        DAYS = HOURS * 24
+        MILLISECONDS = TimeUnit.MICROSECONDS * 1000,
+        SECONDS = TimeUnit.MILLISECONDS * 1000,
+        MINUTES = TimeUnit.SECONDS * 60,
+        HOURS = TimeUnit.MINUTES * 60,
+        DAYS = TimeUnit.HOURS * 24
     }
 
     public static class TimeUnitExtensions

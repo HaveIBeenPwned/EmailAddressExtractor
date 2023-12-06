@@ -1,9 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyAddressExtractor;
-using MyAddressExtractor.Objects;
-using MyAddressExtractor.Objects.Filters;
+﻿using HaveIBeenPwned.AddressExtractor.Objects;
+using HaveIBeenPwned.AddressExtractor.Objects.Filters;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AddressExtractorTest
+namespace HaveIBeenPwned.AddressExtractor.Tests
 {
     [TestClass]
     public class AddressExtractorTests

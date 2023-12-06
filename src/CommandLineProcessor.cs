@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
-using MyAddressExtractor.Objects;
-using MyAddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
-namespace MyAddressExtractor
+namespace HaveIBeenPwned.AddressExtractor
 {
     public class CommandLineProcessor
     {

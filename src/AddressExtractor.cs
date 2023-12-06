@@ -1,10 +1,10 @@
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using MyAddressExtractor.Objects;
-using MyAddressExtractor.Objects.Performance;
-using MyAddressExtractor.Objects.Readers;
+using HaveIBeenPwned.AddressExtractor.Objects;
+using HaveIBeenPwned.AddressExtractor.Objects.Performance;
+using HaveIBeenPwned.AddressExtractor.Objects.Readers;
 
-namespace MyAddressExtractor
+namespace HaveIBeenPwned.AddressExtractor
 {
     public partial class AddressExtractor
     {

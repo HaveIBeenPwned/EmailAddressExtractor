@@ -1,6 +1,6 @@
-using MyAddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
-namespace MyAddressExtractor.Objects {
+namespace HaveIBeenPwned.AddressExtractor.Objects {
     public sealed class AddressFilter {
         /// <summary>
         /// A base class for checking whether an Email Address should be filtered out

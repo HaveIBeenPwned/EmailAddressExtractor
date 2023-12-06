@@ -1,8 +1,8 @@
 using System.Runtime.CompilerServices;
 using System.Text;
-using MyAddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
-namespace MyAddressExtractor.Objects.Readers {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Readers {
     [ExtensionTypes(".log", ".json", ".txt", ".sql", ".xml", ".sample", ".csv", ".tsv")]
     internal sealed class PlainTextReader : ILineReader
     {

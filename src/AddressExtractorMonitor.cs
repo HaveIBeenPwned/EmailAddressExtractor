@@ -2,10 +2,10 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Channels;
-using MyAddressExtractor.Objects;
-using MyAddressExtractor.Objects.Performance;
+using HaveIBeenPwned.AddressExtractor.Objects;
+using HaveIBeenPwned.AddressExtractor.Objects.Performance;
 
-namespace MyAddressExtractor {
+namespace HaveIBeenPwned.AddressExtractor {
     public class AddressExtractorMonitor : IAsyncDisposable {
         private readonly Runtime Runtime;
         private Config Config => this.Runtime.Config;

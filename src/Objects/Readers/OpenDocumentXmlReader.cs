@@ -1,6 +1,6 @@
-using MyAddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
-namespace MyAddressExtractor.Objects.Readers
+namespace HaveIBeenPwned.AddressExtractor.Objects.Readers
 {
     /// <summary>Open Document - ISO 26300</summary>
     [ExtensionTypes(".odt")]

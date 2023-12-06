@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using MyAddressExtractor.Objects.Attributes;
+using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
-namespace MyAddressExtractor.Objects.Filters {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
     [AddressFilter(Priority = 990)]
     public sealed partial class StrictMatchFilter : AddressFilter.BaseFilter
     {

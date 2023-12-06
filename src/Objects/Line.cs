@@ -1,4 +1,4 @@
-namespace MyAddressExtractor.Objects
+namespace HaveIBeenPwned.AddressExtractor.Objects
 {
     /// <summary>
     /// A line read from a file
