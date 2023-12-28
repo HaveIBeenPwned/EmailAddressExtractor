@@ -1,13 +1,20 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 using HaveIBeenPwned.AddressExtractor.Objects.Readers;
+using Microsoft.VisualStudio.Threading;
 
 namespace HaveIBeenPwned.AddressExtractor.Objects {
     public sealed class Runtime {
         /// <summary>The Runtime Configuration</summary>
         public readonly Config Config;
+
+        /// <summary>The options for reading/writing Json</summary>
+        public readonly JsonSerializerOptions Json;
 
         /// <summary>Filters created for filtering <see cref="EmailAddress"/>es</summary>
         public readonly IEnumerable<AddressFilter.BaseFilter> Filters;
@@ -15,6 +22,8 @@ namespace HaveIBeenPwned.AddressExtractor.Objects {
         /// <summary>File Extension Parsers created for Reading file types</summary>
         private readonly IReadOnlyDictionary<string, FileExtensionParsing> FileExtensions;
         private readonly FileExtensionParsing UnknownFileExtension = new() { Error = "Unknown Extension" };
+
+        private readonly JoinableTaskFactory TaskFactory;
 
         #region Asynchronous Waiting
 
@@ -32,6 +41,26 @@ namespace HaveIBeenPwned.AddressExtractor.Objects {
             this.Config = config ?? new Config();
             this.Filters = this.CreateFilters();
             this.FileExtensions = this.CreateExtensions();
+
+            this.TaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
+
+            this.Json = new JsonSerializerOptions {
+                // Use 'unsafe' Json parsing (We're not worried about dirty json as a client)
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                AllowTrailingCommas = true,
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                
+                // Numbers can be read from strings or floating points
+                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals,
+                
+                // Don't need to write indented to files
+                WriteIndented = false,
+                
+                // Don't leave out any C# object members
+                IncludeFields = true,
+                IgnoreReadOnlyFields = false,
+                IgnoreReadOnlyProperties = false
+            };
         }
 
         #region CLI Waiters
@@ -82,6 +111,13 @@ namespace HaveIBeenPwned.AddressExtractor.Objects {
             => this.PromptLock.WaitAsync(cancellation);
 
         #endregion
+        #region Tasks
+
+        public JoinableTask<T> ExecuteAsync<T>(Func<Task<T>> func) {
+            return this.TaskFactory.RunAsync(func);
+        }
+
+        #endregion
         #region Filters
 
         private FilterCollection CreateFilters()
@@ -97,7 +133,6 @@ namespace HaveIBeenPwned.AddressExtractor.Objects {
                 {
                     var property = type.GetProperty(nameof(AddressFilter.BaseFilter.Runtime));
                     property!.SetValue(filter, this);
-
                     filters.Add(filter);
                 }
             }
