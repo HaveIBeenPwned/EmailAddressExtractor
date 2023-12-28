@@ -2,19 +2,23 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.VisualStudio.Threading;
 
 namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
     public sealed class TldFilter : AddressFilter.BaseFilter {
         private const string IANA = "https://data.iana.org/TLD/tlds-alpha-by-domain.txt";
         private const string PATH = "tld.json";
 
+        private readonly IDisposable EmptySetNotice = Output.SingleNotice("Failed to read a set of TLDs from provider IANA, TLD filtering disabled during this run");
+
         public override string Name => "TLD Filter";
 
-        private readonly Task<ISet<string>> List;
+        private readonly Lazy<JoinableTask<ISet<string>>> List;
 
         public TldFilter()
         {
-            this.List = this.FetchAsync(CancellationToken.None);
+            // Wrapped in a Lazy because 'Runtime' is an injected property set after the constructor
+            this.List = new Lazy<JoinableTask<ISet<string>>>(() => this.Runtime!.ExecuteAsync(() => this.FetchAsync(CancellationToken.None)));
         }
 
         /// <inheritdoc />
@@ -23,8 +27,14 @@ namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
 
         private async ValueTask<Result> ValidateDomainAsync(string domain)
         {
-            var list = await this.List;
+            var list = await this.List.Value;
             var tld = domain[(domain.LastIndexOf('.') + 1)..];
+
+            if (list.Count is 0) {
+                this.EmptySetNotice.Dispose();
+                return Result.CONTINUE;
+            }
+
             return this.Continue(list.Contains(tld));
         }
 
@@ -101,17 +111,45 @@ namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
             if (!File.Exists(TldFilter.PATH))
                 return null;
 
-            await using (var filestream = new FileStream(TldFilter.PATH, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous))
-            {
-                return await JsonSerializer.DeserializeAsync<DataSet>(filestream, cancellationToken: cancellation);
+            try {
+                await using (var filestream = new FileStream(TldFilter.PATH, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous))
+                {
+                    return await JsonSerializer.DeserializeAsync<DataSet>(filestream, this.Runtime.Json, cancellation);
+                }
+            } catch (IOException e) {
+                // Reading the cache isn't a huge deal, notify of failure if debugging
+                if (this.Config.Debug)
+                    Output.Exception(new Exception("Failed to read the cached Tld file from disk", e));
+                
+            } catch (JsonException e) {
+                // Reading the cache isn't a huge deal, notify of failure if debugging
+                if (this.Config.Debug)
+                    Output.Exception(new Exception("Failed to parse the cached Tld file on disk", e));
             }
+
+            // Return null that we failed to read the file due to an exception
+            return null;
         }
 
         private async ValueTask WriteFileAsync(DataSet set, CancellationToken cancellation)
         {
-            await using (var filestream = new FileStream(TldFilter.PATH, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
-            {
-                await JsonSerializer.SerializeAsync(filestream, set, cancellationToken: cancellation);
+            try {
+                await using (var filestream = new FileStream(TldFilter.PATH, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
+                {
+                    await JsonSerializer.SerializeAsync(filestream, set, this.Runtime.Json, cancellation);
+                }
+            } catch (IOException e) {
+                if (this.Config.Debug)
+                    Output.Exception(new Exception("Failed to cache IANA-Tlds", e));
+                else
+                    Output.Error($"Failed to cache IANA-Tlds to disk: {e.Message}");
+                
+            } catch (JsonException e) {
+                if (this.Config.Debug)
+                    Output.Exception(new Exception("Failed to cache IANA-Tlds", e));
+                else
+                    Output.Error($"Failed to cache IANA-Tlds due to a Json Exception: {e.Message}");
+                
             }
         }
 
