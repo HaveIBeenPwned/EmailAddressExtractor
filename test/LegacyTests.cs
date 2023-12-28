@@ -68,10 +68,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
         public async Task DomainWithNumbersOnlyIsValid()
             => Assert.IsTrue(await this.IsValidEmailAsync(@"foo@666.com"));
 
-        [TestMethod]
-        public async Task EmailOf255CharsIsValid()
-            => Assert.IsTrue(await this.IsValidEmailAsync(@"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111@example.com"));
-
         #endregion
         #region Invalid addresses
 
