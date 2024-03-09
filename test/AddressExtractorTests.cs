@@ -10,10 +10,23 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
         [TestMethod]
         public async Task CorrectNumberOfAddressesAreExtractedFromFile()
         {
+            var expected = new List<string> {
+                "test1@example.com",
+                "test3@example.com",
+                "test4@example.com",
+                "test-5@example.com",
+                "test+6@example.com",
+                "test_8@example.com",
+                "test.9@example.com",
+                "test&12@example.com",
+                "13@exmple.com",
+                "!test14@example.com",
+                "15@example.com" };
+
             var result = await this.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
 
             // Assert
-            Assert.IsTrue(result.Count == 11, $"11 email addresses should be found, found {result.Count}");
+            Assert.IsTrue(result.Count == 11, $"11 email addresses should be found, found {result.Count}:\n{string.Join("\n", expected.Except(result))}");
         }     
         
         [TestMethod]
