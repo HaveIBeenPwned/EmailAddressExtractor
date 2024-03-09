@@ -26,7 +26,7 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             var result = await this.ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/SingleSmallFile.txt");
 
             // Assert
-            Assert.IsTrue(result.Count == 11, $"11 email addresses should be found, found {result.Count}:\n{string.Join("\n", expected.Except(result))}");
+            Assert.IsTrue(result.Count == 11, $"11 email addresses should be found, result was missing:\n{string.Join("\n", expected.Except(result))}");
         }     
         
         [TestMethod]
@@ -176,6 +176,22 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from escaped double quotes");
+        }
+
+        [TestMethod]
+        public async Task EmailAddressesInQuotesWithLeadingExclamationMarkIsInvalid()
+        {
+            // Arrange
+            const string INPUT = "'!test@example.com'";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from quotes with trailing space");
         }
 
         [TestMethod]
