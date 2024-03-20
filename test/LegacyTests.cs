@@ -129,6 +129,10 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             => Assert.IsFalse(await this.IsValidEmailAsync(@"pootietang.@example.com"));
 
         [TestMethod]
+        public async Task DotBeforeAliasIsInvalid()
+            => Assert.IsFalse(await this.IsValidEmailAsync(@".pootietang@example.com"));
+
+        [TestMethod]
         public async Task DotForAliasIsInvalid()
             => Assert.IsFalse(await this.IsValidEmailAsync(@".@example.com"));
 
