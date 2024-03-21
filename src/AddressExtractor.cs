@@ -93,15 +93,7 @@ namespace HaveIBeenPwned.AddressExtractor
                     if (valid is Result.DENY)
                         continue;
 
-                    yield return address.Full
-                        // Simple cleanups that may be possible via the regex
-                        .Replace("'", string.Empty)
-                        .Replace("!", string.Empty)
-                        .Replace("`", string.Empty)
-                        .Replace("{", string.Empty)
-                        .Replace("#", string.Empty)
-                        .Replace(@"\n", string.Empty)
-                        .Replace("\\\"", string.Empty);
+                    yield return address.Full;
                 }
             }
         }
