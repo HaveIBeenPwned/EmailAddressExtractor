@@ -12,13 +12,14 @@ namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
 
         /// <inheritdoc />
         public override Result ValidateEmailAddress(ref EmailAddress address) {
-            if (
-                ReplaceInvalidFilter.StartsWithCharacter()
-                    .Match(address.Full) is not { Length: > 0 } match
-            ) return Result.CONTINUE;
-
+            Match match = ReplaceInvalidFilter.StartsWithCharacter()
+                .Match(address.Full);
+            
+            if ( match is not { Length: > 0 } )
+                return Result.CONTINUE;
+            
             address.Full = match.Groups[1].Value;
-
+            
             // If the email is now empty, it was only consisting of illegal characters
             return address.Length is 0 ? Result.DENY : Result.REVALIDATE;
 
