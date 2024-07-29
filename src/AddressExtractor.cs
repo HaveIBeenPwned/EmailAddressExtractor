@@ -23,7 +23,7 @@ namespace HaveIBeenPwned.AddressExtractor
         public static partial Regex LooseMatch();
 
         private readonly Runtime Runtime;
-        
+
         public AddressExtractor(Runtime runtime)
         {
             this.Runtime = runtime;
@@ -59,6 +59,11 @@ namespace HaveIBeenPwned.AddressExtractor
             // If line is NULL or any time of whitespace, don't waste computation time searching any empty string
             if (string.IsNullOrWhiteSpace(content))
                 yield break;
+
+            // This should be able to be done via the regex but for now, replace chars that are
+            // causing addresses to be improperly parsed with a space
+            content = content.Replace("=", " ")
+                .Replace("|", " ");
 
             var matches = AddressExtractor.LooseMatch()
                 .Matches(content);
