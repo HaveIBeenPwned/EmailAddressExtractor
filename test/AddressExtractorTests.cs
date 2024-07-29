@@ -195,7 +195,7 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
         }
 
         [TestMethod]
-        public async Task EmailAddressesInExtracted()
+        public async Task EmailAddressesInPipesIsExtracted()
         {
             // Arrange
             const string INPUT = "foo|test@example.com|bar";
