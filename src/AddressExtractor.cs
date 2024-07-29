@@ -105,7 +105,11 @@ namespace HaveIBeenPwned.AddressExtractor
                         .Replace("`", string.Empty)
                         .Replace("{", string.Empty)
                         .Replace("#", string.Empty)
+
+                        // ToDo: This isn't ideal, and seems to be the result of escape chars being double-escaped on file read
                         .Replace(@"\n", string.Empty)
+                        .Replace(@"\r", string.Empty)
+                        .Replace(@"\t", string.Empty)
                         .Replace("\\\"", string.Empty);
                 }
             }

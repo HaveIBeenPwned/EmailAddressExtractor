@@ -227,6 +227,54 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
         }
 
         [TestMethod]
+        public async Task EmailAddressesStartingWithEscapedCarriageReturnlsSignIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "\\rtest@example.com";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after escaped carriage return");
+        }
+
+        [TestMethod]
+        public async Task EmailAddressesStartingWithEscapedNewlinelsSignIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "\\ntest@example.com";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after escaped newline");
+        }
+
+        [TestMethod]
+        public async Task EmailAddressesStartingWithEscapedTablsSignIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "\\ttest@example.com";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after escaped tab");
+        }
+
+        [TestMethod]
         public async Task EmailAddressInQuotesAreExtracted()
         {
             const string INPUT = """
