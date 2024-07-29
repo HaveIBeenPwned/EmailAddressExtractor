@@ -211,6 +211,22 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
         }
 
         [TestMethod]
+        public async Task EmailAddressesAfterEqualsSignIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "username=test@example.com";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after equals sign");
+        }
+
+        [TestMethod]
         public async Task EmailAddressInQuotesAreExtracted()
         {
             const string INPUT = """
