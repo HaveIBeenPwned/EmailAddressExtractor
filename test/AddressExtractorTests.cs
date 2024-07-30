@@ -275,6 +275,22 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
         }
 
         [TestMethod]
+        public async Task EmailAddressesStartingWithNonBreakingUnicodeSpaceIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "\\xa0test@example.com";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after non-breaking unicode space");
+        }
+
+        [TestMethod]
         public async Task EmailAddressInQuotesAreExtracted()
         {
             const string INPUT = """

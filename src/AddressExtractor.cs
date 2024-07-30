@@ -60,10 +60,20 @@ namespace HaveIBeenPwned.AddressExtractor
             if (string.IsNullOrWhiteSpace(content))
                 yield break;
 
-            // This should be able to be done via the regex but for now, replace chars that are
-            // causing addresses to be improperly parsed with a space
+            // ToDo: This should be able to be done via the regex but for now, replace chars that are causing addresses to be improperly parsed with a space
             content = content.Replace("=", " ")
-                .Replace("|", " ");
+                .Replace("|", " ")
+
+                // Encoded angle brackets may have been included
+                .Replace(@"%3c", " ")
+                .Replace(@"%3e", " ")
+
+                // ToDo: This isn't ideal, and seems to be the result of escape chars being double-escaped on file read
+                .Replace(@"\xa0", " ")
+                .Replace(@"\n", " ")
+                .Replace(@"\r", " ")
+                .Replace(@"\t", " ")
+                .Replace("\\\"", " ");
 
             var matches = AddressExtractor.LooseMatch()
                 .Matches(content);
@@ -99,18 +109,12 @@ namespace HaveIBeenPwned.AddressExtractor
                         continue;
 
                     yield return address.Full
-                        // Simple cleanups that may be possible via the regex
+                        // ToDo: Simple cleanups that may be possible via the regex
                         .Replace("'", string.Empty)
                         .Replace("!", string.Empty)
                         .Replace("`", string.Empty)
                         .Replace("{", string.Empty)
-                        .Replace("#", string.Empty)
-
-                        // ToDo: This isn't ideal, and seems to be the result of escape chars being double-escaped on file read
-                        .Replace(@"\n", string.Empty)
-                        .Replace(@"\r", string.Empty)
-                        .Replace(@"\t", string.Empty)
-                        .Replace("\\\"", string.Empty);
+                        .Replace("#", string.Empty);
                 }
             }
         }
