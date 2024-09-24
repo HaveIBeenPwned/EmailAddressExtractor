@@ -10,6 +10,10 @@ namespace HaveIBeenPwned.AddressExtractor.Objects.Filters {
         {
             var domain = address.Domain;
 
+            // Handle domain ending in period
+            if (domain[domain.Length - 1].Equals('.'))
+                return Result.DENY;
+
             // Handle cases such as: foo@bar.1com, foo@bar.12com
             if (char.IsNumber(domain[domain.LastIndexOf('.')+1]))
                 return Result.DENY;
