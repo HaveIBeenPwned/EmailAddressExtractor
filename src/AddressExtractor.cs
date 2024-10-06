@@ -63,6 +63,7 @@ namespace HaveIBeenPwned.AddressExtractor
             // ToDo: This should be able to be done via the regex but for now, replace chars that are causing addresses to be improperly parsed with a space
             content = content.Replace("=", " ")
                 .Replace("|", " ")
+                .Replace("~", " ")
 
                 // Encoded angle brackets may have been included
                 .Replace(@"%3c", " ")

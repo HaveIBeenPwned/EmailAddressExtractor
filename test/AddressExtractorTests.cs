@@ -275,6 +275,22 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
         }
 
         [TestMethod]
+        public async Task EmailAddressesSurroundedWithTildasIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "~test@example.com~";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            result.Add(EXPECTED);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from tildas");
+        }
+
+        [TestMethod]
         public async Task EmailAddressesStartingWithNonBreakingUnicodeSpaceIsExtracted()
         {
             // Arrange
