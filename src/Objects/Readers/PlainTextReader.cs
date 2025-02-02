@@ -3,7 +3,7 @@ using System.Text;
 using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
 namespace HaveIBeenPwned.AddressExtractor.Objects.Readers {
-    [ExtensionTypes(".log", ".json", ".txt", ".sql", ".xml", ".sample", ".csv", ".tsv")]
+    [ExtensionTypes(".log", ".json", ".jsonl", ".txt", ".sql", ".xml", ".sample", ".csv", ".tsv")]
     internal sealed class PlainTextReader : ILineReader
     {
         private readonly FileStream FileStream;
