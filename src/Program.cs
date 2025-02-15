@@ -52,7 +52,8 @@ namespace HaveIBeenPwned.AddressExtractor
 
                 await using (var monitor = new AddressExtractorMonitor(runtime, perf))
                 {
-                    foreach (var file in files)
+                    var fileCount = 0;
+                    foreach (var file in files.OrderBy(f => f.Length))
                     {
                         fileCount++;
                         try {
