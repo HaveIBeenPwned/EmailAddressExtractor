@@ -95,10 +95,12 @@ namespace HaveIBeenPwned.AddressExtractor {
             }
         }
 
-        public async ValueTask RunAsync(FileInfo file, CancellationToken cancellation = default)
+        public async ValueTask RunAsync(int fileCount, FileInfo file, CancellationToken cancellation = default)
         {
             using (var stack = this.Stack.CreateStack("Read file"))
             {
+                Output.Write($"File number {fileCount:n0}");
+
                 var lines = 0;
                 var count = new Count();
 

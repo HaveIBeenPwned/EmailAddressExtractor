@@ -54,8 +54,9 @@ namespace HaveIBeenPwned.AddressExtractor
                 {
                     foreach (var file in files)
                     {
+                        fileCount++;
                         try {
-                            await monitor.RunAsync(file, runtime.CancellationToken);
+                            await monitor.RunAsync(fileCount, file, runtime.CancellationToken);
                         } catch (OperationCanceledException) {
                             throw;
                         } catch (Exception ex) {
