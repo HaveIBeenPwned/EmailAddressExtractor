@@ -125,7 +125,7 @@ namespace HaveIBeenPwned.AddressExtractor {
                                 Number = ++lines
                             }, cancellation);
 
-                            if (!this.Config.Quiet && lines % 25000 is 0)
+                            if (!this.Config.Quiet && lines % 250000 is 0)
                                 Output.Write($"Read {lines:n0} lines from \"{file.Name}\"");
                         }
                     }
