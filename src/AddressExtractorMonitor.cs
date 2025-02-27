@@ -169,7 +169,7 @@ namespace HaveIBeenPwned.AddressExtractor {
             {
                 var reportContent = new StringBuilder("Unique addresses per file:\n");
 
-                foreach ((var file, var count) in this.Files)
+                foreach ((var file, var count) in this.Files.OrderByDescending(f => f.Value.Value))
                 {
                     reportContent.AppendLine($"{file}: {count}");
                 }
