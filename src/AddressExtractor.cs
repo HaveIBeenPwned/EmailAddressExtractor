@@ -12,7 +12,7 @@ namespace HaveIBeenPwned.AddressExtractor
         /// Email Regex pattern with simple checks and no backtrack
         /// </summary>
         [GeneratedRegex(
-            """[\\"']*[a-z0-9\.\-\*!#$%&+=?^_`{|}~\\]+@([a-z0-9\-]+[a-z0-9\-]*\.)+[a-z0-9]{2,}\.?[\\"']*""",
+            """[a-z0-9\.\-+_]+@([a-z0-9\-]+[a-z0-9\-]*\.)+[a-z0-9]{2,}\.?""",
             RegexOptions.ExplicitCapture // Require naming captures; implies '(?:)' on groups. We don't make use of the groups
             | RegexOptions.IgnoreCase // Match upper and lower casing
             | RegexOptions.Compiled // Compile the nodes
@@ -74,7 +74,8 @@ namespace HaveIBeenPwned.AddressExtractor
                 .Replace(@"\n", " ")
                 .Replace(@"\r", " ")
                 .Replace(@"\t", " ")
-                .Replace("\\\"", " ");
+                .Replace("\\\"", " ")
+                .Trim();
 
             var matches = AddressExtractor.LooseMatch()
                 .Matches(content);
