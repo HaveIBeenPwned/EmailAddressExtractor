@@ -149,6 +149,34 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
         }
 
         [TestMethod]
+        public async Task EmailAddressesWithOnlyOpeningDoubleQuoteIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "\"test@example.com";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from opening double quote");
+        }
+
+        [TestMethod]
+        public async Task EmailAddressesWithInDoubleQuotesWithTrailingSpacesIsExtracted()
+        {
+            // Arrange
+            const string INPUT = "\"test@example.com      \"";
+            const string EXPECTED = "test@example.com";
+
+            // Act
+            var result = await this.ExtractAddressesAsync(INPUT);
+
+            // Assert
+            Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from opening double quote");
+        }
+
+        [TestMethod]
         public async Task EmailAddressesInEscapedDoubleQuotesIsExtracted()
         {
             // Arrange
