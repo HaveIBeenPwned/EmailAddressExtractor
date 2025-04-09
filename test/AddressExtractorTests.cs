@@ -60,8 +60,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
 
-            result.Add(EXPECTED);
-
             // Assert
             Assert.IsTrue(result.Count == 1, "Address should always be converted to lowercase");
         }
@@ -75,8 +73,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from single quotes");
@@ -92,8 +88,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
 
-            result.Add(EXPECTED);
-
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from single quotes with trailing space");
         }
@@ -107,8 +101,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from a URL");
@@ -124,8 +116,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
 
-            result.Add(EXPECTED);
-
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted when beginning with backslash");
         }
@@ -139,8 +129,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted when beginning with backslash");
@@ -156,8 +144,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
 
-            result.Add(EXPECTED);
-
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from double quotes");
         }
@@ -171,8 +157,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from escaped double quotes");
@@ -188,8 +172,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
 
-            result.Add(EXPECTED);
-
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from quotes with trailing space");
         }
@@ -203,8 +185,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from pipes");
@@ -220,8 +200,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
 
-            result.Add(EXPECTED);
-
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after equals sign");
         }
@@ -235,8 +213,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after escaped carriage return");
@@ -252,8 +228,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
 
-            result.Add(EXPECTED);
-
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after escaped newline");
         }
@@ -267,8 +241,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after escaped tab");
@@ -284,8 +256,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
 
-            result.Add(EXPECTED);
-
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted from tildas");
         }
@@ -299,8 +269,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Address should be extracted after non-breaking unicode space");
@@ -335,8 +303,6 @@ namespace HaveIBeenPwned.AddressExtractor.Tests
 
             // Act
             var result = await this.ExtractAddressesAsync(INPUT);
-
-            result.Add(EXPECTED);
 
             // Assert
             Assert.AreEqual(EXPECTED, result.First(), "Email should be found");
