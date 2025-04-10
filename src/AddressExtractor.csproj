@@ -2,15 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <LangVersion>11</LangVersion>
     <RootNamespace>HaveIBeenPwned.AddressExtractor</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.8.14" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.13.61" />
   </ItemGroup>
 
 </Project>
