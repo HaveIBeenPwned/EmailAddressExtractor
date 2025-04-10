@@ -2,47 +2,35 @@ using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Xml;
 
-namespace HaveIBeenPwned.AddressExtractor.Objects.Readers
+namespace HaveIBeenPwned.AddressExtractor.Objects.Readers;
+
+internal abstract class CompressedXmlReader(string zipPath) : ILineReader
 {
-    internal abstract class CompressedXmlReader : ILineReader
+    public ValueTask DisposeAsync()
+        => ValueTask.CompletedTask;
+
+    public async IAsyncEnumerable<string?> ReadLineAsync([EnumeratorCancellation] CancellationToken cancellation = default)
     {
-        private readonly string zipPath;
-
-        public CompressedXmlReader(string zipPath)
+        using var archive = ZipFile.OpenRead(zipPath);
+        foreach (var entry in archive.Entries)
         {
-            this.zipPath = zipPath;
-        }
-
-        public ValueTask DisposeAsync()
-            => ValueTask.CompletedTask;
-
-        public async IAsyncEnumerable<string?> ReadLineAsync([EnumeratorCancellation] CancellationToken cancellation = default)
-        {
-            using (ZipArchive archive = ZipFile.OpenRead(this.zipPath))
+            if (IsMatch(entry.FullName))
             {
-                foreach (ZipArchiveEntry entry in archive.Entries)
-                {
-                    if (this.IsMatch(entry.FullName))
-                    {
-                        XmlReaderSettings settings = new XmlReaderSettings();
-                        settings.Async = true;
+                var settings = new XmlReaderSettings();
+                settings.Async = true;
 
-                        using(var reader = XmlReader.Create(entry.Open(), settings))
-                        {
-                            while(await reader.ReadAsync())
-                            {
-                                if (reader.NodeType == XmlNodeType.Text ||
-                                    reader.NodeType == XmlNodeType.CDATA)
-                                {
-                                    yield return await reader.ReadContentAsStringAsync();
-                                }
-                            }
-                        }
+                using var reader = XmlReader.Create(entry.Open(), settings);
+                while (await reader.ReadAsync().ConfigureAwait(false))
+                {
+                    if (reader.NodeType == XmlNodeType.Text ||
+                        reader.NodeType == XmlNodeType.CDATA)
+                    {
+                        yield return await reader.ReadContentAsStringAsync().ConfigureAwait(false);
                     }
                 }
             }
         }
-
-        public abstract bool IsMatch(string entry);
     }
+
+    public abstract bool IsMatch(string entry);
 }

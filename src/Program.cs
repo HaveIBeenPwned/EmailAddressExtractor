@@ -1,114 +1,137 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
+
 using HaveIBeenPwned.AddressExtractor.Objects;
 using HaveIBeenPwned.AddressExtractor.Objects.Performance;
 
-[assembly:InternalsVisibleTo("AddressExtractorTest")]
+[assembly: InternalsVisibleTo("AddressExtractorTest")]
 
-namespace HaveIBeenPwned.AddressExtractor
+namespace HaveIBeenPwned.AddressExtractor;
+
+public class Program
 {
-    public class Program
+    private enum ErrorCode
     {
-        private enum ErrorCode
+        NoError = 0,
+        UnspecifiedError = 1,
+        InvalidArguments = 2
+    }
+
+    public static async Task<int> Main(string[] args)
+    {
+        IList<string> inputFilePaths;
+
+        Config config;
+        try
         {
-            NoError = 0,
-            UnspecifiedError = 1,
-            InvalidArguments = 2
+            config = CommandLineProcessor.Parse(args, out inputFilePaths);
+        }
+        catch (ArgumentException ae)
+        {
+            Output.Exception(ae, trace: false);
+            return (int)ErrorCode.InvalidArguments;
+        }
+        // If no input paths were listed, the usage was printed, so we should exit cleanly
+        if (inputFilePaths.Count == 0)
+        {
+            return (int)ErrorCode.NoError;
         }
 
-        public static async Task<int> Main(string[] args)
+        try
         {
-            IList<string> inputFilePaths;
+            var runtime = new Runtime(config);
+            var files = new FileCollection(runtime, inputFilePaths);
 
-            Config config;
-            try
-            {
-                config = CommandLineProcessor.Parse(args, out inputFilePaths);
-            }
-            catch (ArgumentException ae)
-            {
-                Output.Exception(ae, trace: false);
-                return (int)ErrorCode.InvalidArguments;
-            }
-            // If no input paths were listed, the usage was printed, so we should exit cleanly
-            if (inputFilePaths.Count == 0)
+            if (!runtime.WaitInput(files))
             {
                 return (int)ErrorCode.NoError;
             }
 
-            try
+            Output.Write("Extracting...");
+
+            var perf = config.Debug
+                ? new DebugPerformanceStack() : IPerformanceStack.DEFAULT;
+
+            var saveOutput = !string.IsNullOrWhiteSpace(config.OutputFilePath);
+            var saveReport = !string.IsNullOrWhiteSpace(config.ReportFilePath);
+
+            await using (var monitor = new AddressExtractorMonitor(runtime, perf))
             {
-                var runtime = new Runtime(config);
-                var files = new FileCollection(runtime, inputFilePaths);
-
-                if (!runtime.WaitInput(files))
-                    return (int)ErrorCode.NoError;
-                Output.Write("Extracting...");
-
-                IPerformanceStack perf = config.Debug
-                    ? new DebugPerformanceStack() : IPerformanceStack.DEFAULT;
-
-                var saveOutput = !string.IsNullOrWhiteSpace(config.OutputFilePath);
-                var saveReport = !string.IsNullOrWhiteSpace(config.ReportFilePath);
-
-                await using (var monitor = new AddressExtractorMonitor(runtime, perf))
+                var fileCount = 0;
+                foreach (var file in files.OrderBy(f => f.Length))
                 {
-                    var fileCount = 0;
-                    foreach (var file in files.OrderBy(f => f.Length))
+                    fileCount++;
+                    try
                     {
-                        fileCount++;
-                        try {
-                            await monitor.RunAsync(fileCount, file, runtime.CancellationToken);
-                        } catch (OperationCanceledException) {
-                            throw;
-                        } catch (Exception ex) {
-                            if (runtime.ShouldDebug(ex))
-                                Output.Exception(new Exception($"An error occurred while reading '{file}':", ex));
-                            else
-                                Output.Error($"An error occurred while reading '{file}': {ex.Message}");
-
-                            if (runtime.ShouldDebug(ex) && !await runtime.WaitOnExceptionAsync())
-                                return (int)ErrorCode.UnspecifiedError;
-                        }
+                        await monitor.RunAsync(fileCount, file, runtime.CancellationToken).ConfigureAwait(false);
                     }
-
-                    // Wait for completion
-                    Output.Write("Finished reading files");
-                    await monitor.AwaitCompletionAsync();
-
-                    // Log one last time out of the Timer loop
-                    monitor.Log();
-
-                    if (saveOutput || saveReport)
+                    catch (OperationCanceledException)
                     {
-                        Output.Write("Saving to disk..");
-                        await monitor.SaveAsync(CancellationToken.None);
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (runtime.ShouldDebug(ex))
+                        {
+                            Output.Exception(new IOException($"An error occurred while reading '{file}':", ex));
+                        }
+                        else
+                        {
+                            Output.Error($"An error occurred while reading '{file}': {ex.Message}");
+                        }
+
+                        if (runtime.ShouldDebug(ex) && !await runtime.WaitOnExceptionAsync().ConfigureAwait(false))
+                        {
+                            return (int)ErrorCode.UnspecifiedError;
+                        }
                     }
                 }
 
-                if (saveOutput)
-                    Output.Write($"Addresses saved to {config.OutputFilePath}");
+                // Wait for completion
+                Output.Write("Finished reading files");
+                await monitor.AwaitCompletionAsync().ConfigureAwait(false);
 
-                if (saveReport)
-                    Output.Write($"Report saved to {config.ReportFilePath}");
-            }
-            catch (TaskCanceledException)
-            {
-                return (int)ErrorCode.UnspecifiedError;
-            }
-            catch (OperationCanceledException)
-            {
-                return (int)ErrorCode.UnspecifiedError;
-            }
-            catch (Exception ex)
-            {
-                if (config.Debug)
-                    Output.Exception(ex);
-                else
-                    Output.Error($"An error occurred: {ex.Message}");
-                return (int)ErrorCode.UnspecifiedError;
+                // Log one last time out of the Timer loop
+                monitor.Log();
+
+                if (saveOutput || saveReport)
+                {
+                    Output.Write("Saving to disk..");
+                    await monitor.SaveAsync(CancellationToken.None).ConfigureAwait(false);
+                }
             }
 
-            return (int)ErrorCode.NoError;
+            if (saveOutput)
+            {
+                Output.Write($"Addresses saved to {config.OutputFilePath}");
+            }
+
+            if (saveReport)
+            {
+                Output.Write($"Report saved to {config.ReportFilePath}");
+            }
         }
+        catch (TaskCanceledException)
+        {
+            return (int)ErrorCode.UnspecifiedError;
+        }
+        catch (OperationCanceledException)
+        {
+            return (int)ErrorCode.UnspecifiedError;
+        }
+        catch (Exception ex)
+        {
+            if (config.Debug)
+            {
+                Output.Exception(ex);
+            }
+            else
+            {
+                Output.Error($"An error occurred: {ex.Message}");
+            }
+
+            return (int)ErrorCode.UnspecifiedError;
+        }
+
+        return (int)ErrorCode.NoError;
     }
 }

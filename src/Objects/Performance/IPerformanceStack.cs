@@ -1,33 +1,35 @@
-namespace HaveIBeenPwned.AddressExtractor.Objects.Performance {
+namespace HaveIBeenPwned.AddressExtractor.Objects.Performance;
+
+/// <summary>
+/// A performance stack object for debugging performance
+/// </summary>
+public interface IPerformanceStack : IDisposable
+{
+    static readonly IPerformanceStack DEFAULT = new DefaultPerformanceStack();
+
     /// <summary>
-    /// A performance stack object for debugging performance
+    /// Create a new nested stack
     /// </summary>
-    public interface IPerformanceStack : IDisposable {
-        static readonly IPerformanceStack DEFAULT = new DefaultPerformanceStack();
+    IPerformanceStack CreateStack(string name);
 
-        /// <summary>
-        /// Create a new nested stack
-        /// </summary>
-        IPerformanceStack CreateStack(string name);
+    /// <summary>
+    /// Add a new measured step in the current stack
+    /// </summary>
+    void Step(string name);
 
-        /// <summary>
-        /// Add a new measured step in the current stack
-        /// </summary>
-        void Step(string name);
+    void Log();
 
-        void Log();
+    private sealed class DefaultPerformanceStack : IPerformanceStack
+    {
+        /// <inheritdoc />
+        public IPerformanceStack CreateStack(string name)
+            => this;
 
-        private sealed class DefaultPerformanceStack : IPerformanceStack {
-            /// <inheritdoc />
-            public IPerformanceStack CreateStack(string name)
-                => this;
+        /// <inheritdoc />
+        public void Step(string name) { }
 
-            /// <inheritdoc />
-            public void Step(string name) {}
+        public void Log() { }
 
-            public void Log() {}
-
-            void IDisposable.Dispose() {}
-        }
+        void IDisposable.Dispose() { }
     }
 }
