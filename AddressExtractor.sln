@@ -10,6 +10,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AddressExtractorTest", "test\AddressExtractorTest.csproj", "{45FD58BE-D8C9-4F76-9FF5-CA627FE618C3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{CD880CF9-1A69-40CF-B0BB-DBC4239B833C}"
+	ProjectSection(SolutionItems) = preProject
+		invalid.txt = invalid.txt
+		valid.txt = valid.txt
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SingleFile", "SingleFile", "{0C5E97E8-41CC-4F48-A8EC-F80C94F30D9F}"
 	ProjectSection(SolutionItems) = preProject
@@ -34,6 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global

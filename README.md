@@ -1,5 +1,5 @@
 # The Have I Been Pwned Email Address Extractor
-A project to rapidly extract all email addresses from any files in a given path
+A project to rapidly extract all email addresses from any files in a given path.    
 
 # Background
 
@@ -11,30 +11,49 @@ This project is intended to be a brand new open source version of a basic codeba
 4. Save them to an output file
 5. Create a report of how many unique addresses were in each file
 
-The regex I've used is as follows: `\b[a-zA-Z0-9\.\-_\+]+@[a-zA-Z0-9\.\-_]+\.[a-zA-Z]+\b`
-
-[Email address validation via regex is hard](https://www.troyhunt.com/dont-trust-net-web-forms-email-regex/), but it also doesn't need to be perfect for this use case. False positives are extremely rare and the impact is negligible, namely that a string that isn't a genuine address gets loaded into HIBP *or* a genuine address of an unusual format gets loaded. For the most part, this regex can be summarised as "stuff either side of an @ symbol with a TLD of alphas characters".
-
 # Practical Considerations
 
-Inevitably discussion has led to compliance with RFC versus the practical uses of certain characters when considering parsing rules. There are 2 primary considerations here:
+[Email address validation via regex is hard](https://www.troyhunt.com/dont-trust-net-web-forms-email-regex/), but it also doesn't need to be perfect for this use case. Inevitably, discussion has led to compliance with the RFC versus the practical uses of certain characters when considering parsing rules. Let me explain:
 
-1. Where the RFC allows a character such as a double quote, it should be considered a valid character and permitted in addresses
-2. A character such as a double quote is more likely to be present as the result of a parsing error rather than legitimate use
+1. There is an argument that where the RFC allows a character such as a double quote, it should be considered a valid character and permitted in addresses
+2. However, a character such as a double quote is more likely to be present as the result of a parsing error rather than legitimate use
 
-Anecdotally, point 1 is rarely ever true in comparison to point 2. The impact of falsely rejecting a legitimate spec-compliant address is that it doesn't end up in HIBP (i.e. low impact). The impact of allowing addresses that don't actually exist is that junk records are introduced into HIBP (also low impact). Especially when considering the likelihood of an address with obscure characters being practically used (for example, accepted into a registration form and not rejected), on balance it is preferable to reject characters that are likely the result of parsing errors.
+Anecdotally, point 1 is rarely ever true in comparison to point 2. The impact of falsely rejecting a legitimate spec-compliant address is that it doesn't end up in HIBP (i.e. low impact). The impact of allowing addresses that don't actually exist is that junk records are introduced into HIBP (also low impact). Especially when considering the likelihood of an address with obscure characters being practically used (for example, accepted into a registration form and not rejected), on balance it is preferable to reject characters that are likely the result of parsing errors. Let me rephrase and and reiterate for impact: **the likelihood of an email address containing obscure character patterns and being valid and actively used is so rare that it should be discarded**.
 
-1. When extracting addresses 
+# Email Address Rules
 
-Realistically, obscure patterns are unlikely to be used in email addresses
+After almost two years of iterations on this project, the following rules have been defined. I'll break them into alias and domain as the latter's logic also applies to various locations in the project that only do domain validation (i.e. the domain search feature):
+
+   ## Alias Rules
+    1. Must be between 1 and 64 characters in length
+    2. The only allowable characters are:
+       - Numbers
+       - Letters (case insensitive)
+       - 4 special characters: _-+.
+    3. Cannot start or end with a period
+    4. Cannot have consecutive periods
+
+    ## Domain Rules
+    1. Must be between 4 and 255 characters in length (the shortest possible TLD is 2 characters)
+    2. The only allowable characters are:
+       - Numbers
+       - Letters (case insensitive)
+       - 2 special characters: -.
+    3. Cannot start or end with a period
+    4. Cannot start or end with a hyphen
+    5. Must have at least 1 period
+    6. Cannot have consecutive periods
+    7. Cannot consecutively have a hyphen then a period
+    8, Must have a TLD from the following IANA list: https://data.iana.org/TLD/tlds-alpha-by-domain.txt
+
+This is an easily defineable set of rules that are implemented across the codebase. They are not perfect - they can *never* be perfect - but they strike the best balance between spec-compliant utopia and weeding out the junk.
 
 # Contributions
 
 [I've reached out and asked for support](https://twitter.com/troyhunt/status/1637966167548780544) and will get things kicked off via one or two key people then seek broader input. I'm particularly interested in optimising the service across larger data sets and non text-based files, especially with the uptick of documents being dumped by ransomware crews. I'll start creating issues for the bits that need building.
 
-# Test data
-
-Using Red Gate's SQL Data Generator, [a sample file containing 10M records of typical breach data is available to download from Mega](https://mega.nz/file/Xk91ETzb#UYklfa84pLs5OzrysEGNFVMbFb5OC0KU7rlnugF_Aps). This file results in exactly 10M email addresses being extracted with the current version of this app. Note: the test data file is presently in V2, with the earlier version resulting in slightly less than 10M unique addresses due to the presence of invalid domain name patterns.
+# Test Data
+Using Red Gate's SQL Data Generator, [a sample (archived) file containing 10M records of typical breach data is available](https://pub-3d159fce059f448487157f143a3f94e0.r2.dev/10M.7z). This file results in exactly 10M email addresses being extracted with the current version of this app.
 
 # Running the Address Extractor
 
