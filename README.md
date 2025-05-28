@@ -35,6 +35,7 @@ Realistically, obscure patterns are unlikely to be used in email addresses
 # Test data
 
 Using Red Gate's SQL Data Generator, [a sample file containing 10M records of typical breach data is available to download from Mega](https://mega.nz/file/Xk91ETzb#UYklfa84pLs5OzrysEGNFVMbFb5OC0KU7rlnugF_Aps). This file results in exactly 10M email addresses being extracted with the current version of this app. Note: the test data file is presently in V2, with the earlier version resulting in slightly less than 10M unique addresses due to the presence of invalid domain name patterns.
+Using Red Gate's SQL Data Generator, [a sample (archived) file containing 10M records of typical breach data is available](https://pub-3d159fce059f448487157f143a3f94e0.r2.dev/10M.7z). This file results in exactly 10M email addresses being extracted with the current version of this app.
 
 # Running the Address Extractor
 
