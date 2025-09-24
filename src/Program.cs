@@ -56,7 +56,7 @@ public class Program
 
             await using (var monitor = new AddressExtractorMonitor(runtime, perf))
             {
-                var fileCount = 0;
+                var fileCount = 0L;
                 foreach (var file in files.OrderBy(f => f.Length))
                 {
                     fileCount++;
