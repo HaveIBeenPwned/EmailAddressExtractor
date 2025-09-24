@@ -15,5 +15,5 @@ public struct Line
     public required Count Counter { get; init; }
 
     /// <summary>The current line number</summary>
-    public required int Number { get; init; }
+    public required long Number { get; init; }
 }

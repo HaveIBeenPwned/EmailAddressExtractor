@@ -24,8 +24,8 @@ public class AddressExtractorMonitor : IAsyncDisposable
     protected readonly ConcurrentDictionary<string, byte> Addresses = new(StringComparer.OrdinalIgnoreCase);
 
     // ReadLine count
-    protected int Lines => _lineCounter;
-    private int _lineCounter;
+    protected long Lines => _lineCounter;
+    private long _lineCounter;
 
     protected readonly Stopwatch Stopwatch = Stopwatch.StartNew();
     private readonly Timer _timer;
@@ -113,12 +113,12 @@ public class AddressExtractorMonitor : IAsyncDisposable
         }
     }
 
-    public async ValueTask RunAsync(int fileCount, FileInfo file, CancellationToken cancellation = default)
+    public async ValueTask RunAsync(long fileCount, FileInfo file, CancellationToken cancellation = default)
     {
         using var stack = _stack.CreateStack("Read file");
         Output.Write($"File number {fileCount:n0}");
 
-        var lines = 0;
+        var lines = 0L;
         var count = new Count();
 
         Files.Add(file.FullName, count);
