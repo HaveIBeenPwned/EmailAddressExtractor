@@ -291,6 +291,34 @@ public class AddressExtractorTests
     }
 
     [TestMethod]
+    public void AliasWithDashIsValid()
+    {
+        // Arrange
+        const string INPUT = "foo-bar@example.com";
+
+        // Act
+        var result = AddressExtractor.ExtractAddresses(INPUT);
+
+        // Assert
+        Assert.AreEqual(1, result.Count, "One address should be extracted");
+        Assert.AreEqual(INPUT, result.First(), "Address with dash in alias should be extracted");
+    }
+
+    [TestMethod]
+    public void AliasWithDoubleDashIsValid()
+    {
+        // Arrange
+        const string INPUT = "foo--bar@example.com";
+
+        // Act
+        var result = AddressExtractor.ExtractAddresses(INPUT);
+
+        // Assert
+        Assert.AreEqual(1, result.Count, "One address should be extracted");
+        Assert.AreEqual(INPUT, result.First(), "Address with double dash in alias should be extracted");
+    }
+
+    [TestMethod]
     public void EmailAddressInQuotesAreExtracted()
     {
         const string INPUT = """
