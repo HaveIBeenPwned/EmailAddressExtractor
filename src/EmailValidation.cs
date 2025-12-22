@@ -117,8 +117,8 @@ public static class EmailValidation
                 return false;
             }
 
-            // Can't have two non-alphanumeric characters in a row
-            if (IsNonAlphaCharValidInAlias(alias[i]) && IsNonAlphaCharValidInAlias(alias[i + 1]))
+            // Can't have two periods in a row
+            if (alias[i] == '.' && alias[i + 1] == '.')
             {
                 return false;
             }
