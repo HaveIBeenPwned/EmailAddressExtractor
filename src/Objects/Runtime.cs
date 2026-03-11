@@ -211,13 +211,51 @@ public sealed class Runtime
     }
 
     internal FileExtensionParsing GetExtension(string extension)
-        => FileExtensions.GetValueOrDefault(extension, UnknownFileExtension);
+    {
+        var parsing = FileExtensions.GetValueOrDefault(extension, UnknownFileExtension);
+        
+        // If ProcessAllExtensions is enabled and the extension is unknown, treat it as plain text
+        if (Config.ProcessAllExtensions && !parsing.Read)
+        {
+            // Create a PlainTextReader for unknown extensions
+            var plainTextType = typeof(PlainTextReader);
+            return new FileExtensionParsing(this, plainTextType);
+        }
+        
+        return parsing;
+    }
 
     internal FileExtensionParsing GetExtension(FileInfo info)
-        => FileExtensions.GetValueOrDefault(info.Extension, UnknownFileExtension);
+    {
+        var extension = info.Extension is { Length: > 0 } ? info.Extension : string.Empty;
+        var parsing = FileExtensions.GetValueOrDefault(extension, UnknownFileExtension);
+        
+        // If ProcessAllExtensions is enabled and the extension is unknown, treat it as plain text
+        if (Config.ProcessAllExtensions && !parsing.Read)
+        {
+            // Create a PlainTextReader for unknown extensions
+            var plainTextType = typeof(PlainTextReader);
+            return new FileExtensionParsing(this, plainTextType);
+        }
+        
+        return parsing;
+    }
 
     internal FileExtensionParsing GetExtensionFromPath(string path)
-        => FileExtensions.GetValueOrDefault(Path.GetExtension(path), UnknownFileExtension);
+    {
+        var extension = Path.GetExtension(path);
+        var parsing = FileExtensions.GetValueOrDefault(extension, UnknownFileExtension);
+        
+        // If ProcessAllExtensions is enabled and the extension is unknown, treat it as plain text
+        if (Config.ProcessAllExtensions && !parsing.Read)
+        {
+            // Create a PlainTextReader for unknown extensions
+            var plainTextType = typeof(PlainTextReader);
+            return new FileExtensionParsing(this, plainTextType);
+        }
+        
+        return parsing;
+    }
 
     #endregion
     #region Debugging
