@@ -46,6 +46,10 @@ public sealed class Config
     [Range(1, 1000)]
     public int Threads { get; private set; } = Defaults.CHANNELS;
 
+    /// <summary>If all files should be processed regardless of extension type</summary>
+    [CommandLineOption("processAllExtensions", Description = "Process all files regardless of their extension type")]
+    public bool ProcessAllExtensions { get; private set; } = Defaults.PROCESS_ALL_EXTENSIONS;
+
     [CommandLineOption("?", "h", "help", Description = "Help for the command line arguments", Exclusive = true)]
     public void ShowUsage()
     {
@@ -103,6 +107,7 @@ public sealed class Config
 
         public const bool DEBUG = false;
         public const bool QUIET = false;
+        public const bool PROCESS_ALL_EXTENSIONS = false;
     }
 
     internal delegate void Writer(string value);

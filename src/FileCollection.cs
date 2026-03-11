@@ -69,16 +69,14 @@ internal sealed class FileCollection : IEnumerable<FileInfo>
 
         foreach (var file in this)
         {
-            if (file.Extension is { Length: > 0 } extension)
-            {
-                var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(Runtime, extension.ToLower()));
-                info.AddFile(file);
+            var extension = file.Extension is { Length: > 0 } ext ? ext : "(no extension)";
+            var info = infos.GetOrAdd(extension, _ => new ExtensionInfo(Runtime, extension.ToLower()));
+            info.AddFile(file);
 
-                // Remove ignored files
-                if (!info.Parsing.Read)
-                {
-                    Files.Remove(file.FullName);
-                }
+            // Remove ignored files
+            if (!Config.ProcessAllExtensions && !info.Parsing.Read)
+            {
+                Files.Remove(file.FullName);
             }
         }
 
