@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
@@ -26,6 +27,12 @@ public class AddressExtractorMonitor : IAsyncDisposable
     // ReadLine count
     protected long Lines => _lineCounter;
     private long _lineCounter;
+
+    private long _quickScanCheckedFiles;
+    private long _quickScanSkippedFiles;
+    private long _quickScanBytesRead;
+    private long _quickScanSavedBytes;
+    private long _quickScanTicks;
 
     protected readonly Stopwatch Stopwatch = Stopwatch.StartNew();
     private readonly Timer _timer;
@@ -118,6 +125,32 @@ public class AddressExtractorMonitor : IAsyncDisposable
         using var stack = _stack.CreateStack("Read file");
         Output.Write($"File number {fileCount:n0}");
 
+        if (file.Length >= Config.MinimumFileSizeForAtSymbolQuickScan)
+        {
+            var quickScanStopwatch = Stopwatch.StartNew();
+            var quickScan = await QuickScanForAtSymbolAsync(file, cancellation).ConfigureAwait(false);
+            quickScanStopwatch.Stop();
+
+            stack.Step("Quick '@' scan");
+
+            Interlocked.Increment(ref _quickScanCheckedFiles);
+            Interlocked.Add(ref _quickScanBytesRead, quickScan.BytesRead);
+            Interlocked.Add(ref _quickScanTicks, quickScanStopwatch.Elapsed.Ticks);
+
+            if (!quickScan.ContainsAtSymbol)
+            {
+                Interlocked.Increment(ref _quickScanSkippedFiles);
+                Interlocked.Add(ref _quickScanSavedBytes, file.Length);
+
+                if (Config.Debug)
+                {
+                    Output.Write($"Skipping \"{file.FullName}\" after quick '@' scan [{quickScanStopwatch.Format()}]");
+                }
+
+                return;
+            }
+        }
+
         var lines = 0L;
         var count = new Count();
 
@@ -153,6 +186,22 @@ public class AddressExtractorMonitor : IAsyncDisposable
     public virtual void Log()
     {
         Output.Write($"Extraction time: {Stopwatch.Format()}");
+        Output.Write($"Files parsed: {Files.Count:n0}");
+
+        var checkedFiles = Interlocked.Read(ref _quickScanCheckedFiles);
+        var skippedFiles = Interlocked.Read(ref _quickScanSkippedFiles);
+        var bytesRead = Interlocked.Read(ref _quickScanBytesRead);
+        var savedBytes = Interlocked.Read(ref _quickScanSavedBytes);
+        var quickScanTime = TimeSpan.FromTicks(Interlocked.Read(ref _quickScanTicks));
+        var scanRate = quickScanTime > TimeSpan.Zero
+            ? (long)(bytesRead / quickScanTime.TotalSeconds)
+            : 0L;
+
+        Output.Write($"Quick '@' scan threshold: {ByteExtensions.Format(Config.MinimumFileSizeForAtSymbolQuickScan)}");
+        Output.Write($"Quick '@' scans: {checkedFiles:n0} files in {quickScanTime.Format()}");
+        Output.Write($"Quick '@' scan bytes read: {ByteExtensions.Format(bytesRead)} ({ByteExtensions.Format(scanRate)}/s)");
+        Output.Write($"Quick '@' scan skips: {skippedFiles:n0} files, avoided parsing {ByteExtensions.Format(savedBytes)}");
+
         Output.Write($"Addresses extracted: {Addresses.Count:n0}");
         var rate = (long)(Lines / (Stopwatch.ElapsedMilliseconds / 1000.0));
         Output.Write($"Read lines total: {Lines:n0}");
@@ -201,5 +250,35 @@ public class AddressExtractorMonitor : IAsyncDisposable
 
         await _timer.DisposeAsync().ConfigureAwait(false);
         Stopwatch.Stop();
+    }
+
+    internal static async ValueTask<(bool ContainsAtSymbol, long BytesRead)> QuickScanForAtSymbolAsync(FileInfo file, CancellationToken cancellation = default)
+    {
+        const int bufferSize = 1024 * 64;
+
+        var bytesRead = 0L;
+        var buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        try
+        {
+            await using var stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, FileOptions.SequentialScan | FileOptions.Asynchronous);
+            while (true)
+            {
+                var read = await stream.ReadAsync(buffer.AsMemory(0, bufferSize), cancellation).ConfigureAwait(false);
+                if (read == 0)
+                {
+                    return (false, bytesRead);
+                }
+
+                bytesRead += read;
+                if (buffer.AsSpan(0, read).Contains((byte)'@'))
+                {
+                    return (true, bytesRead);
+                }
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
     }
 }

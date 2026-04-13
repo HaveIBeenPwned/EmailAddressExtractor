@@ -191,6 +191,16 @@ public class CommandLineProcessorTests
         }
     }
 
+    [TestMethod]
+    public void QuickAtCheckThresholdDefaultsToTenMegabytes()
+    {
+        var args = new[] { "input" };
+
+        var config = CommandLineProcessor.Parse(args, out _);
+
+        Assert.AreEqual(10 * 1000 * 1000, config.MinimumFileSizeForAtSymbolQuickScan, "Quick '@' scan threshold should default to 10 MB");
+    }
+
     #endregion
     #region File Inputs
 
