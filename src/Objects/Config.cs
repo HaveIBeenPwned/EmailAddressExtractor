@@ -50,6 +50,9 @@ public sealed class Config
     [CommandLineOption("processAllExtensions", Description = "Process all files regardless of their extension type")]
     public bool ProcessAllExtensions { get; private set; } = Defaults.PROCESS_ALL_EXTENSIONS;
 
+    /// <summary>The minimum file size required before the quick <c>@</c> scan is used</summary>
+    public long MinimumFileSizeForAtSymbolQuickScan { get; } = Defaults.MINIMUM_FILE_SIZE_FOR_AT_SYMBOL_QUICK_SCAN;
+
     [CommandLineOption("?", "h", "help", Description = "Help for the command line arguments", Exclusive = true)]
     public void ShowUsage()
     {
@@ -108,6 +111,7 @@ public sealed class Config
         public const bool DEBUG = false;
         public const bool QUIET = false;
         public const bool PROCESS_ALL_EXTENSIONS = false;
+        public const long MINIMUM_FILE_SIZE_FOR_AT_SYMBOL_QUICK_SCAN = 10 * 1000 * 1000;
     }
 
     internal delegate void Writer(string value);

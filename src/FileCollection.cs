@@ -92,6 +92,7 @@ internal sealed class FileCollection : IEnumerable<FileInfo>
         var report = Config.ReportFilePath;
         Output.Write($"Output will {(string.IsNullOrWhiteSpace(output) ? "not be saved" : $"be saved to \"{output}\"")}.");
         Output.Write($"Report will {(string.IsNullOrWhiteSpace(report) ? "not be saved" : $"be saved to \"{report}\"")}.");
+        Output.Write($"Quick '@' scan will be used for files {ByteExtensions.Format(Config.MinimumFileSizeForAtSymbolQuickScan)} and larger.");
     }
 
     /// <inheritdoc />
