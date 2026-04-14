@@ -123,7 +123,6 @@ public class AddressExtractorMonitor : IAsyncDisposable
     public async ValueTask RunAsync(long fileCount, FileInfo file, CancellationToken cancellation = default)
     {
         using var stack = _stack.CreateStack("Read file");
-        Output.Write($"File number {fileCount:n0}");
 
         if (file.Length >= Config.MinimumFileSizeForAtSymbolQuickScan)
         {
@@ -142,10 +141,7 @@ public class AddressExtractorMonitor : IAsyncDisposable
                 Interlocked.Increment(ref _quickScanSkippedFiles);
                 Interlocked.Add(ref _quickScanSavedBytes, file.Length);
 
-                if (Config.Debug)
-                {
-                    Output.Write($"Skipping \"{file.FullName}\" after quick '@' scan [{quickScanStopwatch.Format()}]");
-                }
+                Output.FileResult(fileCount, file.FullName, file.Length, "skipped due to no @ symbol");
 
                 return;
             }
@@ -161,7 +157,8 @@ public class AddressExtractorMonitor : IAsyncDisposable
         // Await any 'continue' prompts
         await _runtime.AwaitContinuationAsync(cancellation).ConfigureAwait(false);
 
-        Output.Write($"Reading \"{file.FullName}\" [{ByteExtensions.Format(file.Length)}]");
+        Output.FileResult(fileCount, file.FullName, file.Length);
+
         await foreach (var line in reader.ReadLineAsync(cancellation).ConfigureAwait(false))
         {
             stack.Step("Read line");
@@ -177,7 +174,7 @@ public class AddressExtractorMonitor : IAsyncDisposable
 
                 if (!Config.Quiet && lines % 250000 is 0)
                 {
-                    Output.Write($"Read {lines:n0} lines from \"{file.Name}\"");
+                    Output.WriteTime($"Read {lines:n0} lines from \"{file.Name}\"");
                 }
             }
         }
@@ -281,4 +278,5 @@ public class AddressExtractorMonitor : IAsyncDisposable
             ArrayPool<byte>.Shared.Return(buffer);
         }
     }
+
 }

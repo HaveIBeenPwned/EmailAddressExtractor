@@ -7,6 +7,12 @@ public static class Output
     public static void Write(string line)
         => Write(Console.Out, line);
 
+    public static void WriteTime(string line)
+        => Console.Out.WriteLine($"[{Time()}] {line}");
+
+    public static void FileResult(long fileNumber, string path, long bytes, string? result = null)
+        => WriteTime($"File number {fileNumber:n0} {path} [{ByteExtensions.Format(bytes)}]{(string.IsNullOrWhiteSpace(result) ? string.Empty : $" - {result}")}");
+
     public static void Exception(Exception ex, bool trace = true)
         => Write(Console.Error, trace ? ex : ex.Message);
 
@@ -29,6 +35,9 @@ public static class Output
 
         to.WriteLine($"[{DateTime()}] {e}");
     }
+
+    private static string Time()
+        => System.DateTime.Now.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
 
     private static string DateTime()
         => System.DateTime.Now.ToString(CultureInfo.CurrentCulture);
