@@ -69,7 +69,7 @@ Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
 | `-v`, `--version`       | Prints the application version number                                      |
 | input                   | One or more input filenames or directories                                 |
 | `-o`, `--output` output | Path and filename of the output file. Defaults to 'addresses_output.txt'   |
-| `-r`, `--report` report | Path and filename of the report file. Defaults to 'report.txt'             |
+| `-r`, `--report` report | Reports are saved as `<output>.report.txt` |
 | `--recursive`           | Enable recursive mode for directories, which will search child directories |
 | `--processAllExtensions`| Process all files regardless of their extension type                       |
 | `-y`, `--yes`           | Automatically confirm prompts to CONTINUE without asking                   |

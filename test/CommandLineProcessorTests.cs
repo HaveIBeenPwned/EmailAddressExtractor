@@ -252,7 +252,7 @@ public class CommandLineProcessorTests
         Assert.AreEqual(inputs.Count, 1);
         Assert.AreEqual(inputs[0], args[0]);
         Assert.AreEqual(config.OutputFilePath, args[2]);
-        Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
+        Assert.AreEqual(config.ReportFilePath, $"{args[2]}{Config.Defaults.REPORT_FILE_SUFFIX}");
     }
 
     [TestMethod]
@@ -268,7 +268,7 @@ public class CommandLineProcessorTests
         Assert.AreEqual(inputs.Count, 1);
         Assert.AreEqual(inputs[0], args[0]);
         Assert.AreEqual(config.OutputFilePath, Config.Defaults.OUTPUT_FILE_PATH);
-        Assert.AreEqual(config.ReportFilePath, args[2]);
+        Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
     }
 
     [TestMethod]
@@ -284,7 +284,7 @@ public class CommandLineProcessorTests
         Assert.AreEqual(inputs.Count, 1);
         Assert.AreEqual(inputs[0], args[0]);
         Assert.AreEqual(config.OutputFilePath, args[2]);
-        Assert.AreEqual(config.ReportFilePath, args[4]);
+        Assert.AreEqual(config.ReportFilePath, $"{args[2]}{Config.Defaults.REPORT_FILE_SUFFIX}");
     }
 
     [TestMethod]
@@ -300,7 +300,7 @@ public class CommandLineProcessorTests
         Assert.AreEqual(inputs.Count, 1);
         Assert.AreEqual(inputs[0], args[0]);
         Assert.AreEqual(config.OutputFilePath, args[4]);
-        Assert.AreEqual(config.ReportFilePath, args[2]);
+        Assert.AreEqual(config.ReportFilePath, $"{args[4]}{Config.Defaults.REPORT_FILE_SUFFIX}");
     }
 
     [TestMethod]
@@ -317,7 +317,7 @@ public class CommandLineProcessorTests
         Assert.AreEqual(inputs[0], args[0]);
         Assert.AreEqual(inputs[1], args[1]);
         Assert.AreEqual(config.OutputFilePath, args[3]);
-        Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
+        Assert.AreEqual(config.ReportFilePath, $"{args[3]}{Config.Defaults.REPORT_FILE_SUFFIX}");
     }
 
     [TestMethod]
@@ -334,6 +334,19 @@ public class CommandLineProcessorTests
         Assert.AreEqual(inputs[0], args[0]);
         Assert.AreEqual(inputs[1], args[3]);
         Assert.AreEqual(config.OutputFilePath, args[2]);
-        Assert.AreEqual(config.ReportFilePath, Config.Defaults.REPORT_FILE_PATH);
+        Assert.AreEqual(config.ReportFilePath, $"{args[2]}{Config.Defaults.REPORT_FILE_SUFFIX}");
+    }
+
+    [TestMethod]
+    public void ReportPathKeepsOutputExtension()
+    {
+        // Arrange
+        var args = new[] { "input1", "-o", "test.txt" };
+
+        // Act
+        var config = CommandLineProcessor.Parse(args, out _);
+
+        // Assert
+        Assert.AreEqual("test.txt.report.txt", config.ReportFilePath);
     }
 }
