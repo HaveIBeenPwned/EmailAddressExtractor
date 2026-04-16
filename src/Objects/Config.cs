@@ -22,8 +22,12 @@ public sealed class Config
     public string OutputFilePath { get; private set; } = Defaults.OUTPUT_FILE_PATH;
 
     /// <summary>The path to write the summary report to</summary>
-    [CommandLineOption("r", "report", Description = "File path to write report file", Expects = "path")]
-    public string ReportFilePath { get; private set; } = Defaults.REPORT_FILE_PATH;
+    [CommandLineOption("r", "report", Description = "Legacy option retained for compatibility; report files are saved to the output path with a '.report.txt' suffix", Expects = "path")]
+    public string ReportFilePath
+    {
+        get => string.IsNullOrWhiteSpace(OutputFilePath) ? string.Empty : $"{OutputFilePath}{Defaults.REPORT_FILE_SUFFIX}";
+        private set { }
+    }
 
     /// <summary>If the prompt to Continue should be skipped</summary>
     [CommandLineOption("y", "yes", Description = "Skips any normal continue prompts")]
@@ -100,7 +104,8 @@ public sealed class Config
     public static class Defaults
     {
         public const string OUTPUT_FILE_PATH = "addresses_output.txt";
-        public const string REPORT_FILE_PATH = "report.txt";
+        public const string REPORT_FILE_SUFFIX = ".report.txt";
+        public const string REPORT_FILE_PATH = OUTPUT_FILE_PATH + REPORT_FILE_SUFFIX;
 
         public const bool OPERATE_RECURSIVELY = false;
         public const bool SKIP_PROMPTS = false;
