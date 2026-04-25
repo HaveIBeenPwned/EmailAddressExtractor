@@ -30,6 +30,16 @@ public class AddressExtractorTests
     }
 
     [TestMethod]
+    public async Task EmailAddressIsExtractedFromPdfFileAsync()
+    {
+        var result = await ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/PdfFile.pdf").ConfigureAwait(false);
+
+        // Assert
+        Assert.AreEqual(1, result.Count, "One email address should be extracted from the PDF");
+        Assert.AreEqual("emailemail@email.com", result.First(), "The extracted email should match the PDF contents");
+    }
+
+    [TestMethod]
     public async Task AddressAfterBlankLineIsFoundAsync()
     {
         var result = await ExtractAddressesFromFileAsync(@"../../../../TestData/SingleFile/FileWithBlankLine.txt").ConfigureAwait(false);
