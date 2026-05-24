@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.13.61" />
+    <PackageReference Include="PdfPig" Version="0.1.14" />
   </ItemGroup>
 
 </Project>
