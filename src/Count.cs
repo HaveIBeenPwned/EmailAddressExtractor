@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace HaveIBeenPwned.AddressExtractor;
 
 /// <summary>
@@ -9,9 +11,21 @@ public sealed class Count
 {
     public long Value => _value;
     private long _value;
+    private readonly ConcurrentDictionary<string, byte> _addresses = new(StringComparer.OrdinalIgnoreCase);
 
     public void Increment()
         => Interlocked.Increment(ref _value);
+
+    public bool TryAdd(string address)
+    {
+        if (!_addresses.TryAdd(address, 0))
+        {
+            return false;
+        }
+
+        Increment();
+        return true;
+    }
 
     /// <inheritdoc />
     public override string ToString()
