@@ -49,6 +49,54 @@ public class AddressExtractorTests
     }
 
     [TestMethod]
+    public async Task ReportCountsUniqueAddressesWithinEachFileAsync()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempRoot);
+
+        try
+        {
+            var inputDirectory = Path.Combine(tempRoot, "input");
+            Directory.CreateDirectory(inputDirectory);
+
+            var file1 = Path.Combine(inputDirectory, "File1.txt");
+            var file2 = Path.Combine(inputDirectory, "File2.txt");
+
+            await File.WriteAllLinesAsync(file1,
+            [
+                "shared@example.com",
+                "shared@example.com",
+                "first@example.com"
+            ]).ConfigureAwait(false);
+
+            await File.WriteAllLinesAsync(file2,
+            [
+                "shared@example.com",
+                "second@example.com",
+                "second@example.com"
+            ]).ConfigureAwait(false);
+
+            var outputPath = Path.Combine(tempRoot, "addresses.txt");
+            var exitCode = await Program.Main([inputDirectory, "-y", "-o", outputPath]).ConfigureAwait(false);
+
+            Assert.AreEqual(0, exitCode, "Extraction should succeed");
+
+            var reportPath = $"{outputPath}{Config.Defaults.REPORT_FILE_SUFFIX}";
+            var report = await File.ReadAllTextAsync(reportPath).ConfigureAwait(false);
+
+            StringAssert.Contains(report, $"{file1}: 2", "The first file should count its own unique addresses, including addresses seen in other files");
+            StringAssert.Contains(report, $"{file2}: 2", "The second file should count its own unique addresses, including addresses seen in other files");
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
+    }
+
+    [TestMethod]
     public void EmailAddressesAreNotCaseSensitive()
     {
         const string ADDRESSES = "test@example.com TEST@EXAMPLE.COM";

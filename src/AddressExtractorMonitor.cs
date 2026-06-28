@@ -80,10 +80,9 @@ public class AddressExtractorMonitor : IAsyncDisposable
                     // Extract addresses from the line
                     foreach (var email in AddressExtractor.ExtractAddresses(line.Value))
                     {
-                        if (Addresses.TryAdd(email, 0))
-                        {
-                            line.Counter.Increment();
-                        }
+                        line.Counter.TryAdd(email);
+
+                        Addresses.TryAdd(email, 0);
 
                         Interlocked.Increment(ref _lineCounter);
 
