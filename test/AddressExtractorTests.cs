@@ -49,6 +49,29 @@ public class AddressExtractorTests
     }
 
     [TestMethod]
+    public async Task EmailAddressIsExtractedFromYamlFileAsync()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}.yaml");
+
+        try
+        {
+            await File.WriteAllTextAsync(tempFile, "email: yamltest@example.com").ConfigureAwait(false);
+
+            var result = await ExtractAddressesFromFileAsync(tempFile).ConfigureAwait(false);
+
+            Assert.AreEqual(1, result.Count, "One email address should be extracted from the YAML file");
+            Assert.AreEqual("yamltest@example.com", result.First(), "The extracted email should match the YAML contents");
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
+    }
+
+    [TestMethod]
     public async Task ReportCountsUniqueAddressesWithinEachFileAsync()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}");

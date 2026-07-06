@@ -38,7 +38,7 @@ public sealed class Runtime
     private static readonly string[] sourceControlExtensions = [".svn-base", ".gitignore", ".gitattributes", ".pack"];
     private static readonly string[] executableExtensions = [".exe", ".dll", ".apk", ".jar", ".java", "bin"];
     private static readonly string[] unsupportedExtensions = [".msi", ".flv", ".swf", ".pdb", ".brd", ".hprof", ".lock", ".docker", ".ttf", ".woff", ".woff2", ".pem", ".crt"];
-    private static readonly string[] notSupportedYetExtensions = [".log", ".json", ".txt", ".sql", ".xml", ".sample", ".csv", ".tsv", ".odt", ".docx", ".pptx", ".xls", ".doc", ".ppt", ".pdf", ".rdb"];
+    private static readonly string[] notSupportedYetExtensions = [".log", ".json", ".txt", ".sql", ".xml", ".yaml", ".sample", ".csv", ".tsv", ".odt", ".docx", ".pptx", ".xls", ".doc", ".ppt", ".pdf", ".rdb"];
     #endregion
 
     public Runtime(Config? config = null)
