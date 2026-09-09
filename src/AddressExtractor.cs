@@ -37,10 +37,25 @@ public partial class AddressExtractor
 
     #endregion
     #region String Extraction
+    /// <summary>
+    /// Builds a matcher equivalent to <see cref="LooseMatch"/> for a single caller to own.
+    /// <see cref="Regex"/> keeps one runner cached internally, so a shared instance under
+    /// heavy concurrency misses that cache on nearly every call and allocates a fresh
+    /// runner, and a <see cref="Match"/> along with it.
+    /// </summary>
+    internal static Regex CreateMatcher()
+    {
+        var prototype = LooseMatch();
+        return new Regex(prototype.ToString(), prototype.Options);
+    }
+
     public static HashSet<string> ExtractAddresses(ReadOnlySpan<char> content)
+        => ExtractAddresses(LooseMatch(), content);
+
+    internal static HashSet<string> ExtractAddresses(Regex matcher, ReadOnlySpan<char> content)
     {
         var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var enumerator = LooseMatch().EnumerateMatches(content);
+        var enumerator = matcher.EnumerateMatches(content);
         while (enumerator.MoveNext())
         {
             if (TryValidateEmail(content.Slice(enumerator.Current.Index, enumerator.Current.Length), out var result) && !set.Contains(result))
@@ -62,7 +77,10 @@ public partial class AddressExtractor
 
         if (EmailValidation.IsValidEmail(match))
         {
-            result = new string(match).ToLowerInvariant();
+            Span<char> lower = stackalloc char[match.Length];
+            match.ToLowerInvariant(lower);
+
+            result = new string(lower);
             return true;
         }
 

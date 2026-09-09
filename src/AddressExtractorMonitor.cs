@@ -14,9 +14,9 @@ public class AddressExtractorMonitor : IAsyncDisposable
 {
     private readonly Runtime _runtime;
     private Config Config => _runtime.Config;
-    private readonly Channel<Line> _channel;
-    private ChannelReader<Line> Reader => _channel.Reader;
-    private ChannelWriter<Line> Writer => _channel.Writer;
+    private readonly Channel<LineBatch> _channel;
+    private ChannelReader<LineBatch> Reader => _channel.Reader;
+    private ChannelWriter<LineBatch> Writer => _channel.Writer;
     private readonly List<Task> _tasks = [];
 
     private readonly IPerformanceStack _stack;
@@ -62,34 +62,39 @@ public class AddressExtractorMonitor : IAsyncDisposable
 
     private async Task ReadAsync(CancellationToken cancellation)
     {
+        // Owned by this task rather than shared with every other one
+        var matcher = AddressExtractor.CreateMatcher();
+
         while (!cancellation.IsCancellationRequested)
         {
-            Line line = default;
+            LineBatch batch = default;
+            var index = 0;
 
             try
             {
                 // Tasks run forever
                 while (!cancellation.IsCancellationRequested)
                 {
-                    // Get a line from the Channel
-                    line = await Reader.ReadAsync(cancellation).ConfigureAwait(false);
+                    // Get a batch of lines from the Channel
+                    batch = await Reader.ReadAsync(cancellation).ConfigureAwait(false);
 
-                    // Check for pauses
+                    // Check for pauses. Once per batch rather than once per line
                     await _runtime.AwaitContinuationAsync(cancellation).ConfigureAwait(false);
 
-                    // Extract addresses from the line
-                    foreach (var email in AddressExtractor.ExtractAddresses(line.Value))
+                    var lines = batch.Lines;
+                    for (index = 0; index < batch.Count; index++)
                     {
-                        line.Counter.TryAdd(email);
+                        // Extract addresses from the line
+                        foreach (var email in AddressExtractor.ExtractAddresses(matcher, lines[index]))
+                        {
+                            batch.Counter.TryAdd(email);
 
-                        Addresses.TryAdd(email, 0);
-
-                        Interlocked.Increment(ref _lineCounter);
-
-                        // Disabled currently, alternating log messages has oddities
-                        /*if (!this.Config.Quiet && this.Lines % 25000 is 0)
-                            Output.Write($"Checked {this.Lines:n0} lines, found {line.Counter.Value:n0} emails");*/
+                            Addresses.TryAdd(email, 0);
+                        }
                     }
+
+                    // One contended write per batch rather than one per address
+                    Interlocked.Add(ref _lineCounter, batch.Count);
                 }
             }
             catch (ChannelClosedException)
@@ -102,13 +107,14 @@ public class AddressExtractorMonitor : IAsyncDisposable
             }
             catch (Exception ex)
             {
+                var number = batch.StartNumber + index;
                 if (Config.Debug)
                 {
-                    Output.Exception(new FormatException($"An error occurred while parsing '{line.File}'L{line.Number}:", ex));
+                    Output.Exception(new FormatException($"An error occurred while parsing '{batch.File}'L{number}:", ex));
                 }
                 else
                 {
-                    Output.Error($"An error occurred while parsing '{line.File}'L{line.Number}: {ex.Message}");
+                    Output.Error($"An error occurred while parsing '{batch.File}'L{number}: {ex.Message}");
                 }
 
                 if (!await _runtime.WaitOnExceptionAsync(cancellation).ConfigureAwait(false))
@@ -158,24 +164,54 @@ public class AddressExtractorMonitor : IAsyncDisposable
 
         Output.FileResult(fileCount, file.FullName, file.Length);
 
+        var batchSize = Config.BatchSize;
+        var buffer = new string[batchSize];
+        var buffered = 0;
+        var batchStart = 1L;
+
         await foreach (var line in reader.ReadLineAsync(cancellation).ConfigureAwait(false))
         {
             stack.Step("Read line");
             if (line is not null)
             {
-                await Writer.WriteAsync(new Line
+                buffer[buffered++] = line;
+                lines++;
+
+                if (buffered == batchSize)
                 {
-                    File = file.FullName,
-                    Value = line,
-                    Counter = count,
-                    Number = ++lines
-                }, cancellation).ConfigureAwait(false);
+                    await Writer.WriteAsync(new LineBatch
+                    {
+                        File = file.FullName,
+                        Lines = buffer,
+                        Count = buffered,
+                        Counter = count,
+                        StartNumber = batchStart
+                    }, cancellation).ConfigureAwait(false);
+
+                    // The published buffer stays with the reader, so start a fresh one
+                    buffer = new string[batchSize];
+                    batchStart = lines + 1;
+                    buffered = 0;
+                }
 
                 if (!Config.Quiet && lines % 250000 is 0)
                 {
                     Output.WriteTime($"Read {lines:n0} lines from \"{file.Name}\"");
                 }
             }
+        }
+
+        // Flush whatever did not fill a whole batch
+        if (buffered > 0)
+        {
+            await Writer.WriteAsync(new LineBatch
+            {
+                File = file.FullName,
+                Lines = buffer,
+                Count = buffered,
+                Counter = count,
+                StartNumber = batchStart
+            }, cancellation).ConfigureAwait(false);
         }
     }
 
@@ -219,12 +255,29 @@ public class AddressExtractorMonitor : IAsyncDisposable
         var report = Config.ReportFilePath;
         if (!string.IsNullOrWhiteSpace(output))
         {
-            await File.WriteAllLinesAsync(
-                output,
-                Addresses.Keys.Select(address => address.ToLowerInvariant())
-                    .OrderBy(address => address, StringComparer.OrdinalIgnoreCase),
-                cancellation
-            ).ConfigureAwait(false);
+            var sorted = Addresses.Keys.ToArray();
+
+            if (sorted.Length >= ParallelSortThreshold)
+            {
+                sorted = sorted.AsParallel()
+                    .OrderBy(address => address, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+            }
+            else
+            {
+                Array.Sort(sorted, StringComparer.OrdinalIgnoreCase);
+            }
+
+            // File.WriteAllLinesAsync buffers 4 KB at a time, which is a lot of flushes across a result set this size.
+            var stream = new FileStream(output, FileMode.Create, FileAccess.Write, FileShare.None, WriteBufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            await using (var writer = new StreamWriter(stream, OutputEncoding, WriteBufferSize))
+            {
+                foreach (var address in sorted)
+                {
+                    cancellation.ThrowIfCancellationRequested();
+                    await writer.WriteLineAsync(address).ConfigureAwait(false);
+                }
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(report))
@@ -247,6 +300,18 @@ public class AddressExtractorMonitor : IAsyncDisposable
         await _timer.DisposeAsync().ConfigureAwait(false);
         Stopwatch.Stop();
     }
+
+    /// <summary>Result-set size past which ordering is worth parallelising</summary>
+    private const int ParallelSortThreshold = 250_000;
+
+    /// <summary>Buffer used when writing the collected addresses back out</summary>
+    private const int WriteBufferSize = 256 * 1024;
+
+    /// <summary>
+    /// UTF-8 without a byte order mark, matching what <see cref="File.WriteAllLinesAsync(string, IEnumerable{string}, CancellationToken)"/>
+    /// emits. <see cref="Encoding.UTF8"/> would prepend a BOM and change the output.
+    /// </summary>
+    private static readonly Encoding OutputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
     internal static async ValueTask<(bool ContainsAtSymbol, long BytesRead)> QuickScanForAtSymbolAsync(FileInfo file, CancellationToken cancellation = default)
     {

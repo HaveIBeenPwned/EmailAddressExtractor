@@ -1,16 +1,25 @@
+using System.Collections.Frozen;
 using System.Net;
 
 namespace HaveIBeenPwned.AddressExtractor;
 
 public static class EmailValidation
 {
-    private static readonly Lazy<string[]> _validTlds = new(FetchTlds, true);
+    private static readonly Lazy<FrozenSet<string>> _validTlds = new(FetchTlds, true);
     private static readonly char[] _separators = ['\r', '\n'];
 
-    private static string[] FetchTlds()
+    /// <summary>
+    /// Case-insensitive set lookup keyed directly off a <see cref="ReadOnlySpan{T}"/>,
+    /// so validating a TLD costs neither an allocation nor a linear scan.
+    /// </summary>
+    private static FrozenSet<string>.AlternateLookup<ReadOnlySpan<char>> TldLookup
+        => _validTlds.Value.GetAlternateLookup<ReadOnlySpan<char>>();
+
+    private static FrozenSet<string> FetchTlds()
     {
         var content = new HttpClient().GetStringAsync("http://data.iana.org/TLD/tlds-alpha-by-domain.txt").GetAwaiter().GetResult();
-        return content.Split(_separators, StringSplitOptions.RemoveEmptyEntries);
+        return content.Split(_separators, StringSplitOptions.RemoveEmptyEntries)
+            .ToFrozenSet(StringComparer.OrdinalIgnoreCase);
     }
 
     public static bool IsValidEmail(string email) => IsValidEmail(email.AsSpan());
@@ -86,7 +95,7 @@ public static class EmailValidation
 
         // Let's make sure the TLD is valid
         var tld = domain[(domain.LastIndexOf('.') + 1)..];
-        if (!_validTlds.Value.Contains(tld.ToString().ToUpperInvariant()))
+        if (!TldLookup.Contains(tld))
         {
             return false;
         }
