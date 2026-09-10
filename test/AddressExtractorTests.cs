@@ -3,6 +3,8 @@ using HaveIBeenPwned.AddressExtractor.Objects;
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using Parquet.Serialization;
+
 namespace HaveIBeenPwned.AddressExtractor.Tests;
 
 [TestClass]
@@ -68,6 +70,67 @@ public class AddressExtractorTests
             if (File.Exists(tempFile))
             {
                 File.Delete(tempFile);
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task EmailAddressesAreExtractedFromParquetFileAsync()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}.parquet");
+        var textFile = $"{tempFile}.txt";
+
+        try
+        {
+            await using (var stream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await ParquetSerializer.SerializeAsync(
+                    [
+                        new ParquetEmailRow
+                        {
+                            Email = "parquet@example.com",
+                            Notes = "backup: parquet-alt@example.com",
+                            Aliases = ["parquet-list@example.com"]
+                        },
+                        new ParquetEmailRow
+                        {
+                            Email = "",
+                            Notes = "seen by parquet-audit@example.com",
+                            Aliases = []
+                        }
+                    ],
+                    stream).ConfigureAwait(false);
+            }
+
+            var result = await ExtractAddressesFromFileAsync(tempFile).ConfigureAwait(false);
+
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    "parquet@example.com",
+                    "parquet-alt@example.com",
+                    "parquet-list@example.com",
+                    "parquet-audit@example.com"
+                },
+                result.ToArray(),
+                "The extractor should parse email addresses from Parquet row data");
+
+            var extractedText = await File.ReadAllTextAsync(textFile).ConfigureAwait(false);
+            StringAssert.Contains(extractedText, "parquet@example.com");
+            StringAssert.Contains(extractedText, "parquet-alt@example.com");
+            StringAssert.Contains(extractedText, "parquet-list@example.com");
+            StringAssert.Contains(extractedText, "parquet-audit@example.com");
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+
+            if (File.Exists(textFile))
+            {
+                File.Delete(textFile);
             }
         }
     }
@@ -643,6 +706,13 @@ public class AddressExtractorTests
     public AddressExtractorTests()
     {
         _runtime = new Runtime();
+    }
+
+    private sealed class ParquetEmailRow
+    {
+        public string? Email { get; init; }
+        public string? Notes { get; init; }
+        public string[] Aliases { get; init; } = [];
     }
 
     private async ValueTask<HashSet<string>> ExtractAddressesFromFileAsync(string path, CancellationToken cancellation = default)
