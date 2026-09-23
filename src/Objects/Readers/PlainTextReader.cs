@@ -5,7 +5,7 @@ using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
 namespace HaveIBeenPwned.AddressExtractor.Objects.Readers;
 
-[ExtensionTypes(".log", ".json", ".jsonl", ".txt", ".sql", ".xml", ".yaml", ".sample", ".csv", ".tsv")]
+[ExtensionTypes(".log", ".json", ".jsonl", ".txt", ".sql", ".xml", ".yaml", ".sample", ".csv", ".tsv", ".html", ".htm")]
 internal sealed class PlainTextReader : ILineReader
 {
     /// <summary>
