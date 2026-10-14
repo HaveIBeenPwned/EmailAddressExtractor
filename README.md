@@ -57,6 +57,10 @@ Using Red Gate's SQL Data Generator, [a sample (archived) file containing 10M re
 
 # Running the Address Extractor
 
+Excel workbooks (`.xlsx`) are supported. The extractor reads shared strings,
+inline text (including rich-text runs), and cached text formula results across
+worksheets. It does not calculate formulas or support legacy `.xls` workbooks.
+
 Syntax: `AddressExtractor.exe -?`
 Syntax: `AddressExtractor.exe -v`
 Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
