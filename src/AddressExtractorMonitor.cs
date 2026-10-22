@@ -129,9 +129,10 @@ public class AddressExtractorMonitor : IAsyncDisposable
     {
         using var stack = _stack.CreateStack("Read file");
 
-        // XLSX text is compressed, so absence of '@' in the archive bytes proves nothing.
+        // Parse Excel containers rather than deciding whether they contain text from raw bytes.
         if (file.Length >= Config.MinimumFileSizeForAtSymbolQuickScan
-            && !file.Extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
+            && !file.Extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
+            && !file.Extension.Equals(".xls", StringComparison.OrdinalIgnoreCase))
         {
             var quickScanStopwatch = Stopwatch.StartNew();
             var quickScan = await QuickScanForAtSymbolAsync(file, cancellation).ConfigureAwait(false);
