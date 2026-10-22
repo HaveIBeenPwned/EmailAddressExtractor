@@ -61,6 +61,13 @@ Excel workbooks (`.xlsx`) are supported. The extractor reads shared strings,
 inline text (including rich-text runs), and cached text formula results across
 worksheets. It does not calculate formulas or support legacy `.xls` workbooks.
 
+The initial file summary lists known and processed, known and ignored, then unknown and ignored file types.
+Each section starts after a blank line and includes its own file count and total size.
+Known ignored and unknown types are ordered by accumulated size descending, then file count descending.
+Known ignored types retain their individual reasons.
+With `--processAllExtensions`, all files are processed and the section headings reflect this.
+The summary has no timestamps; processing results retain their timestamps.
+
 Syntax: `AddressExtractor.exe -?`
 Syntax: `AddressExtractor.exe -v`
 Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`

@@ -210,6 +210,9 @@ public sealed class Runtime
         return extensions;
     }
 
+    internal bool IsKnownExtension(string extension)
+        => FileExtensions.ContainsKey(extension);
+
     internal FileExtensionParsing GetExtension(string extension)
     {
         var parsing = FileExtensions.GetValueOrDefault(extension, UnknownFileExtension);

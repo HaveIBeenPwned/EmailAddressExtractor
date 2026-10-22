@@ -112,19 +112,40 @@ internal sealed class FileCollection : IEnumerable<FileInfo>
             }
         }
 
-        var sorted = infos.Values
-            .OrderBy(info => info.Parsing.Read ? -info.Count : 0);
-        Output.Write($"Found {count:n0} files:");
-        foreach (var info in sorted)
-        {
-            Output.Write($"  {info.Extension,-6} {info.Count:n0} files: {ByteExtensions.Format(info.Bytes)}{(info.Parsing.Read ? string.Empty : $", Skipping ({info.Parsing.Error})")}");
-        }
+        var processed = infos.Values
+            .Where(info => info.IsKnown && info.Parsing.Read)
+            .OrderByDescending(info => info.Count);
+        var ignored = infos.Values
+            .Where(info => info.IsKnown && !info.Parsing.Read)
+            .OrderByDescending(info => info.Bytes)
+            .ThenByDescending(info => info.Count);
+        var unknown = infos.Values
+            .Where(info => !info.IsKnown)
+            .OrderByDescending(info => info.Bytes)
+            .ThenByDescending(info => info.Count);
+        Output.WritePlain($"Found {count:n0} files:");
+        LogExtensions("Known and processed file types", processed);
+        LogExtensions("Known and ignored file types", ignored);
+        LogExtensions(Config.ProcessAllExtensions ? "Unknown and processed file types" : "Unknown and ignored file types", unknown);
 
         var output = Config.OutputFilePath;
         var report = Config.ReportFilePath;
-        Output.Write($"Output will {(string.IsNullOrWhiteSpace(output) ? "not be saved" : $"be saved to \"{output}\"")}.");
-        Output.Write($"Report will {(string.IsNullOrWhiteSpace(report) ? "not be saved" : $"be saved to \"{report}\"")}.");
-        Output.Write($"Quick '@' scan will be used for files {ByteExtensions.Format(Config.MinimumFileSizeForAtSymbolQuickScan)} and larger.");
+        Output.WritePlain(string.Empty);
+        Output.WritePlain($"Output will {(string.IsNullOrWhiteSpace(output) ? "not be saved" : $"be saved to \"{output}\"")}.");
+        Output.WritePlain($"Report will {(string.IsNullOrWhiteSpace(report) ? "not be saved" : $"be saved to \"{report}\"")}.");
+        Output.WritePlain($"Quick '@' scan will be used for files {ByteExtensions.Format(Config.MinimumFileSizeForAtSymbolQuickScan)} and larger.");
+    }
+
+    private static void LogExtensions(string heading, IEnumerable<ExtensionInfo> extensions)
+    {
+        var infos = extensions.ToArray();
+        Output.WritePlain(string.Empty);
+        Output.WritePlain($"{heading}: {infos.Sum(info => info.Count):n0} files: {ByteExtensions.Format(infos.Sum(info => info.Bytes))}");
+        foreach (var info in infos)
+        {
+            var reason = info.IsKnown && !info.Parsing.Read ? $" ({info.Parsing.Error})" : string.Empty;
+            Output.WritePlain($"  {info.Extension,-6} {info.Count:n0} files: {ByteExtensions.Format(info.Bytes)}{reason}");
+        }
     }
 
     /// <inheritdoc />
@@ -152,6 +173,7 @@ internal sealed class FileCollection : IEnumerable<FileInfo>
     private class ExtensionInfo(Runtime runtime, string extension)
     {
         public readonly string Extension = extension;
+        public readonly bool IsKnown = runtime.IsKnownExtension(extension);
         public readonly FileExtensionParsing Parsing = runtime.GetExtension(extension);
 
         public int Count { get; private set; }
@@ -159,8 +181,8 @@ internal sealed class FileCollection : IEnumerable<FileInfo>
 
         public void AddFile(FileInfo info)
         {
-            Count++;
             Bytes += info.Length;
+            Count++;
         }
     }
 }

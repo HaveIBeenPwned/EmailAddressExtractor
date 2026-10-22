@@ -7,6 +7,9 @@ public static class Output
     public static void Write(string line)
         => Write(Console.Out, line);
 
+    public static void WritePlain(string line)
+        => Console.Out.WriteLine(line);
+
     public static void WriteTime(string line)
         => Console.Out.WriteLine($"[{Time()}] {line}");
 
