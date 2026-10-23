@@ -129,9 +129,12 @@ public class AddressExtractorMonitor : IAsyncDisposable
     {
         using var stack = _stack.CreateStack("Read file");
 
-        // Compressed or MIME-encoded text can contain addresses without a literal '@' in the file.
+        // Office containers and MIME-encoded text can contain addresses without a literal '@' in the file.
         if (file.Length >= Config.MinimumFileSizeForAtSymbolQuickScan
             && !file.Extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
+            && !file.Extension.Equals(".xls", StringComparison.OrdinalIgnoreCase)
+            && !file.Extension.Equals(".pptx", StringComparison.OrdinalIgnoreCase)
+            && !file.Extension.Equals(".ppt", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".mbox", StringComparison.OrdinalIgnoreCase))
         {
             var quickScanStopwatch = Stopwatch.StartNew();

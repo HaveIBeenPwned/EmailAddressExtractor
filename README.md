@@ -57,9 +57,15 @@ Using Red Gate's SQL Data Generator, [a sample (archived) file containing 10M re
 
 # Running the Address Extractor
 
-Excel workbooks (`.xlsx`) are supported. The extractor reads shared strings,
-inline text (including rich-text runs), and cached text formula results across
-worksheets. It does not calculate formulas or support legacy `.xls` workbooks.
+Excel workbooks (`.xlsx` and legacy binary `.xls`) are supported.
+The extractor reads text cells (including rich text) and cached text formula results across worksheets.
+For `.xlsx`, this includes shared strings and inline text; `.xls` is read row by row using ExcelDataReader, including legacy character encodings.
+It does not calculate formulas or accept passwords for encrypted workbooks.
+
+PowerPoint presentations (`.pptx` and PowerPoint 97-2003 binary `.ppt`) are supported, including slide text and speaker notes.
+The `.pptx` reader joins formatting runs within each paragraph, including text in tables, while keeping paragraph and line breaks separate.
+The `.ppt` reader scans stored text records, which can also include master slides, hyperlinks, and text retained from earlier revisions.
+Images and embedded documents are not parsed, and password-protected presentations are not supported.
 
 Mbox mailboxes (`.mbox`) are supported without `--processAllExtensions`.
 The extractor processes messages sequentially, reading envelope senders, decoded headers, and text MIME parts (including text attachments and nested messages).
