@@ -22,4 +22,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\TestData\Excel\BinaryWorkbook.xls" Link="Fixtures\BinaryWorkbook.xls" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
