@@ -62,6 +62,11 @@ The extractor reads text cells (including rich text) and cached text formula res
 For `.xlsx`, this includes shared strings and inline text; `.xls` is read row by row using ExcelDataReader, including legacy character encodings.
 It does not calculate formulas or accept passwords for encrypted workbooks.
 
+PowerPoint presentations (`.pptx` and PowerPoint 97-2003 binary `.ppt`) are supported, including slide text and speaker notes.
+The `.pptx` reader joins formatting runs within each paragraph, including text in tables, while keeping paragraph and line breaks separate.
+The `.ppt` reader scans stored text records, which can also include master slides, hyperlinks, and text retained from earlier revisions.
+Images and embedded documents are not parsed, and password-protected presentations are not supported.
+
 Syntax: `AddressExtractor.exe -?`
 Syntax: `AddressExtractor.exe -v`
 Syntax: `AddressExtractor.exe <input [[... input]]> [-o output] [-r report]`
