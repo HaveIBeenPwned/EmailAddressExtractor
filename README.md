@@ -61,6 +61,18 @@ Excel workbooks (`.xlsx`) are supported. The extractor reads shared strings,
 inline text (including rich-text runs), and cached text formula results across
 worksheets. It does not calculate formulas or support legacy `.xls` workbooks.
 
+Mbox mailboxes (`.mbox`) are supported without `--processAllExtensions`.
+The extractor processes messages sequentially, reading envelope senders, decoded headers, and text MIME parts (including text attachments and nested messages).
+Base64, quoted-printable, declared character sets, and HTML character references are decoded before extraction.
+Binary attachment contents are excluded from MIME extraction.
+MIME content remains file-backed and decoded text is read line by line, rather than loading the whole mailbox into memory.
+Mbox files bypass the raw `@` quick scan because encoded addresses may not contain a literal `@` in the file.
+Malformed message sections (including unescaped `From ` lines in message bodies) are scanned as plain text with a notice, then MIME decoding resumes at the next parseable message.
+Leading fragments and files without valid mbox messages are also scanned as plain text.
+Plain-text recovery finds visible addresses but cannot guarantee recovery of MIME-encoded addresses in the damaged section.
+Unrecognized character sets produce a notice and fall back to UTF-8 while still decoding the MIME transfer encoding.
+File-access errors surface through the existing file-error reporting.
+
 The initial file summary lists known and processed, known and ignored, then unknown and ignored file types.
 Each section starts after a blank line and includes its own file count and total size.
 Known ignored and unknown types are ordered by accumulated size descending, then file count descending.
