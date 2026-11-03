@@ -134,6 +134,7 @@ public class AddressExtractorMonitor : IAsyncDisposable
             && !file.Extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".xls", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".pptx", StringComparison.OrdinalIgnoreCase)
+            && !file.Extension.Equals(".potx", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".ppt", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".mbox", StringComparison.OrdinalIgnoreCase))
         {

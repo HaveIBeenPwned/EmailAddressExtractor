@@ -7,7 +7,7 @@ using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
 namespace HaveIBeenPwned.AddressExtractor.Objects.Readers;
 
-[ExtensionTypes(".pptx")]
+[ExtensionTypes(".pptx", ".potx")]
 internal sealed class PresentationXmlReader(string path) : ILineReader
 {
     public ValueTask DisposeAsync()

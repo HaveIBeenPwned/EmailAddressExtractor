@@ -17,6 +17,7 @@ public class PresentationReaderTests
     [TestMethod]
     [DataRow(".PPT")]
     [DataRow(".PPTX")]
+    [DataRow(".POTX")]
     public async Task ExtractsSlidesNotesAndTablesAsync(string extension)
     {
         var path = TempPath(extension);
@@ -128,6 +129,7 @@ public class PresentationReaderTests
     [TestMethod]
     [DataRow(".ppt")]
     [DataRow(".pptx")]
+    [DataRow(".potx")]
     public async Task CancellationReleasesPresentationAsync(string extension)
     {
         var path = TempPath(extension);
@@ -155,6 +157,7 @@ public class PresentationReaderTests
     [TestMethod]
     [DataRow(".ppt")]
     [DataRow(".pptx")]
+    [DataRow(".potx")]
     public async Task EarlyExitReleasesPresentationAsync(string extension)
     {
         var path = TempPath(extension);
@@ -178,6 +181,7 @@ public class PresentationReaderTests
     [TestMethod]
     [DataRow(".ppt")]
     [DataRow(".pptx")]
+    [DataRow(".potx")]
     public async Task PreCancelledReadDoesNotOpenFileAsync(string extension)
     {
         var path = TempPath(extension);
@@ -265,9 +269,11 @@ public class PresentationReaderTests
     }
 
     [TestMethod]
-    public async Task LargeXmlPresentationIsNotSkippedByRawAtSymbolScanAsync()
+    [DataRow(".PPTX")]
+    [DataRow(".POTX")]
+    public async Task LargeXmlPresentationIsNotSkippedByRawAtSymbolScanAsync(string extension)
     {
-        var path = TempPath(".PPTX");
+        var path = TempPath(extension);
         var output = $"{path}.txt";
         try
         {
