@@ -62,10 +62,17 @@ The extractor reads text cells (including rich text) and cached text formula res
 For `.xlsx`, this includes shared strings and inline text; `.xls` is read row by row using ExcelDataReader, including legacy character encodings.
 It does not calculate formulas or accept passwords for encrypted workbooks.
 
-PowerPoint presentations (`.pptx` and PowerPoint 97-2003 binary `.ppt`) are supported, including slide text and speaker notes.
-The `.pptx` reader joins formatting runs within each paragraph, including text in tables, while keeping paragraph and line breaks separate.
+PowerPoint presentations (`.pptx` and PowerPoint 97-2003 binary `.ppt`) and templates (`.potx`) are supported, including slide text and speaker notes.
+The `.pptx` and `.potx` reader joins formatting runs within each paragraph, including text in tables, while keeping paragraph and line breaks separate.
 The `.ppt` reader scans stored text records, which can also include master slides, hyperlinks, and text retained from earlier revisions.
 Images and embedded documents are not parsed, and password-protected presentations are not supported.
+
+Outlook messages (`.msg`) are supported without `--processAllExtensions`.
+The extractor reads sender and recipient fields, subject and transport headers, plain text, HTML, and compressed RTF bodies, including embedded Outlook messages.
+Unicode and declared Windows code pages are decoded, as are HTML character references and encoded transport headers.
+Binary attachment contents are excluded; encrypted message contents are not decrypted.
+Compound-file streams are read directly without loading attachments into memory; RTF body conversion buffers the body.
+MSG files bypass the raw `@` quick scan because encoded addresses may not contain a literal `@` in the file.
 
 Mbox mailboxes (`.mbox`) are supported without `--processAllExtensions`.
 The extractor processes messages sequentially, reading envelope senders, decoded headers, and text MIME parts (including text attachments and nested messages).
