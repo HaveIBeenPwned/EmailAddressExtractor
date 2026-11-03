@@ -17,6 +17,7 @@
     <PackageReference Include="OpenMcdf" Version="3.3.0" />
     <PackageReference Include="Parquet.Net" Version="6.1.0" />
     <PackageReference Include="PdfPig" Version="0.1.14" />
+    <PackageReference Include="RtfPipe" Version="2.0.7677.4303" />
   </ItemGroup>
 
 </Project>
