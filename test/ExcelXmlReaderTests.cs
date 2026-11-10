@@ -11,13 +11,16 @@ namespace HaveIBeenPwned.AddressExtractor.Tests;
 public class ExcelXmlReaderTests
 {
     [TestMethod]
-    public async Task ExtractsSharedInlineRichAndCachedTextAcrossWorksheetsAsync()
+    [DataRow(".xlsx")]
+    [DataRow(".XLSM")]
+    public async Task ExtractsSharedInlineRichAndCachedTextAcrossWorksheetsAsync(string extension)
     {
-        var path = CreateWorkbook();
+        var path = CreateWorkbook(extension);
         try
         {
             var runtime = new Runtime();
             await using var reader = runtime.GetExtensionFromPath(path).GetReader(path);
+            Assert.IsInstanceOfType<ExcelXmlReader>(reader);
             var addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             await foreach (var address in AddressExtractor.ExtractFileAddressesAsync(reader).ConfigureAwait(false))
             {
@@ -39,9 +42,11 @@ public class ExcelXmlReaderTests
     }
 
     [TestMethod]
-    public async Task ReadsWorkbookWithoutSharedStringsAsync()
+    [DataRow(".xlsx")]
+    [DataRow(".xlsm")]
+    public async Task ReadsWorkbookWithoutSharedStringsAsync(string extension)
     {
-        var path = CreateWorkbook(includeSharedStrings: false);
+        var path = CreateWorkbook(extension, includeSharedStrings: false);
         try
         {
             await using var reader = new ExcelXmlReader(path);
@@ -62,9 +67,11 @@ public class ExcelXmlReaderTests
     }
 
     [TestMethod]
-    public async Task CancellationReleasesWorkbookAsync()
+    [DataRow(".xlsx")]
+    [DataRow(".xlsm")]
+    public async Task CancellationReleasesWorkbookAsync(string extension)
     {
-        var path = CreateWorkbook();
+        var path = CreateWorkbook(extension);
         try
         {
             using var cancellation = new CancellationTokenSource();
@@ -86,9 +93,11 @@ public class ExcelXmlReaderTests
     }
 
     [TestMethod]
-    public async Task MalformedWorksheetRaisesXmlErrorAsync()
+    [DataRow(".xlsx")]
+    [DataRow(".xlsm")]
+    public async Task MalformedWorksheetRaisesXmlErrorAsync(string extension)
     {
-        var path = CreateWorkbook();
+        var path = CreateWorkbook(extension);
         try
         {
             using (var archive = ZipFile.Open(path, ZipArchiveMode.Update))
@@ -111,9 +120,11 @@ public class ExcelXmlReaderTests
     }
 
     [TestMethod]
-    public async Task LargeWorkbookIsNotSkippedByRawAtSymbolScanAsync()
+    [DataRow(".xlsx")]
+    [DataRow(".XLSM")]
+    public async Task LargeWorkbookIsNotSkippedByRawAtSymbolScanAsync(string extension)
     {
-        var path = CreateWorkbook(includeSharedStrings: false, includePadding: true);
+        var path = CreateWorkbook(extension, includeSharedStrings: false, includePadding: true);
         var output = $"{path}.txt";
         try
         {
@@ -134,9 +145,9 @@ public class ExcelXmlReaderTests
         }
     }
 
-    private static string CreateWorkbook(bool includeSharedStrings = true, bool includePadding = false)
+    private static string CreateWorkbook(string extension, bool includeSharedStrings = true, bool includePadding = false)
     {
-        var path = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}.xlsx");
+        var path = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}{extension}");
         using var archive = ZipFile.Open(path, ZipArchiveMode.Create);
         if (includePadding)
         {
@@ -187,6 +198,10 @@ public class ExcelXmlReaderTests
             """);
         WriteEntry(archive, "docProps/core.xml", "<metadata>metadata@example.com</metadata>");
         WriteEntry(archive, "xl/worksheets/_rels/sheet1.xml.rels", "<relationships>relationship@example.com</relationships>");
+        if (extension.Equals(".xlsm", StringComparison.OrdinalIgnoreCase))
+        {
+            WriteEntry(archive, "xl/vbaProject.bin", "ignored-macro@example.com");
+        }
 
         return path;
     }

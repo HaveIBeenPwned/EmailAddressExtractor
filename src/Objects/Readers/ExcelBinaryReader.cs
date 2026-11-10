@@ -7,7 +7,7 @@ using ExcelDataReader;
 
 namespace HaveIBeenPwned.AddressExtractor.Objects.Readers;
 
-[ExtensionTypes(".xls")]
+[ExtensionTypes(".xls", ".xlsb")]
 internal sealed class ExcelBinaryReader(string path) : ILineReader
 {
     static ExcelBinaryReader()
@@ -22,7 +22,7 @@ internal sealed class ExcelBinaryReader(string path) : ILineReader
     {
         cancellation.ThrowIfCancellationRequested();
         await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-        using var reader = ExcelReaderFactory.CreateBinaryReader(stream, new ExcelReaderConfiguration
+        using var reader = ExcelReaderFactory.CreateReader(stream, new ExcelReaderConfiguration
         {
             LeaveOpen = true,
             SinglePassMode = true

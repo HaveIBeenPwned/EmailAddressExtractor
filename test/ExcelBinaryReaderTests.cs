@@ -13,9 +13,11 @@ namespace HaveIBeenPwned.AddressExtractor.Tests;
 public class ExcelBinaryReaderTests
 {
     [TestMethod]
-    public async Task ExtractsTextRichTextAndCachedResultsAcrossWorksheetsAsync()
+    [DataRow(".XLS")]
+    [DataRow(".XLSB")]
+    public async Task ExtractsTextRichTextAndCachedResultsAcrossWorksheetsAsync(string extension)
     {
-        var path = CopyWorkbook();
+        var path = CopyWorkbook(extension);
         var output = $"{path}.txt";
         try
         {
@@ -95,9 +97,11 @@ public class ExcelBinaryReaderTests
     }
 
     [TestMethod]
-    public async Task CancellationReleasesWorkbookAsync()
+    [DataRow(".xls")]
+    [DataRow(".xlsb")]
+    public async Task CancellationReleasesWorkbookAsync(string extension)
     {
-        var path = CopyWorkbook();
+        var path = CopyWorkbook(extension);
         try
         {
             using var cancellation = new CancellationTokenSource();
@@ -119,9 +123,11 @@ public class ExcelBinaryReaderTests
     }
 
     [TestMethod]
-    public async Task PreCancelledReadDoesNotOpenFileAsync()
+    [DataRow(".xls")]
+    [DataRow(".xlsb")]
+    public async Task PreCancelledReadDoesNotOpenFileAsync(string extension)
     {
-        var path = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}.xls");
+        var path = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}{extension}");
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync().ConfigureAwait(false);
         await using var reader = new ExcelBinaryReader(path);
@@ -131,9 +137,11 @@ public class ExcelBinaryReaderTests
     }
 
     [TestMethod]
-    public async Task EarlyExitReleasesWorkbookAsync()
+    [DataRow(".xls")]
+    [DataRow(".xlsb")]
+    public async Task EarlyExitReleasesWorkbookAsync(string extension)
     {
-        var path = CopyWorkbook();
+        var path = CopyWorkbook(extension);
         try
         {
             await using var reader = new ExcelBinaryReader(path);
@@ -151,9 +159,11 @@ public class ExcelBinaryReaderTests
     }
 
     [TestMethod]
-    public async Task LargeInvalidWorkbookRaisesErrorInsteadOfBeingSkippedAsync()
+    [DataRow(".xls")]
+    [DataRow(".XLSB")]
+    public async Task LargeInvalidWorkbookRaisesErrorInsteadOfBeingSkippedAsync(string extension)
     {
-        var path = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}.xls");
+        var path = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}{extension}");
         try
         {
             using (var stream = File.Create(path))
@@ -178,11 +188,11 @@ public class ExcelBinaryReaderTests
         }
     }
 
-    private static string CopyWorkbook()
+    private static string CopyWorkbook(string extension)
     {
-        var path = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}.XLS");
-        // Synthetic BIFF8 fixture: empty/sparse sheets, rich/Unicode text, a cached formula and metadata.
-        File.Copy(Path.Combine(AppContext.BaseDirectory, "Fixtures", "BinaryWorkbook.xls"), path);
+        var path = Path.Combine(Path.GetTempPath(), $"EmailAddressExtractorTests-{Guid.NewGuid():N}{extension}");
+        // Synthetic workbooks with rich/Unicode text, a cached formula and multiple sheets.
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "Fixtures", $"BinaryWorkbook{extension.ToLowerInvariant()}"), path);
         return path;
     }
 }
