@@ -57,6 +57,8 @@ Using Red Gate's SQL Data Generator, [a sample (archived) file containing 10M re
 
 # Running the Address Extractor
 
+Building and running from source requires the .NET 11 SDK.
+
 Excel workbooks (`.xlsx`, macro-enabled `.xlsm`, binary `.xlsb`, and legacy binary `.xls`) are supported.
 The extractor reads text cells (including rich text) and cached text formula results across worksheets.
 For `.xlsx` and `.xlsm`, this includes shared strings and inline text; `.xls` and `.xlsb` are read row by row using ExcelDataReader, including legacy `.xls` character encodings.

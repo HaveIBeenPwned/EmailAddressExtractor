@@ -2,7 +2,7 @@
 
 ## Purpose and behavior
 
-This is the Have I Been Pwned email address extractor: a .NET 10 console
+This is the Have I Been Pwned email address extractor: a .NET 11 console
 application for extracting addresses from breach-data files. It normalizes
 addresses to lowercase, deduplicates them, saves sorted output, and reports
 per-file counts.
@@ -37,7 +37,7 @@ filter pipeline.
 
 ## Build and run
 
-Use the .NET 10 SDK. Run commands from the repository root:
+Use the .NET 11 SDK. Run commands from the repository root:
 
 ```powershell
 dotnet build AddressExtractor.sln
