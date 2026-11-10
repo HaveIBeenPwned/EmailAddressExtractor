@@ -7,7 +7,7 @@ using HaveIBeenPwned.AddressExtractor.Objects.Attributes;
 
 namespace HaveIBeenPwned.AddressExtractor.Objects.Readers;
 
-[ExtensionTypes(".xlsx")]
+[ExtensionTypes(".xlsx", ".xlsm")]
 internal sealed class ExcelXmlReader(string zipPath) : ILineReader
 {
     public ValueTask DisposeAsync()

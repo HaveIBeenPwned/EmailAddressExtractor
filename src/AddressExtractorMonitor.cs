@@ -132,7 +132,9 @@ public class AddressExtractorMonitor : IAsyncDisposable
         // Office containers and MIME-encoded text can contain addresses without a literal '@' in the file.
         if (file.Length >= Config.MinimumFileSizeForAtSymbolQuickScan
             && !file.Extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase)
+            && !file.Extension.Equals(".xlsm", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".xls", StringComparison.OrdinalIgnoreCase)
+            && !file.Extension.Equals(".xlsb", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".pptx", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".potx", StringComparison.OrdinalIgnoreCase)
             && !file.Extension.Equals(".msg", StringComparison.OrdinalIgnoreCase)
